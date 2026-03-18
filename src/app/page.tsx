@@ -17,7 +17,7 @@
 import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Inbox, Plus, Disc, ArrowRight, Settings, LayoutDashboard, Trash2 } from "lucide-react"
-import { createCollection } from "./actions/collections"
+import { createCollection, deleteCollection } from "./actions/collections"
 
 export default async function LandingPage() {
   const vaults = await prisma.discCollection.findMany({
