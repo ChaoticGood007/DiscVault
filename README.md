@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DiscVault
 
-## Getting Started
+DiscVault is a professional-grade, self-hosted disc golf inventory management system. Designed for collectors and throwers alike, it features a unique "Vault-first" architecture that allows you to manage multiple separate collections (e.g., your Main Bag, Storage, and Collector's Vault) within a single unified interface.
 
-First, run the development server:
+![DiscVault Dashboard](public/window.svg) *(Logo Placeholder)*
+
+## 🚀 Key Features
+
+- **Vault Workspaces:** Dedicated environments for different collections with strict isolation.
+- **Smart CSV Importer:** Interactive tool with fuzzy auto-mapping for existing spreadsheets.
+- **Advanced Search:** Range filtering by Flight Numbers (Speed, Glide, Turn, Fade), Weight, Condition, and more.
+- **Deep Analytics:** Real-time stats on brand distribution, stability, condition averages, and even total collection weight.
+- **Infinite Browsing:** High-performance Card and Table views with infinite scroll for 1,000+ disc collections.
+- **Global Awareness:** A "Total Inventory" workspace for searching across all your vaults at once.
+- **Docker Ready:** Plug-and-play deployment with automatic database initialization.
+
+## 📦 Quick Start (Docker)
+
+The easiest way to run DiscVault is via Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker run -d \
+  -p 3000:3000 \
+  -v discvault_data:/app/data \
+  -e DATABASE_URL="file:/app/data/vault.db" \
+  ghcr.io/chaoticgood007/discvault:latest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` to start your first vault.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Development Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If you want to contribute or run the project from source:
 
-## Learn More
+1. **Clone the Repo:**
+   ```bash
+   git clone git@github.com:ChaoticGood007/DiscVault.git
+   cd discvault
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Database Setup:**
+   Create a `.env` file with `DATABASE_URL="file:./data/dev.db"`, then run:
+   ```bash
+   npx prisma db push
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Run Dev Server:**
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+## 🏗️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Framework:** Next.js 15 (App Router)
+- **Database:** SQLite with Prisma 6
+- **Styling:** Tailwind CSS (Forced Light Theme / Slate palette)
+- **UI Components:** Lucide Icons, Recharts, Framer Motion
+- **Containerization:** Docker (Standalone multi-stage build)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚖️ License
+
+This project is licensed under the **GNU General Public License v3 (GPLv3)** - see the [LICENSE](LICENSE) file for details. 
+
+Source code headers are licensed under **Apache-2.0**.
+
+---
+*Created by [ChaoticGood007](https://github.com/ChaoticGood007)*
