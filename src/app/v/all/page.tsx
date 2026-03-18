@@ -91,9 +91,9 @@ export default async function AllVaultsDashboard({
     condition: (minCond !== undefined || maxCond !== undefined) ? { gte: minCond, lte: maxCond } : undefined,
     ink: inkFilter === 'none' ? { equals: 'None' } : inkFilter === 'exists' ? { not: 'None' } : undefined,
     mold: {
-      ...searchFilter.mold,
-      category: category ? { contains: category } : searchFilter.mold?.category,
-      brand: brand ? { contains: brand } : searchFilter.mold?.brand,
+      name: searchQuery ? { contains: searchQuery } : undefined,
+      brand: brand ? { contains: brand } : (searchQuery ? { contains: searchQuery } : undefined),
+      category: category ? { contains: category } : (searchQuery ? { contains: searchQuery } : undefined),
       speed: (minSpeed !== undefined || maxSpeed !== undefined) ? { gte: minSpeed, lte: maxSpeed } : undefined,
       glide: (minGlide !== undefined || maxGlide !== undefined) ? { gte: minGlide, lte: maxGlide } : undefined,
       turn: (minTurn !== undefined || maxTurn !== undefined) ? { gte: minTurn, lte: maxTurn } : undefined,
