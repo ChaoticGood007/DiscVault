@@ -19,8 +19,9 @@ COPY . .
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
-# Dummy DB URL for build-time static generation
+# Dummy DB for build-time static generation validation
 ENV DATABASE_URL="file:./dummy.db"
+RUN npx prisma db push --accept-data-loss
 
 RUN npm run build
 
