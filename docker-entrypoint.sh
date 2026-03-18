@@ -1,8 +1,25 @@
 #!/bin/sh
 set -e
 
-# Extract the file path from the DATABASE_URL (assuming format "file:/path/to/db.sqlite")
-DB_FILE=$(echo "$DATABASE_URL" | sed 's/file://')
+# Robustly extract the file path from DATABASE_URL
+# Handles "file:path", "file:/path", "file://path", etc.
+DB_FILE=$(echo "$DATABASE_URL" | sed 's|^file:/*|/|')
+
+# Ensure path is absolute for internal logic
+case "$DB_FILE" in
+  /*) ;;
+  *) DB_FILE="/app/$DB_FILE" ;;
+esac
+
+echo "Target database file: $DB_FILE"
+echo "Directory: $(dirname "$DB_FILE")"
+
+# Check permissions of the data directory
+if [ -d "$(dirname "$DB_FILE")" ]; then
+    ls -ld "$(dirname "$DB_FILE")"
+else
+    echo "Directory $(dirname "$DB_FILE") does not exist yet."
+fi
 
 # Check if the database file exists
 if [ ! -f "$DB_FILE" ]; then
