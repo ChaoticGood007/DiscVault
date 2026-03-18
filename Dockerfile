@@ -19,6 +19,8 @@ COPY . .
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Dummy DB URL for build-time static generation
+ENV DATABASE_URL="file:./dummy.db"
 
 RUN npm run build
 
