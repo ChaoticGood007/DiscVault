@@ -34,6 +34,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Correct Alpine syntax for adding group and user
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 
+# Install Prisma globally for the entrypoint script
+RUN npm install -g prisma
+
 COPY --from=builder /app/public ./public
 
 # Set the correct permission for prerender cache
@@ -45,6 +48,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
+# Copy and setup entrypoint script
+COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 # Create the data directory for SQLite
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
@@ -55,4 +62,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]
