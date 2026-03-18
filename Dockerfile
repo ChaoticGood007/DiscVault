@@ -35,8 +35,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Correct Alpine syntax for adding group and user
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 
-# Install Prisma globally for the entrypoint script
-RUN npm install -g prisma
+# Install Prisma globally for the entrypoint script (Pinned to v6)
+RUN npm install -g prisma@6
 
 COPY --from=builder /app/public ./public
 
