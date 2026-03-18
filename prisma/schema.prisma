@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Mold {
+  id              String      @id @default(uuid())
+  name            String
+  brand           String
+  category        String
+  speed           Float
+  glide           Float
+  turn            Float
+  fade            Float
+  stability       String
+  link            String?
+  pic             String?
+  name_slug       String?
+  brand_slug      String?
+  category_slug   String?
+  stability_slug  String?
+  color           String?
+  background_color String?
+  isCustom        Boolean     @default(false)
+  inventory       Inventory[]
+}
+
+model DiscCollection {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  inventory   Inventory[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Inventory {
+  id           String          @id @default(uuid())
+  moldId       String
+  mold         Mold            @relation(fields: [moldId], references: [id])
+  collectionId String?
+  collection   DiscCollection? @relation(fields: [collectionId], references: [id])
+  weight       Float?
+  color        String?
+  plastic      String?
+  stamp        String?
+  stampFoil    String?
+  location     String?
+  condition    Int?
+  inBag        Boolean         @default(false)
+  ink          String?
+  notes        String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
