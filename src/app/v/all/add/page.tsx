@@ -18,6 +18,8 @@ import { db as prisma } from "@/lib/prisma"
 import AddDiscForm from "@/components/AddDiscForm"
 import { Inbox } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AllVaultsAddPage({
   searchParams,
 }: {

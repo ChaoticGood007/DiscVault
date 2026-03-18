@@ -19,6 +19,8 @@ import { createCollection, deleteCollection } from "@/app/actions/collections"
 import { Inbox, Trash2, Plus, Disc, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+
 export default async function CollectionsPage() {
   const vaults = await prisma.discCollection.findMany({
     include: {

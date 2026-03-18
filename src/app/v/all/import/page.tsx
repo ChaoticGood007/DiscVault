@@ -17,6 +17,8 @@
 import { db as prisma } from "@/lib/prisma"
 import CSVImporter from "@/components/CSVImporter"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AllVaultsImportPage() {
   const collections = await prisma.discCollection.findMany({
     orderBy: { name: 'asc' }

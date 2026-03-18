@@ -19,6 +19,8 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { LayoutDashboard, BarChart3, Plus, Upload, Inbox } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function WorkspaceLayout({
   children,
   params,

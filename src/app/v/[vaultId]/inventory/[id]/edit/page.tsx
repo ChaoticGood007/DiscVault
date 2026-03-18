@@ -18,6 +18,8 @@ import { db as prisma } from "@/lib/prisma"
 import EditDiscForm from "@/components/EditDiscForm"
 import { notFound } from "next/navigation"
 
+export const dynamic = 'force-dynamic'
+
 export default async function ScopedEditPage({
   params,
 }: {
