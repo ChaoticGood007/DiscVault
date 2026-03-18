@@ -33,16 +33,14 @@ Create a `docker-compose.yml` file:
 services:
   discvault:
     image: ghcr.io/chaoticgood007/discvault:latest
+    container_name: discvault
+    restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
-      - discvault_data:/app/data
+      - ./data:/app/data
     environment:
       - DATABASE_URL=file:/app/data/vault.db
-    restart: unless-stopped
-
-volumes:
-  discvault_data:
 ```
 Then run:
 ```bash
