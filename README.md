@@ -18,12 +18,35 @@ DiscVault is a professional-grade, self-hosted disc golf inventory management sy
 
 The easiest way to run DiscVault is via Docker.
 
+### Using Docker Run
 ```bash
 docker run -d \
   -p 3000:3000 \
   -v discvault_data:/app/data \
   -e DATABASE_URL="file:/app/data/vault.db" \
   ghcr.io/chaoticgood007/discvault:latest
+```
+
+### Using Docker Compose
+Create a `docker-compose.yml` file:
+```yaml
+services:
+  discvault:
+    image: ghcr.io/chaoticgood007/discvault:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - discvault_data:/app/data
+    environment:
+      - DATABASE_URL=file:/app/data/vault.db
+    restart: unless-stopped
+
+volumes:
+  discvault_data:
+```
+Then run:
+```bash
+docker-compose up -d
 ```
 
 Open `http://localhost:3000` to start your first vault.
