@@ -26,7 +26,7 @@ mkdir -p $(dirname "$DB_FILE")
 
 echo "Synchronizing database schema with Prisma..."
 # Always run db push on boot to seamlessly apply software updates to existing volumes
-npx prisma db push --accept-data-loss
+npx prisma db push --accept-data-loss --skip-generate
 
 # Execute the main command (starts the Next.js app)
 echo "Starting application..."
