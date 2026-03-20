@@ -9,9 +9,15 @@ export async function getGlobalSettings() {
   })
 
   if (!settings) {
-    settings = await prisma.settings.create({
-      data: { id: 'global', accentColor: '#4f46e5' },
-    })
+    try {
+      settings = await prisma.settings.create({
+        data: { id: 'global', accentColor: '#4f46e5' },
+      })
+    } catch (e) {
+      settings = await prisma.settings.findUnique({
+        where: { id: 'global' },
+      })
+    }
   }
   
   return settings
