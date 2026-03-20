@@ -20,7 +20,7 @@ export async function getGlobalSettings() {
     }
   }
   
-  return settings
+  return settings!
 }
 
 export async function updateAccentColor(hexCode: string) {
