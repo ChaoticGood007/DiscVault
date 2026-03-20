@@ -72,8 +72,8 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
   }
 
   return (
-    <div className="space-y-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="space-y-6 md:space-y-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
         {items.map((item) => (
           <div key={item.id} className="bg-white rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all border border-slate-100 overflow-hidden group relative flex flex-col">
             <Link 
@@ -83,7 +83,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
               <Edit3 className="h-5 w-5" />
             </Link>
 
-            <div className="p-8 flex-1">
+            <div className="p-5 md:p-8 flex-1">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center px-4 h-[28px] rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50/50 border border-indigo-100 whitespace-nowrap">
@@ -97,8 +97,8 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               </div>
 
-              <div className="mb-8">
-                <h3 className="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight break-words">
+              <div className="mb-4 md:mb-8">
+                <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight break-words">
                   {item.mold.name}
                 </h3>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
@@ -120,7 +120,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               </div>
 
-              <div className="flex items-center justify-between bg-slate-50/50 p-4 rounded-2xl border border-slate-100 mb-8">
+              <div className="flex items-center justify-between bg-slate-50/50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 mb-5 md:mb-8">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Flight Numbers</div>
                 <div className="flex space-x-2">
                   {[
@@ -130,7 +130,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     { label: 'F', val: item.mold.fade }
                   ].map((stat, idx) => (
                     <div key={idx} className="flex flex-col items-center">
-                      <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-slate-900 font-black text-sm border border-slate-200 shadow-sm transition-transform group-hover:scale-110">
+                      <span className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl bg-white text-slate-900 font-black text-xs md:text-sm border border-slate-200 shadow-sm transition-transform group-hover:scale-110">
                         {stat.val}
                       </span>
                     </div>
@@ -138,30 +138,30 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 py-6 border-t border-slate-50">
-                <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Plastic</span>
+              <div className="flex items-center justify-between py-4 md:py-6 border-t border-slate-50">
+                <div className="flex-1 min-w-0 space-y-1 flex flex-col pr-3">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Plastic</span>
                   <Tooltip content={item.plastic}>
-                    <span className="block font-black text-slate-900 text-sm text-center truncate px-1 max-w-[80px]">
+                    <span className="block font-black text-slate-900 text-sm truncate w-full text-left">
                       {item.plastic || "—"}
                     </span>
                   </Tooltip>
                 </div>
-                <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Weight</span>
+                <div className="shrink-0 px-4 md:px-6 space-y-1 flex flex-col items-center border-x border-slate-100">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Weight</span>
                   <span className="block font-black text-indigo-600 text-sm text-center">{item.weight ? `${item.weight}g` : "—"}</span>
                 </div>
-                <div className="space-y-1">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Color</span>
+                <div className="flex-1 min-w-0 space-y-1 flex flex-col pl-3">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Color</span>
                   <Tooltip content={item.color}>
-                    <div className="flex items-center justify-center gap-1.5 px-1 max-w-[80px]">
+                    <div className="flex items-center justify-end gap-1.5 w-full">
                       {item.color && (
                         <div 
                           className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0" 
                           style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
                         />
                       )}
-                      <span className="font-black text-slate-900 text-sm truncate">
+                      <span className="font-black text-slate-900 text-sm truncate text-right">
                         {item.color || "—"}
                       </span>
                     </div>
@@ -176,7 +176,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
               )}
             </div>
             
-            <div className="bg-slate-50 px-8 py-5 flex justify-between items-center group-hover:bg-indigo-50 transition-colors border-t border-slate-100">
+            <div className="bg-slate-50 px-5 py-4 md:px-8 md:py-5 flex justify-between items-center group-hover:bg-indigo-50 transition-colors border-t border-slate-100">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Added {new Date(item.createdAt).toLocaleDateString()}</span>
             </div>
           </div>

@@ -18,6 +18,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { getGlobalSettings } from '@/app/actions/settings';
+import { generateTailwindPalette } from '@/lib/colors';
+import { Settings } from 'lucide-react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,15 +37,19 @@ export const metadata: Metadata = {
   description: "Personal disc golf inventory management",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getGlobalSettings();
+  const customPalette = generateTailwindPalette(settings.accentColor);
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900 min-h-screen`}
+        style={customPalette as React.CSSProperties}
       >
         <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +62,10 @@ export default function RootLayout({
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">DiscVault</span>
                 </Link>
               </div>
-              <nav className="flex items-center gap-4">
+              <nav className="flex items-center gap-2">
+                <Link href="/settings" className="p-2.5 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-50 transition-colors">
+                  <Settings className="w-5 h-5" />
+                </Link>
                 <Link href="/" className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">
                   Vaults
                 </Link>
@@ -63,7 +73,7 @@ export default function RootLayout({
             </div>
           </div>
         </header>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
           {children}
         </main>
       </body>

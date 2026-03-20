@@ -132,7 +132,7 @@ export default async function VaultDashboard({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-shrink-0 mb-8">
+      <div className="flex-shrink-0 mb-4 md:mb-8">
         <DashboardToolbar 
           brands={brandsList}
           categories={categoriesList}

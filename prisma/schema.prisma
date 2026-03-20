@@ -60,3 +60,10 @@ model Inventory {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 }
+
+model Settings {
+  id          String   @id @default("global")
+  accentColor String   @default("#4f46e5")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
