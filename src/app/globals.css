@@ -24,6 +24,18 @@ body {
   color: #0f172a !important;
 }
 
+/* Ensure dynamic accent colors don't wash out child text components */
+.bg-indigo-600.text-white, 
+.bg-indigo-600 .text-white,
+.bg-indigo-700.text-white, 
+.bg-indigo-700 .text-white,
+.hover\:bg-indigo-700:hover.text-white,
+.hover\:bg-indigo-700:hover .text-white,
+.hover\:bg-indigo-600:hover.text-white,
+.hover\:bg-indigo-600:hover .text-white {
+  color: var(--color-indigo-contrast, #ffffff) !important;
+}
+
 /* Ensure form elements have high contrast */
 input, select, textarea {
   @apply bg-white text-slate-900 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500;
