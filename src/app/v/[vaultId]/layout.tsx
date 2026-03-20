@@ -51,8 +51,8 @@ export default async function WorkspaceLayout({
   ]
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm">
+    <div className="flex flex-col h-[calc(100dvh-176px)] gap-8">
+      <div className="flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="p-4 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100">
             <Inbox className="w-8 h-8 text-white" />
@@ -81,7 +81,7 @@ export default async function WorkspaceLayout({
         </nav>
       </div>
 
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex-1 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col">
         {children}
       </div>
     </div>

@@ -169,7 +169,7 @@ export default function InventoryList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full space-y-4">
       {selectedIds.length > 0 && (
         <div className="sticky top-4 z-[140] bg-indigo-600 px-6 py-4 rounded-2xl shadow-2xl shadow-indigo-100 flex items-center justify-between animate-in slide-in-from-top-4 duration-300">
           <div className="flex items-center gap-4 text-white">
@@ -240,11 +240,11 @@ export default function InventoryList({
         />
       )}
 
-      <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
+      <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="overflow-auto flex-1 relative">
+          <table className="w-full text-left border-collapse whitespace-nowrap">
+            <thead className="sticky top-0 z-20 bg-slate-50 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+              <tr className="border-b border-slate-100">
                 <th className="px-6 py-4 text-center">
                   <input 
                     type="checkbox" 
@@ -318,17 +318,21 @@ export default function InventoryList({
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Loading Trigger */}
-      <div ref={ref} className="py-8 flex justify-center">
-        {hasMore && (
-          <div className="flex items-center gap-3">
-            <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading Records...</span>
+          
+          {/* Loading Trigger */}
+          <div ref={ref} className="py-8 flex justify-center w-full relative z-0">
+            {hasMore ? (
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading Records...</span>
+              </div>
+            ) : (
+              <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest py-4">
+                End of Inventory
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

@@ -131,16 +131,17 @@ export default async function VaultDashboard({
   const activeFiltersCount = (category ? 1 : 0) + (brand ? 1 : 0) + (searchQuery ? 1 : 0) + (isInBag ? 1 : 0) + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0)
 
   return (
-    <div className="space-y-8">
-      <DashboardToolbar 
-        brands={brandsList}
-        categories={categoriesList}
-        collections={collections as any}
-        currentCollectionIds={[vaultId]}
-        currentCategory={category}
-        currentBrand={brand}
-        currentView={view}
-        searchQuery={searchQuery}
+    <div className="flex flex-col h-full">
+      <div className="flex-shrink-0 mb-8">
+        <DashboardToolbar 
+          brands={brandsList}
+          categories={categoriesList}
+          collections={collections as any}
+          currentCollectionIds={[vaultId]}
+          currentCategory={category}
+          currentBrand={brand}
+          currentView={view}
+          searchQuery={searchQuery}
         isInBag={isInBag}
         advancedFilters={{
           minSpeed, maxSpeed,
@@ -155,10 +156,12 @@ export default async function VaultDashboard({
         sortOrder={sortOrder}
         visibleColumns={colsParam}
       />
+      </div>
 
-      {totalCount === 0 ? (
-        <div className="text-center py-24 bg-white rounded-[32px] border-4 border-dashed border-slate-100 shadow-inner">
-          <Disc className="mx-auto h-24 w-24 text-slate-200 mb-6 animate-spin-slow" />
+      <div className="flex-1 min-h-0">
+        {totalCount === 0 ? (
+          <div className="h-full overflow-auto text-center py-24 bg-white rounded-[32px] border-4 border-dashed border-slate-100 shadow-inner">
+            <Disc className="mx-auto h-24 w-24 text-slate-200 mb-6 animate-spin-slow" />
           {activeFiltersCount > 0 ? (
             <>
               <h3 className="text-3xl font-black text-slate-900">No matching discs</h3>
@@ -188,25 +191,30 @@ export default async function VaultDashboard({
           )}
         </div>
       ) : view === 'cards' ? (
-        <InventoryInfiniteList 
-          initialItems={inventory as any}
-          where={whereClause}
-          orderBy={getOrderBy(sortBy, sortOrder)}
-          pageSize={pageSize}
-          totalCount={totalCount}
-        />
+        <div className="h-full overflow-auto">
+          <InventoryInfiniteList 
+            initialItems={inventory as any}
+            where={whereClause}
+            orderBy={getOrderBy(sortBy, sortOrder)}
+            pageSize={pageSize}
+            totalCount={totalCount}
+          />
+        </div>
       ) : (
-        <InventoryList 
-          initialItems={inventory as any} 
-          collections={collections as any}
-          visibleColumns={colsParam}
-          sortBy={sortBy}
-          where={whereClause}
-          orderBy={getOrderBy(sortBy, sortOrder)}
-          pageSize={pageSize}
-          totalCount={totalCount}
-        />
+        <div className="h-full">
+          <InventoryList 
+            initialItems={inventory as any} 
+            collections={collections as any}
+            visibleColumns={colsParam}
+            sortBy={sortBy}
+            where={whereClause}
+            orderBy={getOrderBy(sortBy, sortOrder)}
+            pageSize={pageSize}
+            totalCount={totalCount}
+          />
+        </div>
       )}
+      </div>
     </div>
   )
 }
