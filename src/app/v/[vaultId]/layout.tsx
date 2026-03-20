@@ -51,29 +51,29 @@ export default async function WorkspaceLayout({
   ]
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-176px)] gap-8">
-      <div className="flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100">
-            <Inbox className="w-8 h-8 text-white" />
+    <div className="flex flex-col md:h-[calc(100vh-176px)] gap-4 md:gap-8">
+      <div className="flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-white p-5 md:p-8 rounded-3xl md:rounded-[40px] border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="p-3 md:p-4 bg-indigo-600 rounded-xl md:rounded-2xl shadow-lg shadow-indigo-100 hidden sm:block">
+            <Inbox className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
-          <div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none mb-1 block">Active Workspace</span>
-            <h1 className="text-3xl font-black text-slate-900 leading-tight">{vault.name}</h1>
-            <p className="text-sm text-slate-500 font-medium">{vault._count.inventory} Discs in Vault</p>
+          <div className="min-w-0">
+            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em] leading-none mb-1 block truncate">Active Workspace</span>
+            <h1 className="text-xl md:text-3xl font-black text-slate-900 leading-tight truncate">{vault.name}</h1>
+            <p className="text-xs md:text-sm text-slate-500 font-medium truncate">{vault._count.inventory} Discs in Vault</p>
           </div>
         </div>
 
-        <nav className="flex items-center gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
+        <nav className="flex items-center gap-1 md:gap-2 p-1.5 bg-slate-50 rounded-xl md:rounded-2xl border border-slate-100 overflow-x-auto w-full no-scrollbar whitespace-nowrap">
           {navItems.map((item) => {
             const Icon = item.icon
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-600 group"
+                className="flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-600 group shrink-0"
               >
-                <Icon className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                <Icon className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
                 {item.label}
               </Link>
             )

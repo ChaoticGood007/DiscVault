@@ -179,9 +179,9 @@ export default function DashboardToolbar({
           <div className="relative" ref={collectionRef}>
             <button 
               onClick={() => setShowCollectionSelector(!showCollectionSelector)}
-              className="flex items-center gap-3 px-5 py-3 bg-white rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-200 transition-all active:scale-95 group"
+              className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-2 md:py-3 bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-200 transition-all active:scale-95 group"
             >
-              <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
+              <div className="p-1.5 md:p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
                 <Inbox className="w-5 h-5 text-indigo-600" />
               </div>
               <div className="text-left pr-4">
@@ -239,11 +239,11 @@ export default function DashboardToolbar({
       )}
 
       {/* Main Toolbar */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-4 justify-between relative z-20">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex items-center text-slate-400 mr-2">
+      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-20">
+        <div className="flex flex-wrap gap-2 md:gap-4 items-center">
+          <div className="hidden sm:flex items-center text-slate-400 mr-2">
             <Filter className="h-5 w-5 mr-2" />
-            <span className="font-bold text-[10px] uppercase tracking-widest">Filter</span>
+            <span className="font-bold text-[10px] uppercase tracking-widest hidden md:inline">Filter</span>
           </div>
           
           <div className="relative flex-grow md:flex-grow-0 md:w-64">
