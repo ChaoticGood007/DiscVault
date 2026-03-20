@@ -20,8 +20,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowUpDown, Edit3, Inbox, MoveRight, Trash2, Loader2 } from 'lucide-react'
 import { moveDiscsToCollection, getPaginatedInventory } from '@/app/actions/inventory'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useInView } from 'react-intersection-observer'
+import BulkEditModal from './BulkEditModal'
 
 interface InventoryItem {
   id: string
@@ -77,12 +78,14 @@ export default function InventoryList({
   const [items, setItems] = useState(initialItems)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [showMoveMenu, setShowMoveMenu] = useState(false)
+  const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialItems.length < totalCount)
   const [loading, setLoading] = useState(false)
   const { ref, inView } = useInView()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   // Reset when filters change
   useEffect(() => {
@@ -127,7 +130,7 @@ export default function InventoryList({
     params.set('sortBy', field)
     params.set('sortOrder', newOrder)
     params.set('page', '1')
-    return `/?${params.toString()}`
+    return `${pathname}?${params.toString()}`
   }
 
   const toggleSelectAll = () => {
@@ -176,6 +179,13 @@ export default function InventoryList({
           </div>
           
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowBulkEdit(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white font-black text-xs rounded-xl transition-all active:scale-95 shadow-sm"
+            >
+              <Edit3 className="w-4 h-4" />
+              Edit Selected
+            </button>
             <div className="relative">
               <button 
                 onClick={() => setShowMoveMenu(!showMoveMenu)}
@@ -217,6 +227,17 @@ export default function InventoryList({
             </button>
           </div>
         </div>
+      )}
+
+      {showBulkEdit && (
+        <BulkEditModal
+          selectedIds={selectedIds}
+          onClose={() => setShowBulkEdit(false)}
+          onSuccess={() => {
+            setShowBulkEdit(false)
+            setSelectedIds([])
+          }}
+        />
       )}
 
       <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">

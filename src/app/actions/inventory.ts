@@ -263,3 +263,17 @@ export async function getPaginatedInventory(options: {
     take: pageSize,
   })
 }
+
+export async function bulkUpdateInventory(ids: string[], updates: Record<string, any>) {
+  if (ids.length === 0 || Object.keys(updates).length === 0) return
+
+  await prisma.inventory.updateMany({
+    where: {
+      id: { in: ids }
+    },
+    data: updates
+  })
+
+  revalidatePath('/')
+  revalidatePath('/v/all')
+}
