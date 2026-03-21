@@ -21,7 +21,7 @@ import { Download, Loader2 } from 'lucide-react'
 import { exportInventory } from '@/app/actions/inventory'
 import Papa from 'papaparse'
 
-export default function ExportButton() {
+export default function ExportButton({ variant = 'default' }: { variant?: 'default' | 'header' }) {
   const [loading, setLoading] = useState(false)
 
   const handleExport = async () => {
@@ -68,18 +68,26 @@ export default function ExportButton() {
     }
   }
 
+  const buttonClass = variant === 'header'
+    ? "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:text-indigo-600 group shrink-0 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    : "inline-flex items-center px-6 py-3 border border-slate-200 text-sm font-black rounded-xl text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+  
+  const iconClass = variant === 'header'
+    ? "w-3 h-3 sm:w-4 sm:h-4 text-slate-400 group-hover:text-indigo-600 transition-colors"
+    : "mr-2 h-4 w-4"
+
   return (
     <button
       onClick={handleExport}
       disabled={loading}
-      className="inline-flex items-center px-6 py-3 border border-slate-200 text-sm font-black rounded-xl text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+      className={buttonClass}
     >
       {loading ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin text-indigo-600" />
+        <Loader2 className={`${iconClass} animate-spin ${variant === 'header' ? '' : 'text-indigo-600'}`} />
       ) : (
-        <Download className="mr-2 h-4 w-4" />
+        <Download className={iconClass} />
       )}
-      Export CSV
+      {variant === 'header' ? 'Export' : 'Export CSV'}
     </button>
   )
 }

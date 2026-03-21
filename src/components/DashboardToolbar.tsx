@@ -65,15 +65,15 @@ const ALL_COLUMNS = [
   { id: 'brand', label: 'Brand' },
   { id: 'name', label: 'Mold' },
   { id: 'category', label: 'Category' },
-  { id: 'speed', label: 'Speed' },
-  { id: 'glide', label: 'Glide' },
-  { id: 'turn', label: 'Turn' },
-  { id: 'fade', label: 'Fade' },
+  { id: 'flight_numbers', label: 'Flight Numbers' },
   { id: 'plastic', label: 'Plastic' },
   { id: 'weight', label: 'Weight' },
+  { id: 'color', label: 'Color' },
+  { id: 'stamp', label: 'Stamp' },
   { id: 'condition', label: 'Cond' },
   { id: 'ink', label: 'Ink' },
   { id: 'location', label: 'Location' },
+  { id: 'notes', label: 'Notes' },
   { id: 'createdAt', label: 'Added' },
 ]
 
@@ -99,6 +99,10 @@ export default function DashboardToolbar({
   const selectorRef = useRef<HTMLDivElement>(null)
   const collectionRef = useRef<HTMLDivElement>(null)
   const advancedRef = useRef<HTMLDivElement>(null)
+  const categoryRef = useRef<HTMLDivElement>(null)
+  const brandRef = useRef<HTMLDivElement>(null)
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false)
   const [localSearch, setLocalSearch] = useState(searchQuery || '')
 
   useEffect(() => {
@@ -115,6 +119,12 @@ export default function DashboardToolbar({
       }
       if (advancedRef.current && !advancedRef.current.contains(event.target as Node)) {
         setShowAdvanced(false)
+      }
+      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
+        setShowCategoryDropdown(false)
+      }
+      if (brandRef.current && !brandRef.current.contains(event.target as Node)) {
+        setShowBrandDropdown(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -195,8 +205,11 @@ export default function DashboardToolbar({
               <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCollectionSelector ? 'rotate-180' : ''}`} />
             </button>
 
-            {showCollectionSelector && (
-              <div className="absolute top-full left-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-slate-100 p-3 z-[100] animate-in fade-in zoom-in-95 duration-200">
+              <div className={`absolute top-full left-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-slate-100 p-3 z-[100] transition-all duration-300 ease-out origin-top-left ${
+                showCollectionSelector 
+                  ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+                  : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+              }`}>
                 <div className="px-4 py-3 mb-2 border-b border-slate-50 flex justify-between items-center">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Vaults</span>
                   <Link href="/" className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors">
@@ -233,13 +246,12 @@ export default function DashboardToolbar({
                   </Link>
                 </div>
               </div>
-            )}
           </div>
         </div>
       )}
 
       {/* Main Toolbar */}
-      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-20">
+      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-40">
         <div className="flex flex-wrap gap-2 md:gap-4 items-center">
           <div className="hidden sm:flex items-center text-slate-400 mr-2">
             <Filter className="h-5 w-5 mr-2" />
@@ -286,59 +298,125 @@ export default function DashboardToolbar({
             )}
           </div>
           
-          <select 
-            className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all"
-            value={currentCategory || ""}
-            onChange={(e) => updateParams({ category: e.target.value || null })}
-          >
-            <option value="">All Categories</option>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+          {/* Category Dropdown */}
+          <div className="relative" ref={categoryRef}>
+            <button
+              onClick={() => { setShowCategoryDropdown(!showCategoryDropdown); setShowBrandDropdown(false) }}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${
+                currentCategory ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
+              }`}
+            >
+              {currentCategory || 'All Categories'}
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left ${
+              showCategoryDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+            }`}>
+              <button
+                onClick={() => { updateParams({ category: null }); setShowCategoryDropdown(false) }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                  !currentCategory ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                All Categories
+                {!currentCategory && <Check className="w-4 h-4" />}
+              </button>
+              <div className="max-h-56 overflow-y-auto mt-1 space-y-0.5">
+                {categories.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => { updateParams({ category: c }); setShowCategoryDropdown(false) }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                      currentCategory === c ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {c}
+                    {currentCategory === c && <Check className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
-          <select 
-            className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all"
-            value={currentBrand || ""}
-            onChange={(e) => updateParams({ brand: e.target.value || null })}
-          >
-            <option value="">All Brands</option>
-            {brands.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
+          {/* Brand Dropdown */}
+          <div className="relative" ref={brandRef}>
+            <button
+              onClick={() => { setShowBrandDropdown(!showBrandDropdown); setShowCategoryDropdown(false) }}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${
+                currentBrand ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
+              }`}
+            >
+              {currentBrand || 'All Brands'}
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showBrandDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left ${
+              showBrandDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+            }`}>
+              <button
+                onClick={() => { updateParams({ brand: null }); setShowBrandDropdown(false) }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                  !currentBrand ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                All Brands
+                {!currentBrand && <Check className="w-4 h-4" />}
+              </button>
+              <div className="max-h-56 overflow-y-auto mt-1 space-y-0.5">
+                {brands.map(b => (
+                  <button
+                    key={b}
+                    onClick={() => { updateParams({ brand: b }); setShowBrandDropdown(false) }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                      currentBrand === b ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {b}
+                    {currentBrand === b && <Check className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 ml-auto lg:ml-0">
-          {currentView === 'list' && (
-            <div className="relative" ref={selectorRef}>
-              <button
-                onClick={() => setShowColSelector(!showColSelector)}
-                className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 ${showColSelector ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
-              >
-                <Columns className="h-5 w-5" />
-                <span className="text-xs font-black uppercase tracking-widest px-1">Columns</span>
-              </button>
+          <div className="relative" ref={selectorRef}>
+            <button
+              onClick={() => setShowColSelector(!showColSelector)}
+              className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 ${showColSelector ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
+            >
+              <Columns className="h-5 w-5" />
+              <span className="text-xs font-black uppercase tracking-widest px-1">{currentView === 'cards' ? 'Fields' : 'Columns'}</span>
+            </button>
 
-              {showColSelector && (
-                <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 grid grid-cols-1 gap-1 z-[110]">
-                  <div className="px-3 py-2 mb-1 border-b border-slate-50">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Visible Columns</span>
-                  </div>
-                  {ALL_COLUMNS.map((col) => (
+              <div className={`absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 grid grid-cols-1 gap-1 z-[110] transition-all duration-300 ease-out origin-top-right ${
+                showColSelector 
+                  ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+                  : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+              }`}>
+                <div className="px-3 py-2 mb-1 border-b border-slate-50">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Visible {currentView === 'cards' ? 'Fields' : 'Columns'}</span>
+                </div>
+                {ALL_COLUMNS.map((col) => {
+                  const isLocked = col.id === 'name'
+                  return (
                     <button
                       key={col.id}
-                      onClick={() => toggleColumn(col.id)}
-                      className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                      onClick={() => !isLocked && toggleColumn(col.id)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors group ${isLocked ? 'cursor-default opacity-60' : 'hover:bg-slate-50'}`}
                     >
                       <span className={`text-sm font-bold ${visibleColumns.includes(col.id) ? 'text-indigo-600' : 'text-slate-500'}`}>
                         {col.label}
                       </span>
-                      {visibleColumns.includes(col.id) && (
-                        <Check className="h-4 w-4 text-indigo-600" />
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {isLocked && <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Required</span>}
+                        {visibleColumns.includes(col.id) && <Check className="h-4 w-4 text-indigo-600" />}
+                      </div>
                     </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                  )
+                })}
+              </div>
+          </div>
 
           <div className="flex items-center bg-slate-100 p-1 rounded-xl">
             <Link 

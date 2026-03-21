@@ -44,6 +44,7 @@ export default async function VaultDashboard({
   const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : 'createdAt') as SortField
   const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : 'desc') as SortOrder
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : DEFAULT_COLUMNS
+  const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
   const isInBag = searchP.inBag === 'true'
 
@@ -154,7 +155,7 @@ export default async function VaultDashboard({
         }}
         sortBy={sortBy}
         sortOrder={sortOrder}
-        visibleColumns={colsParam}
+        visibleColumns={visibleCols}
       />
       </div>
 
@@ -198,6 +199,7 @@ export default async function VaultDashboard({
             orderBy={getOrderBy(sortBy, sortOrder)}
             pageSize={pageSize}
             totalCount={totalCount}
+            visibleColumns={visibleCols}
           />
         </div>
       ) : (
@@ -205,7 +207,7 @@ export default async function VaultDashboard({
           <InventoryList 
             initialItems={inventory as any} 
             collections={collections as any}
-            visibleColumns={colsParam}
+            visibleColumns={visibleCols}
             sortBy={sortBy}
             where={whereClause}
             orderBy={getOrderBy(sortBy, sortOrder)}

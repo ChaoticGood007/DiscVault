@@ -19,6 +19,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { addDisc } from '@/app/actions/inventory'
 import { Search, Loader2 } from 'lucide-react'
+import LocationPicker, { InBagField } from '@/components/LocationPicker'
+import { resolveInBag, type LocationNode } from '@/lib/locationTree'
 
 interface Mold {
   id: string
@@ -29,14 +31,17 @@ interface Mold {
 
 interface AddDiscFormProps {
   vaultId: string
+  tree: LocationNode[]
 }
 
-export default function AddDiscForm({ vaultId }: AddDiscFormProps) {
+export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
   const [query, setQuery] = useState('')
   const [molds, setMolds] = useState<Mold[]>([])
   const [selectedMold, setSelectedMold] = useState<Mold | null>(null)
   const [loading, setLoading] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const autoInBag = selectedLocation ? resolveInBag(selectedLocation, tree) : null
 
   const searchMolds = useCallback(async (q: string) => {
     if (q.length < 2) {
@@ -165,11 +170,10 @@ export default function AddDiscForm({ vaultId }: AddDiscFormProps) {
         </div>
         <div className="space-y-2">
           <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Location</label>
-          <input
-            type="text"
-            name="location"
-            placeholder="Main Bag, Storage..."
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+          <LocationPicker
+            tree={tree}
+            value={selectedLocation}
+            onChange={(val) => setSelectedLocation(val)}
           />
         </div>
       </div>
@@ -198,16 +202,11 @@ export default function AddDiscForm({ vaultId }: AddDiscFormProps) {
             <option value="Both">Both</option>
           </select>
         </div>
-        <div className="flex items-center space-x-3 pb-4">
-          <input
-            type="checkbox"
-            name="inBag"
-            id="inBag"
-            className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-slate-200 rounded-lg"
-          />
-          <label htmlFor="inBag" className="text-xs font-black text-slate-400 uppercase tracking-widest">
-            Currently in Bag
-          </label>
+        <div className="flex items-center pb-4">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">In Bag</label>
+            <InBagField autoInBag={autoInBag} defaultChecked={false} />
+          </div>
         </div>
       </div>
 

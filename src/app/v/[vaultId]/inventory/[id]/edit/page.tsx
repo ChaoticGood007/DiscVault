@@ -17,6 +17,7 @@
 import { db as prisma } from "@/lib/prisma"
 import EditDiscForm from "@/components/EditDiscForm"
 import { notFound } from "next/navigation"
+import { getLocationTree } from "@/app/actions/settings"
 
 export const dynamic = 'force-dynamic'
 
@@ -27,14 +28,11 @@ export default async function ScopedEditPage({
 }) {
   const { id, vaultId } = await params
 
-  const disc = await prisma.inventory.findUnique({
-    where: { id },
-    include: { mold: true },
-  })
-
-  const collections = await prisma.discCollection.findMany({
-    orderBy: { name: 'asc' }
-  })
+  const [disc, collections, tree] = await Promise.all([
+    prisma.inventory.findUnique({ where: { id }, include: { mold: true } }),
+    prisma.discCollection.findMany({ orderBy: { name: 'asc' } }),
+    getLocationTree(),
+  ])
 
   if (!disc) {
     notFound()
@@ -46,7 +44,7 @@ export default async function ScopedEditPage({
         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Edit Disc</h1>
         <p className="mt-2 text-lg text-slate-600 font-medium">Update the details of this specific disc in your vault.</p>
       </div>
-      <EditDiscForm disc={disc as any} collections={collections as any} />
+      <EditDiscForm disc={disc as any} collections={collections as any} tree={tree} />
     </div>
   )
 }

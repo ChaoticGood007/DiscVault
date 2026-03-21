@@ -47,11 +47,12 @@ export async function updateCollection(id: string, formData: FormData) {
 }
 
 export async function deleteCollection(id: string) {
-  // We'll move discs to the first available collection if they exist, 
-  // or just let them stay "uncategorized" (collectionId = null)
-  // For now, let's keep it simple and just delete the collection.
-  // The schema allows collectionId to be null.
-  
+  // Clear primary tracking if the user deletes their active default vault
+  const settings = await prisma.settings.findUnique({ where: { id: 'global' } })
+  if (settings?.primaryVaultId === id) {
+    await prisma.settings.update({ where: { id: 'global' }, data: { primaryVaultId: null } })
+  }
+
   await prisma.discCollection.delete({
     where: { id }
   })

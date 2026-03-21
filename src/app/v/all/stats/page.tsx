@@ -61,7 +61,7 @@ export default async function AllVaultsStatsPage() {
           <div>
             <span className="block text-indigo-300 text-[10px] font-black uppercase tracking-widest mb-1">Total Payload</span>
             <span className="text-3xl font-black">{stats.totalWeightKg} <span className="text-sm font-bold opacity-60 text-indigo-200">kg</span></span>
-            <p className="text-[10px] text-indigo-200/60 font-medium mt-1">Combined across all workspaces.</p>
+            <p className="text-[10px] text-indigo-200/60 font-medium mt-1">Combined across all vaults.</p>
           </div>
           <div>
             <span className="block text-indigo-300 text-[10px] font-black uppercase tracking-widest mb-1">Top Brand</span>

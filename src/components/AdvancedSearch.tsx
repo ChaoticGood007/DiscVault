@@ -77,30 +77,38 @@ export default function AdvancedSearch({ filters, onClose }: AdvancedSearchProps
     onClose()
   }
 
-  const RangeInput = ({ label, minKey, maxKey }: { label: string, minKey: keyof AdvancedFilters, maxKey: keyof AdvancedFilters }) => (
-    <div className="space-y-2">
-      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          step="0.5"
-          placeholder="Min"
-          value={localFilters[minKey] ?? ''}
-          onChange={(e) => handleUpdate(minKey, e.target.value ? parseFloat(e.target.value) : undefined)}
-          className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-        <span className="text-slate-300">—</span>
-        <input
-          type="number"
-          step="0.5"
-          placeholder="Max"
-          value={localFilters[maxKey] ?? ''}
-          onChange={(e) => handleUpdate(maxKey, e.target.value ? parseFloat(e.target.value) : undefined)}
-          className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+  const RangeInput = ({ label, minKey, maxKey }: { label: string, minKey: keyof AdvancedFilters, maxKey: keyof AdvancedFilters }) => {
+    const allowNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight','-','.'].includes(e.key)) return
+      if (!/[\d]/.test(e.key)) e.preventDefault()
+    }
+    return (
+      <div className="space-y-2">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="Min"
+            value={localFilters[minKey] ?? ''}
+            onKeyDown={allowNumeric}
+            onChange={(e) => handleUpdate(minKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-200 transition-all text-slate-900 placeholder:text-slate-300 placeholder:font-medium"
+          />
+          <span className="text-slate-200 font-bold shrink-0">—</span>
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="Max"
+            value={localFilters[maxKey] ?? ''}
+            onKeyDown={allowNumeric}
+            onChange={(e) => handleUpdate(maxKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-200 transition-all text-slate-900 placeholder:text-slate-300 placeholder:font-medium"
+          />
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="absolute top-full right-0 mt-4 w-[400px] bg-white rounded-[32px] shadow-2xl border border-slate-100 p-8 z-[150] animate-in fade-in zoom-in-95 duration-200">

@@ -17,10 +17,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 import { getGlobalSettings } from '@/app/actions/settings';
 import { generateTailwindPalette } from '@/lib/colors';
-import { Settings } from 'lucide-react';
+import { db as prisma } from "@/lib/prisma";
+import { syncMolds } from "@/app/actions/molds";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +42,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Execute background mold synchronization natively if the master registry is completely empty.
+  const coreMoldCount = await prisma.mold.count();
+  if (coreMoldCount === 0) {
+    console.log("Empty Master Database detected. Triggering automated background sync natively...");
+    // Fire and forget Promise directly into the Node Event Loop without blocking the HTML render!
+    syncMolds().catch(console.error);
+  }
+
   const settings = await getGlobalSettings();
   const customPalette = generateTailwindPalette(settings.accentColor);
 
@@ -51,31 +59,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900 min-h-screen`}
         style={customPalette as React.CSSProperties}
       >
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-20">
-              <div className="flex items-center">
-                <Link href="/" className="flex-shrink-0 flex items-center gap-3 group">
-                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100 group-hover:rotate-12 transition-transform">
-                    <span className="text-white font-black text-xl italic italic-vault">DV</span>
-                  </div>
-                  <span className="text-2xl font-black text-slate-900 tracking-tighter">DiscVault</span>
-                </Link>
-              </div>
-              <nav className="flex items-center gap-2">
-                <Link href="/settings" className="p-2.5 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-50 transition-colors">
-                  <Settings className="w-5 h-5" />
-                </Link>
-                <Link href="/" className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">
-                  Vaults
-                </Link>
-              </nav>
-            </div>
-          </div>
-        </header>
-        <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );
