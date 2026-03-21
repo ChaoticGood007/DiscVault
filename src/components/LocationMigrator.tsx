@@ -19,10 +19,12 @@
 import { useState } from 'react'
 import { GitBranch, Loader2, Check } from 'lucide-react'
 import { migrateLocationsFromInventory } from '@/app/actions/settings'
+import { useRouter } from 'next/navigation'
 
 export default function LocationMigrator() {
   const [status, setStatus] = useState<'idle' | 'running' | 'done' | 'error'>('idle')
   const [result, setResult] = useState<{ count: number; nodes: number } | null>(null)
+  const router = useRouter()
 
   const run = async () => {
     setStatus('running')
@@ -30,6 +32,7 @@ export default function LocationMigrator() {
       const res = await migrateLocationsFromInventory()
       setResult(res)
       setStatus('done')
+      router.refresh() // re-fetch server data so the tree editor shows the imported nodes
     } catch {
       setStatus('error')
     }

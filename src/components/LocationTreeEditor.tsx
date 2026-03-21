@@ -91,16 +91,17 @@ function NodeRow({ node, depth, onUpdate, onDelete, onAddChild }: NodeRowProps) 
         <button
           onClick={() => onAddChild(node.id)}
           title="Add child location"
-          className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-all"
+          className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 text-[10px] font-black uppercase tracking-widest transition-all"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-3 h-3" />
+          Child
         </button>
 
         {/* Delete */}
         <button
           onClick={() => onDelete(node.id)}
           title="Remove location"
-          className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+          className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-red-500 transition-all"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
