@@ -19,6 +19,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { LayoutDashboard, BarChart3, Plus, Upload } from "lucide-react"
 import { Header } from "@/components/Header"
+import VaultSwitcher from "@/components/VaultSwitcher"
 
 export const dynamic = 'force-dynamic'
 
@@ -31,14 +32,17 @@ export default async function WorkspaceLayout({
 }) {
   const { vaultId } = await params
 
-  const vault = await prisma.discCollection.findUnique({
-    where: { id: vaultId },
-    include: {
-      _count: {
-        select: { inventory: true }
+  const [vault, allVaults] = await Promise.all([
+    prisma.discCollection.findUnique({
+      where: { id: vaultId },
+      include: {
+        _count: {
+          select: { inventory: true }
+        }
       }
-    }
-  })
+    }),
+    prisma.discCollection.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+  ])
 
   if (!vault) {
     notFound()
@@ -69,8 +73,8 @@ export default async function WorkspaceLayout({
     <>
       <Header actions={<>{navLinks}</>}>
         <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:block">Workspace</span>
-        <h1 className="text-sm sm:text-xl font-black text-slate-900 leading-tight truncate">{vault.name}</h1>
-        <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-slate-100 rounded-md text-[8px] sm:text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] hidden sm:inline-block">{vault._count.inventory} Discs</span>
+        <VaultSwitcher vaults={allVaults} activeId={vault.id} />
+        <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-slate-100 rounded-md text-[8px] sm:text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] hidden sm:inline-block shrink-0">{vault._count.inventory} Discs</span>
       </Header>
 
       <main className="max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col min-h-[calc(100vh-120px)]">

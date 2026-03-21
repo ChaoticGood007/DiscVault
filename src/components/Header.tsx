@@ -44,9 +44,6 @@ export function Header({
                <Link href="/settings" className="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-50 transition-colors">
                  <Settings className="w-5 h-5" />
                </Link>
-               <Link href="/" className="px-3 sm:px-5 py-2 sm:py-2.5 text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors rounded-xl whitespace-nowrap">
-                 Vaults
-               </Link>
              </div>
           </div>
         </div>

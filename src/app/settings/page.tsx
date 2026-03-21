@@ -3,11 +3,16 @@ import { getGlobalSettings } from '@/app/actions/settings'
 import { Settings2, Database } from 'lucide-react'
 import { Header } from "@/components/Header"
 import SyncButton from '@/components/SyncButton'
+import PrimaryVaultSelector from '@/components/PrimaryVaultSelector'
+import { db as prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
-  const settings = await getGlobalSettings()
+  const [settings, vaults] = await Promise.all([
+    getGlobalSettings(),
+    prisma.discCollection.findMany({ orderBy: { name: 'asc' } })
+  ])
 
   return (
     <>
@@ -35,6 +40,16 @@ export default async function SettingsPage() {
         </div>
         
         <ThemeCustomizer initialHex={settings.accentColor} />
+      </div>
+
+      {/* Primary Vault Configuration Module */}
+      <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-6">
+        <div className="border-b border-slate-50 pb-6">
+          <h2 className="text-lg font-black text-slate-900">Primary Workspace</h2>
+          <p className="text-sm text-slate-500 font-medium max-w-[450px] mt-1">Designate the default DiscVault workspace loaded automatically when accessing the dashboard root.</p>
+        </div>
+        
+        <PrimaryVaultSelector vaults={vaults} currentPrimary={settings.primaryVaultId} />
       </div>
 
       {/* Database Synchronization Module */}

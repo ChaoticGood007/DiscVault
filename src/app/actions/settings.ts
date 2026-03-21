@@ -32,3 +32,13 @@ export async function updateAccentColor(hexCode: string) {
   
   revalidatePath('/', 'layout')
 }
+
+export async function setPrimaryVault(vaultId: string) {
+  await prisma.settings.upsert({
+    where: { id: 'global' },
+    update: { primaryVaultId: vaultId },
+    create: { id: 'global', primaryVaultId: vaultId },
+  })
+  
+  revalidatePath('/', 'layout')
+}
