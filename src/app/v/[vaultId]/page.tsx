@@ -198,6 +198,7 @@ export default async function VaultDashboard({
             orderBy={getOrderBy(sortBy, sortOrder)}
             pageSize={pageSize}
             totalCount={totalCount}
+            visibleColumns={colsParam}
           />
         </div>
       ) : (

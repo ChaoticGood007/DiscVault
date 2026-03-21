@@ -188,6 +188,7 @@ export default async function AllVaultsDashboard({
           orderBy={getOrderBy(sortBy, sortOrder)}
           pageSize={pageSize}
           totalCount={totalCount}
+          visibleColumns={colsParam}
         />
       ) : (
         <InventoryList 
