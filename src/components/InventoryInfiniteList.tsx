@@ -77,12 +77,6 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
         {items.map((item) => (
           <div key={item.id} className="bg-white rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all border border-slate-100 overflow-hidden group relative flex flex-col">
-            <Link 
-              href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`}
-              className="absolute top-6 right-6 p-3 bg-white/80 backdrop-blur rounded-xl border border-slate-100 text-slate-400 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10 shadow-sm"
-            >
-              <Edit3 className="h-5 w-5" />
-            </Link>
 
             <div className="p-4 md:p-6 flex-1">
               <div className="flex items-start justify-between mb-3">
@@ -99,7 +93,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                   )}
                 </div>
                 {visibleColumns.includes('weight') && item.weight && (
-                  <span className="inline-flex items-center px-3 h-[24px] text-[10px] font-black tracking-widest text-slate-500 uppercase rounded-full border border-slate-200 bg-slate-50/80 mr-10 shadow-sm transition-all group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 shrink-0">
+                  <span className="inline-flex items-center px-3 h-[24px] text-[10px] font-black tracking-widest text-slate-500 uppercase rounded-full border border-slate-200 bg-slate-50/80 shadow-sm transition-all hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 shrink-0">
                     {item.weight}g
                   </span>
                 )}
@@ -107,9 +101,11 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
 
               <div className="mb-3 md:mb-5 mt-1">
                 {visibleColumns.includes('name') && (
-                  <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight break-words">
-                    {item.mold.name}
-                  </h3>
+                  <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`} className="inline-block group/title">
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover/title:text-indigo-600 transition-colors leading-tight break-words group-hover:text-indigo-600">
+                      {item.mold.name}
+                    </h3>
+                  </Link>
                 )}
                 {(visibleColumns.includes('plastic') || visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
                   <div className="flex flex-wrap items-center gap-y-2 mt-2">

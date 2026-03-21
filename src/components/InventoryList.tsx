@@ -271,7 +271,6 @@ export default function InventoryList({
                 <TableHeader field="location" label="Location" />
                 <TableHeader field="notes" label="Notes" />
                 <TableHeader field="createdAt" label="Added" />
-                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -298,7 +297,13 @@ export default function InventoryList({
                     </td>
                   )}
                   {visibleColumns.includes('brand') && <td className="px-6 py-5 text-sm font-black text-slate-400 uppercase tracking-tighter group-hover:text-indigo-400">{item.mold.brand}</td>}
-                  {visibleColumns.includes('name') && <td className="px-6 py-5 text-sm font-black text-indigo-600">{item.mold.name}</td>}
+                  {visibleColumns.includes('name') && (
+                    <td className="px-6 py-5 text-sm font-black text-indigo-600">
+                      <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`} className="hover:text-indigo-800 hover:underline">
+                        {item.mold.name}
+                      </Link>
+                    </td>
+                  )}
                   {visibleColumns.includes('category') && <td className="px-6 py-5 text-sm font-bold text-slate-500">{item.mold.category}</td>}
                   {visibleColumns.includes('flight_numbers') && (
                     <>
@@ -333,14 +338,6 @@ export default function InventoryList({
                       {new Date(item.createdAt).toLocaleDateString()}
                     </td>
                   )}
-                  <td className="px-6 py-5 text-right">
-                    <Link 
-                      href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`}
-                      className="inline-flex p-2 bg-white border border-slate-100 rounded-lg text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </Link>
-                  </td>
                 </tr>
               ))}
             </tbody>
