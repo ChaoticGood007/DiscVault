@@ -17,7 +17,7 @@
 import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Inbox, Plus, Disc, ArrowRight, Settings, LayoutDashboard, Trash2 } from "lucide-react"
-import { createCollection, deleteCollection } from "./actions/collections"
+import { createCollection, deleteCollection } from "@/app/actions/collections"
 import { Header } from "@/components/Header"
 
 export const dynamic = 'force-dynamic'
