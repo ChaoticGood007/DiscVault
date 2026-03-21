@@ -40,6 +40,7 @@ export default async function AllVaultsDashboard({
   const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : 'createdAt') as SortField
   const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : 'desc') as SortOrder
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : DEFAULT_COLUMNS
+  const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
   const isInBag = searchP.inBag === 'true'
   const selectedCollectionIds = typeof searchP.collections === 'string' ? searchP.collections.split(',') : []
@@ -155,7 +156,7 @@ export default async function AllVaultsDashboard({
         }}
         sortBy={sortBy}
         sortOrder={sortOrder}
-        visibleColumns={colsParam}
+        visibleColumns={visibleCols}
       />
 
       {totalCount === 0 ? (
@@ -188,13 +189,13 @@ export default async function AllVaultsDashboard({
           orderBy={getOrderBy(sortBy, sortOrder)}
           pageSize={pageSize}
           totalCount={totalCount}
-          visibleColumns={colsParam}
+          visibleColumns={visibleCols}
         />
       ) : (
         <InventoryList 
           initialItems={inventory as any} 
           collections={collections as any}
-          visibleColumns={colsParam}
+          visibleColumns={visibleCols}
           sortBy={sortBy}
           where={whereClause}
           orderBy={getOrderBy(sortBy, sortOrder)}

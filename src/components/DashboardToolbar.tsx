@@ -325,20 +325,24 @@ export default function DashboardToolbar({
                 <div className="px-3 py-2 mb-1 border-b border-slate-50">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Visible {currentView === 'cards' ? 'Fields' : 'Columns'}</span>
                 </div>
-                {ALL_COLUMNS.map((col) => (
-                  <button
-                    key={col.id}
-                    onClick={() => toggleColumn(col.id)}
-                    className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
-                  >
-                    <span className={`text-sm font-bold ${visibleColumns.includes(col.id) ? 'text-indigo-600' : 'text-slate-500'}`}>
-                      {col.label}
-                    </span>
-                    {visibleColumns.includes(col.id) && (
-                      <Check className="h-4 w-4 text-indigo-600" />
-                    )}
-                  </button>
-                ))}
+                {ALL_COLUMNS.map((col) => {
+                  const isLocked = col.id === 'name'
+                  return (
+                    <button
+                      key={col.id}
+                      onClick={() => !isLocked && toggleColumn(col.id)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors group ${isLocked ? 'cursor-default opacity-60' : 'hover:bg-slate-50'}`}
+                    >
+                      <span className={`text-sm font-bold ${visibleColumns.includes(col.id) ? 'text-indigo-600' : 'text-slate-500'}`}>
+                        {col.label}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {isLocked && <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Required</span>}
+                        {visibleColumns.includes(col.id) && <Check className="h-4 w-4 text-indigo-600" />}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
           </div>
 
