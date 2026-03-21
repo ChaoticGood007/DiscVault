@@ -85,8 +85,8 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
             </Link>
 
             <div className="p-4 md:p-6 flex-1">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex flex-wrap items-center gap-2">
                   {visibleColumns.includes('brand') && (
                     <span className="inline-flex items-center px-4 h-[28px] rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50/50 border border-indigo-100 whitespace-nowrap">
                       {item.mold.brand}
@@ -98,9 +98,14 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     </span>
                   )}
                 </div>
+                {visibleColumns.includes('weight') && item.weight && (
+                  <span className="inline-flex items-center px-3 h-[24px] text-[10px] font-black tracking-widest text-slate-500 uppercase rounded-full border border-slate-200 bg-slate-50/80 mr-10 shadow-sm transition-all group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 shrink-0">
+                    {item.weight}g
+                  </span>
+                )}
               </div>
 
-              <div className="mb-3 md:mb-5">
+              <div className="mb-3 md:mb-5 mt-1">
                 {visibleColumns.includes('name') && (
                   <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight break-words">
                     {item.mold.name}
