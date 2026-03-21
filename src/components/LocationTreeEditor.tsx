@@ -99,7 +99,15 @@ function NodeRow({ node, depth, onUpdate, onDelete, onAddChild }: NodeRowProps) 
 
         {/* Delete */}
         <button
-          onClick={() => onDelete(node.id)}
+          onClick={() => {
+            const countDescendants = (n: LocationNode): number =>
+              n.children.reduce((acc, c) => acc + 1 + countDescendants(c), 0)
+            const childCount = countDescendants(node)
+            if (childCount > 0) {
+              if (!confirm(`Delete "${node.label}" and its ${childCount} child location${childCount !== 1 ? 's' : ''}?`)) return
+            }
+            onDelete(node.id)
+          }}
           title="Remove location"
           className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-red-500 transition-all"
         >
