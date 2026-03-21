@@ -106,16 +106,34 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     {item.mold.name}
                   </h3>
                 )}
-                {(visibleColumns.includes('category') || visibleColumns.includes('stamp')) && (
+                {(visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
                     {visibleColumns.includes('category') && (
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         {item.mold.category}
                       </span>
                     )}
-                    {visibleColumns.includes('category') && visibleColumns.includes('stamp') && (
+
+                    {visibleColumns.includes('category') && visibleColumns.includes('color') && item.color && (
                       <span className="text-slate-300 font-bold">•</span>
                     )}
+
+                    {visibleColumns.includes('color') && item.color && (
+                      <div className="flex items-center gap-1.5" title={item.color}>
+                        <div 
+                          className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0 shadow-sm" 
+                          style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
+                        />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
+                          {item.color}
+                        </span>
+                      </div>
+                    )}
+
+                    {(visibleColumns.includes('category') || (visibleColumns.includes('color') && item.color)) && visibleColumns.includes('stamp') && (
+                      <span className="text-slate-300 font-bold">•</span>
+                    )}
+
                     {visibleColumns.includes('stamp') && (
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
                         {item.stamp || 'Stock'} Stamp
@@ -154,7 +172,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               )}
 
-              {(visibleColumns.includes('plastic') || visibleColumns.includes('weight') || visibleColumns.includes('color') || visibleColumns.includes('condition') || visibleColumns.includes('location') || visibleColumns.includes('ink')) && (
+              {(visibleColumns.includes('plastic') || visibleColumns.includes('weight') || visibleColumns.includes('condition') || visibleColumns.includes('location') || visibleColumns.includes('ink')) && (
                 <div className="grid grid-cols-3 gap-y-4 gap-x-2 py-3 md:py-4 border-t border-slate-50">
                   {visibleColumns.includes('plastic') && (
                     <div className="space-y-1 flex flex-col items-center">
@@ -176,24 +194,6 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     <div className="space-y-1 flex flex-col items-center">
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cond</span>
                       <span className="block font-black text-emerald-600 text-sm text-center">{item.condition ? `${item.condition}/10` : "—"}</span>
-                    </div>
-                  )}
-                  {visibleColumns.includes('color') && (
-                    <div className="space-y-1 flex flex-col items-center">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color</span>
-                      <Tooltip content={item.color}>
-                        <div className="flex items-center justify-center gap-1.5 w-full">
-                          {item.color && (
-                            <div 
-                              className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0" 
-                              style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
-                            />
-                          )}
-                          <span className="font-black text-slate-900 text-sm truncate text-center">
-                            {item.color || "—"}
-                          </span>
-                        </div>
-                      </Tooltip>
                     </div>
                   )}
                   {visibleColumns.includes('ink') && (
