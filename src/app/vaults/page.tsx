@@ -60,12 +60,12 @@ export default async function LandingPage() {
           </div>
           <div className="flex-1 relative z-10">
             <h3 className="text-3xl font-black leading-tight">Total Inventory</h3>
-            <p className="text-indigo-100 font-medium mt-3 leading-relaxed">
+            <p className="opacity-80 font-medium mt-3 leading-relaxed">
               View and search across all your vaults at once with multi-select filtering.
             </p>
           </div>
           <div className="mt-10 pt-8 border-t border-white/10 flex items-center justify-between relative z-10">
-            <span className="text-xs font-black uppercase tracking-[0.2em] text-indigo-200">
+            <span className="text-xs font-black uppercase tracking-[0.2em] opacity-70">
               Browse All
             </span>
             <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
