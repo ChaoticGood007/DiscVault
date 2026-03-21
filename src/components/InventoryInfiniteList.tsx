@@ -106,47 +106,74 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     {item.mold.name}
                   </h3>
                 )}
-                {(visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
-                    {visibleColumns.includes('category') && (
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        {item.mold.category}
-                      </span>
-                    )}
+                {(visibleColumns.includes('weight') || visibleColumns.includes('plastic') || visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
+                  <div className="flex flex-wrap items-center gap-y-2 mt-2">
+                    {(() => {
+                      const tags = []
 
-                    {visibleColumns.includes('category') && visibleColumns.includes('color') && item.color && (
-                      <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-1" />
-                    )}
+                      if (visibleColumns.includes('weight') && item.weight) {
+                        tags.push(
+                          <span key="weight" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
+                            {item.weight}g
+                          </span>
+                        )
+                      }
 
-                    {visibleColumns.includes('color') && item.color && (
-                      <div className="flex items-center gap-1.5" title={item.color}>
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0 shadow-sm" 
-                          style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
-                        />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
-                          {item.color}
-                        </span>
-                      </div>
-                    )}
+                      if (visibleColumns.includes('plastic') && item.plastic) {
+                        tags.push(
+                          <span key="plastic" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.1em]">
+                            {item.plastic}
+                          </span>
+                        )
+                      }
+                      
+                      if (visibleColumns.includes('category')) {
+                        tags.push(
+                          <span key="category" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                            {item.mold.category}
+                          </span>
+                        )
+                      }
 
-                    {(visibleColumns.includes('category') || (visibleColumns.includes('color') && item.color)) && visibleColumns.includes('stamp') && (
-                      <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-1" />
-                    )}
+                      if (visibleColumns.includes('color') && item.color) {
+                        tags.push(
+                          <div key="color" className="flex items-center gap-1.5" title={item.color}>
+                            <div 
+                              className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0 shadow-sm" 
+                              style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
+                            />
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
+                              {item.color}
+                            </span>
+                          </div>
+                        )
+                      }
 
-                    {visibleColumns.includes('stamp') && (
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                        {item.stamp || 'Stock'} Stamp
-                      </span>
-                    )}
-                    {visibleColumns.includes('stamp') && item.stampFoil && (
-                      <>
-                        <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-1" />
-                        <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">
-                          {item.stampFoil} Foil
-                        </span>
-                      </>
-                    )}
+                      if (visibleColumns.includes('stamp') && item.stampFoil) {
+                        tags.push(
+                          <span key="foil" className="text-[10px] font-black text-amber-600 uppercase tracking-widest">
+                            {item.stampFoil} Foil
+                          </span>
+                        )
+                      }
+
+                      if (visibleColumns.includes('stamp')) {
+                        tags.push(
+                          <span key="stamp" className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            {item.stamp || 'Stock'} Stamp
+                          </span>
+                        )
+                      }
+
+                      return tags.map((tag, index) => (
+                        <div key={tag.key} className="flex items-center">
+                          {tag}
+                          {index < tags.length - 1 && (
+                            <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-2" />
+                          )}
+                        </div>
+                      ))
+                    })()}
                   </div>
                 )}
               </div>
@@ -172,24 +199,8 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               )}
 
-              {(visibleColumns.includes('plastic') || visibleColumns.includes('weight') || visibleColumns.includes('condition') || visibleColumns.includes('location') || visibleColumns.includes('ink')) && (
+              {(visibleColumns.includes('condition') || visibleColumns.includes('location') || visibleColumns.includes('ink')) && (
                 <div className="grid grid-cols-3 gap-y-4 gap-x-2 py-3 md:py-4 border-t border-slate-50">
-                  {visibleColumns.includes('plastic') && (
-                    <div className="space-y-1 flex flex-col items-center">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Plastic</span>
-                      <Tooltip content={item.plastic}>
-                        <span className="block font-black text-slate-900 text-sm truncate w-full text-center">
-                          {item.plastic || "—"}
-                        </span>
-                      </Tooltip>
-                    </div>
-                  )}
-                  {visibleColumns.includes('weight') && (
-                    <div className="space-y-1 flex flex-col items-center">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Weight</span>
-                      <span className="block font-black text-indigo-600 text-sm text-center">{item.weight ? `${item.weight}g` : "—"}</span>
-                    </div>
-                  )}
                   {visibleColumns.includes('condition') && (
                     <div className="space-y-1 flex flex-col items-center">
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cond</span>
