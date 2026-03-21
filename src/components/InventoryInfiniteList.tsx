@@ -115,7 +115,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     )}
 
                     {visibleColumns.includes('category') && visibleColumns.includes('color') && item.color && (
-                      <div className="w-[1px] h-3 bg-slate-200 mx-0.5" />
+                      <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-1" />
                     )}
 
                     {visibleColumns.includes('color') && item.color && (
@@ -131,7 +131,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     )}
 
                     {(visibleColumns.includes('category') || (visibleColumns.includes('color') && item.color)) && visibleColumns.includes('stamp') && (
-                      <div className="w-[1px] h-3 bg-slate-200 mx-0.5" />
+                      <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-1" />
                     )}
 
                     {visibleColumns.includes('stamp') && (
@@ -141,7 +141,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     )}
                     {visibleColumns.includes('stamp') && item.stampFoil && (
                       <>
-                        <div className="w-[1px] h-3 bg-slate-200 mx-0.5" />
+                        <div className="w-[2px] h-3 bg-slate-200 rounded-full mx-1" />
                         <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">
                           {item.stampFoil} Foil
                         </span>
