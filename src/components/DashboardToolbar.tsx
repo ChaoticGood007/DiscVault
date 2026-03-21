@@ -241,7 +241,7 @@ export default function DashboardToolbar({
       )}
 
       {/* Main Toolbar */}
-      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-20">
+      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-40">
         <div className="flex flex-wrap gap-2 md:gap-4 items-center">
           <div className="hidden sm:flex items-center text-slate-400 mr-2">
             <Filter className="h-5 w-5 mr-2" />
