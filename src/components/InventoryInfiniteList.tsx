@@ -106,18 +106,10 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                     {item.mold.name}
                   </h3>
                 )}
-                {(visibleColumns.includes('weight') || visibleColumns.includes('plastic') || visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
+                {(visibleColumns.includes('plastic') || visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
                   <div className="flex flex-wrap items-center gap-y-2 mt-2">
                     {(() => {
                       const tags = []
-
-                      if (visibleColumns.includes('weight') && item.weight) {
-                        tags.push(
-                          <span key="weight" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
-                            {item.weight}g
-                          </span>
-                        )
-                      }
 
                       if (visibleColumns.includes('plastic') && item.plastic) {
                         tags.push(
