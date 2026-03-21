@@ -17,6 +17,7 @@
 import { db as prisma } from "@/lib/prisma"
 import AddDiscForm from "@/components/AddDiscForm"
 import { Inbox } from "lucide-react"
+import { getLocationTree } from "@/app/actions/settings"
 
 export const dynamic = 'force-dynamic'
 
@@ -28,9 +29,10 @@ export default async function AllVaultsAddPage({
   const searchP = await searchParams
   const collectionId = typeof searchP.collection === 'string' ? searchP.collection : undefined
 
-  const collections = await prisma.discCollection.findMany({
-    orderBy: { name: 'asc' }
-  })
+  const [collections, tree] = await Promise.all([
+    prisma.discCollection.findMany({ orderBy: { name: 'asc' } }),
+    getLocationTree(),
+  ])
 
   return (
     <div className="max-w-4xl mx-auto space-y-10">
@@ -66,7 +68,7 @@ export default async function AllVaultsAddPage({
 
       {collectionId ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <AddDiscForm vaultId={collectionId} />
+          <AddDiscForm vaultId={collectionId} tree={tree} />
         </div>
       ) : (
         <div className="text-center py-20 bg-slate-50 rounded-[40px] border-4 border-dashed border-white">
