@@ -19,6 +19,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getGlobalSettings } from '@/app/actions/settings';
 import { generateTailwindPalette } from '@/lib/colors';
+import { db as prisma } from "@/lib/prisma";
+import { syncMolds } from "@/app/actions/molds";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +42,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Execute background mold synchronization natively if the master registry is completely empty.
+  const coreMoldCount = await prisma.mold.count();
+  if (coreMoldCount === 0) {
+    console.log("Empty Master Database detected. Triggering automated background sync natively...");
+    // Fire and forget Promise directly into the Node Event Loop without blocking the HTML render!
+    syncMolds().catch(console.error);
+  }
+
   const settings = await getGlobalSettings();
   const customPalette = generateTailwindPalette(settings.accentColor);
 
