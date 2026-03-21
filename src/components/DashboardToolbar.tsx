@@ -74,6 +74,7 @@ const ALL_COLUMNS = [
   { id: 'condition', label: 'Cond' },
   { id: 'ink', label: 'Ink' },
   { id: 'location', label: 'Location' },
+  { id: 'notes', label: 'Notes' },
   { id: 'createdAt', label: 'Added' },
 ]
 

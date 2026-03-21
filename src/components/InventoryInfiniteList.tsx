@@ -211,7 +211,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               )}
 
-              {item.notes && (
+              {visibleColumns.includes('notes') && item.notes && (
                 <div className="mt-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                   <p className="text-xs text-slate-600 leading-relaxed italic line-clamp-2">"{item.notes}"</p>
                 </div>

@@ -266,6 +266,7 @@ export default function InventoryList({
                 <TableHeader field="condition" label="Cond" />
                 <TableHeader field="ink" label="Ink" />
                 <TableHeader field="location" label="Location" />
+                <TableHeader field="notes" label="Notes" />
                 <TableHeader field="createdAt" label="Added" />
                 <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
               </tr>
@@ -305,6 +306,7 @@ export default function InventoryList({
                   {visibleColumns.includes('condition') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.condition ? `${item.condition}/10` : "—"}</td>}
                   {visibleColumns.includes('ink') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.ink || "—"}</td>}
                   {visibleColumns.includes('location') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.location || "—"}</td>}
+                  {visibleColumns.includes('notes') && <td className="px-6 py-5 text-xs font-medium text-slate-500 max-w-[200px] truncate">{item.notes || "—"}</td>}
                   <td className="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-5 text-right">
                     <Link 
