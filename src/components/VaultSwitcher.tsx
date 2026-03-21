@@ -42,54 +42,58 @@ export default function VaultSwitcher({
       </button>
 
       {/* Floating Dropdown Menu */}
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden ring-1 ring-slate-900/5">
-          <div className="max-h-[60vh] overflow-y-auto no-scrollbar scroll-smooth">
-            {vaults.map(v => (
-              <button
-                key={v.id}
-                onClick={() => {
-                  setIsOpen(false)
-                  router.push(`/v/${v.id}`)
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${
-                  activeId === v.id 
-                    ? 'bg-indigo-50/80 text-indigo-900' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <div className={`p-2 rounded-xl transition-colors duration-200 ${
-                  activeId === v.id 
-                    ? 'bg-indigo-100 text-indigo-600 shrink-0' 
-                    : 'bg-slate-100 text-slate-400 shrink-0'
-                }`}>
-                  <Inbox className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col truncate">
-                  <span className="font-bold text-sm">{v.name}</span>
-                  {activeId === v.id && <span className="text-[10px] uppercase font-black tracking-widest text-indigo-500 mt-0.5">Active</span>}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <div className="h-px bg-slate-100 my-2 mx-4" />
-
-          {/* Settings Action Hub */}
-          <button
-            onClick={() => {
-              setIsOpen(false)
-              router.push('/vaults')
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 group"
-          >
-            <div className="p-2 rounded-xl bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600 transition-colors shrink-0">
-              <Settings className="w-4 h-4" />
-            </div>
-            <span className="font-bold text-sm">Manage Workspaces</span>
-          </button>
+      <div 
+        className={`absolute top-full left-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-100 py-2 z-50 overflow-hidden ring-1 ring-slate-900/5 transition-all duration-300 ease-out origin-top-left ${
+          isOpen 
+            ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+            : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+        }`}
+      >
+        <div className="max-h-[60vh] overflow-y-auto no-scrollbar scroll-smooth">
+          {vaults.map(v => (
+            <button
+              key={v.id}
+              onClick={() => {
+                setIsOpen(false)
+                router.push(`/v/${v.id}`)
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${
+                activeId === v.id 
+                  ? 'bg-indigo-50/80 text-indigo-900' 
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <div className={`p-2 rounded-xl transition-colors duration-200 ${
+                activeId === v.id 
+                  ? 'bg-indigo-100 text-indigo-600 shrink-0' 
+                  : 'bg-slate-100 text-slate-400 shrink-0'
+              }`}>
+                <Inbox className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col truncate">
+                <span className="font-bold text-sm">{v.name}</span>
+                {activeId === v.id && <span className="text-[10px] uppercase font-black tracking-widest text-indigo-500 mt-0.5">Active</span>}
+              </div>
+            </button>
+          ))}
         </div>
-      )}
+
+        <div className="h-px bg-slate-100 my-2 mx-4" />
+
+        {/* Settings Action Hub */}
+        <button
+          onClick={() => {
+            setIsOpen(false)
+            router.push('/vaults')
+          }}
+          className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 group"
+        >
+          <div className="p-2 rounded-xl bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600 transition-colors shrink-0">
+            <Settings className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-sm">Manage Workspaces</span>
+        </button>
+      </div>
     </div>
   )
 }
