@@ -84,8 +84,8 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
               <Edit3 className="h-5 w-5" />
             </Link>
 
-            <div className="p-5 md:p-8 flex-1">
-              <div className="flex items-center justify-between mb-4">
+            <div className="p-4 md:p-6 flex-1">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   {visibleColumns.includes('brand') && (
                     <span className="inline-flex items-center px-4 h-[28px] rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50/50 border border-indigo-100 whitespace-nowrap">
@@ -100,7 +100,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 </div>
               </div>
 
-              <div className="mb-4 md:mb-8">
+              <div className="mb-3 md:mb-5">
                 {visibleColumns.includes('name') && (
                   <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight break-words">
                     {item.mold.name}
@@ -134,8 +134,8 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
               </div>
 
               {(visibleColumns.includes('speed') || visibleColumns.includes('glide') || visibleColumns.includes('turn') || visibleColumns.includes('fade')) && (
-                <div className="flex flex-wrap items-center justify-between bg-slate-50/50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 mb-5 md:mb-8 gap-4">
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Flight Numbers</div>
+                <div className="flex flex-wrap items-center justify-between bg-slate-50/50 p-3 rounded-xl border border-slate-100 mb-4 md:mb-6 gap-3">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Flight Numbers</div>
                   <div className="flex space-x-2">
                     {[
                       { key: 'speed', label: 'S', val: item.mold.speed },
@@ -155,57 +155,57 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
               )}
 
               {(visibleColumns.includes('plastic') || visibleColumns.includes('weight') || visibleColumns.includes('color') || visibleColumns.includes('condition') || visibleColumns.includes('location') || visibleColumns.includes('ink')) && (
-                <div className="flex items-center py-4 md:py-6 border-t border-slate-50 overflow-x-auto invisible-scrollbar">
+                <div className="grid grid-cols-3 gap-y-4 gap-x-2 py-3 md:py-4 border-t border-slate-50">
                   {visibleColumns.includes('plastic') && (
-                    <div className="flex-1 min-w-[80px] space-y-1 flex flex-col pr-3">
+                    <div className="space-y-1 flex flex-col items-center">
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Plastic</span>
                       <Tooltip content={item.plastic}>
-                        <span className="block font-black text-slate-900 text-sm truncate w-full text-left">
+                        <span className="block font-black text-slate-900 text-sm truncate w-full text-center">
                           {item.plastic || "—"}
                         </span>
                       </Tooltip>
                     </div>
                   )}
                   {visibleColumns.includes('weight') && (
-                    <div className="shrink-0 px-4 md:px-6 space-y-1 flex flex-col items-center border-l border-slate-100">
+                    <div className="space-y-1 flex flex-col items-center">
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Weight</span>
                       <span className="block font-black text-indigo-600 text-sm text-center">{item.weight ? `${item.weight}g` : "—"}</span>
                     </div>
                   )}
                   {visibleColumns.includes('condition') && (
-                    <div className="shrink-0 px-4 md:px-6 space-y-1 flex flex-col items-center border-l border-slate-100">
+                    <div className="space-y-1 flex flex-col items-center">
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cond</span>
                       <span className="block font-black text-emerald-600 text-sm text-center">{item.condition ? `${item.condition}/10` : "—"}</span>
                     </div>
                   )}
-                  {visibleColumns.includes('ink') && (
-                    <div className="shrink-0 px-4 md:px-6 space-y-1 flex flex-col items-center border-l border-slate-100">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ink</span>
-                      <span className="block font-black text-slate-700 text-sm text-center">{item.ink || "—"}</span>
-                    </div>
-                  )}
-                  {visibleColumns.includes('location') && (
-                    <div className="shrink-0 px-4 md:px-6 space-y-1 flex flex-col items-center border-l border-slate-100">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location</span>
-                      <span className="block font-black text-slate-700 text-sm text-center">{item.location || "—"}</span>
-                    </div>
-                  )}
                   {visibleColumns.includes('color') && (
-                    <div className="flex-1 min-w-[80px] space-y-1 flex flex-col pl-3 border-l border-slate-100">
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Color</span>
+                    <div className="space-y-1 flex flex-col items-center">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Color</span>
                       <Tooltip content={item.color}>
-                        <div className="flex items-center justify-end gap-1.5 w-full">
+                        <div className="flex items-center justify-center gap-1.5 w-full">
                           {item.color && (
                             <div 
                               className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0" 
                               style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
                             />
                           )}
-                          <span className="font-black text-slate-900 text-sm truncate text-right">
+                          <span className="font-black text-slate-900 text-sm truncate text-center">
                             {item.color || "—"}
                           </span>
                         </div>
                       </Tooltip>
+                    </div>
+                  )}
+                  {visibleColumns.includes('ink') && (
+                    <div className="space-y-1 flex flex-col items-center">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ink</span>
+                      <span className="block font-black text-slate-700 text-sm text-center">{item.ink || "—"}</span>
+                    </div>
+                  )}
+                  {visibleColumns.includes('location') && (
+                    <div className="space-y-1 flex flex-col items-center">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location</span>
+                      <span className="block font-black text-slate-700 text-sm text-center">{item.location || "—"}</span>
                     </div>
                   )}
                 </div>
@@ -219,7 +219,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
             </div>
             
             {visibleColumns.includes('createdAt') && (
-              <div className="bg-slate-50 px-5 py-4 md:px-8 md:py-5 flex justify-between items-center group-hover:bg-indigo-50 transition-colors border-t border-slate-100">
+              <div className="bg-slate-50 px-4 py-3 md:px-6 md:py-4 flex justify-between items-center group-hover:bg-indigo-50 transition-colors border-t border-slate-100">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Added {new Date(item.createdAt).toLocaleDateString()}</span>
               </div>
             )}
