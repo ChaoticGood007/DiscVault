@@ -58,24 +58,8 @@ export default async function AllVaultsLayout({
       </Header>
 
       <main className="max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col min-h-[calc(100vh-120px)]">
-        <div className="space-y-8 flex flex-col flex-1">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900 p-8 rounded-[40px] shadow-2xl shadow-indigo-100 text-white animate-in zoom-in-95 duration-500">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md">
-                <LayoutDashboard className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em] leading-none mb-1 block">Global Vault</span>
-                <h1 className="text-3xl font-black leading-tight">All Vaults Combined</h1>
-                <p className="text-sm text-indigo-200/60 font-medium">{totalCount} Discs across all collections</p>
-              </div>
-            </div>
-
-          </div>
-
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col flex-1">
-            {children}
-          </div>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col flex-1">
+          {children}
         </div>
       </main>
     </>
