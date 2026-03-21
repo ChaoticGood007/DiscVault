@@ -156,8 +156,9 @@ export default function InventoryList({
     setShowMoveMenu(false)
   }
 
-  const TableHeader = ({ field, label, center = false }: { field: string; label: string; center?: boolean }) => {
-    if (!visibleColumns.includes(field)) return null;
+  const TableHeader = ({ field, label, checkField, center = false }: { field: string; label: string; checkField?: string; center?: boolean }) => {
+    const isVisible = visibleColumns.includes(checkField || field);
+    if (!isVisible) return null;
     return (
       <th className={`px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest ${center ? 'text-center' : ''}`}>
         <Link href={getSortUrl(field)} className={`inline-flex items-center hover:text-indigo-600 transition-colors ${sortBy === field ? 'text-indigo-600' : ''}`}>
@@ -257,10 +258,10 @@ export default function InventoryList({
                 <TableHeader field="brand" label="Brand" />
                 <TableHeader field="name" label="Mold" />
                 <TableHeader field="category" label="Category" />
-                <TableHeader field="speed" label="S" center />
-                <TableHeader field="glide" label="G" center />
-                <TableHeader field="turn" label="T" center />
-                <TableHeader field="fade" label="F" center />
+                <TableHeader field="speed" label="S" checkField="flight_numbers" center />
+                <TableHeader field="glide" label="G" checkField="flight_numbers" center />
+                <TableHeader field="turn" label="T" checkField="flight_numbers" center />
+                <TableHeader field="fade" label="F" checkField="flight_numbers" center />
                 <TableHeader field="plastic" label="Plastic" />
                 <TableHeader field="weight" label="Weight" />
                 <TableHeader field="color" label="Color" />
@@ -299,10 +300,14 @@ export default function InventoryList({
                   {visibleColumns.includes('brand') && <td className="px-6 py-5 text-sm font-black text-slate-400 uppercase tracking-tighter group-hover:text-indigo-400">{item.mold.brand}</td>}
                   {visibleColumns.includes('name') && <td className="px-6 py-5 text-sm font-black text-indigo-600">{item.mold.name}</td>}
                   {visibleColumns.includes('category') && <td className="px-6 py-5 text-sm font-bold text-slate-500">{item.mold.category}</td>}
-                  {visibleColumns.includes('speed') && <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.speed}</td>}
-                  {visibleColumns.includes('glide') && <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.glide}</td>}
-                  {visibleColumns.includes('turn') && <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.turn}</td>}
-                  {visibleColumns.includes('fade') && <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.fade}</td>}
+                  {visibleColumns.includes('flight_numbers') && (
+                    <>
+                      <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.speed}</td>
+                      <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.glide}</td>
+                      <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.turn}</td>
+                      <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.fade}</td>
+                    </>
+                  )}
                   {visibleColumns.includes('plastic') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.plastic || "—"}</td>}
                   {visibleColumns.includes('weight') && <td className="px-6 py-5 text-sm font-black text-indigo-600">{item.weight ? `${item.weight}g` : "—"}</td>}
                   {visibleColumns.includes('color') && (

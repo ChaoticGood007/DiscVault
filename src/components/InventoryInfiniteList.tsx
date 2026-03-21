@@ -32,7 +32,7 @@ interface InventoryInfiniteListProps {
   visibleColumns?: string[]
 }
 
-export default function InventoryInfiniteList({ initialItems, where, orderBy, pageSize, totalCount, visibleColumns = ['brand', 'category', 'speed', 'glide', 'turn', 'fade', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'] }: InventoryInfiniteListProps) {
+export default function InventoryInfiniteList({ initialItems, where, orderBy, pageSize, totalCount, visibleColumns = ['brand', 'category', 'flight_numbers', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'] }: InventoryInfiniteListProps) {
   const [items, setItems] = useState(initialItems)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialItems.length < totalCount)
@@ -133,7 +133,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 )}
               </div>
 
-              {(visibleColumns.includes('speed') || visibleColumns.includes('glide') || visibleColumns.includes('turn') || visibleColumns.includes('fade')) && (
+              {visibleColumns.includes('flight_numbers') && (
                 <div className="flex flex-wrap items-center justify-between bg-slate-50/50 p-3 rounded-xl border border-slate-100 mb-4 md:mb-6 gap-3">
                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Flight Numbers</div>
                   <div className="flex space-x-2">
@@ -142,7 +142,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                       { key: 'glide', label: 'G', val: item.mold.glide },
                       { key: 'turn', label: 'T', val: item.mold.turn },
                       { key: 'fade', label: 'F', val: item.mold.fade }
-                    ].map((stat, idx) => visibleColumns.includes(stat.key) && (
+                    ].map((stat, idx) => (
                       <div key={idx} className="flex flex-col items-center">
                         <span className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl bg-white text-slate-900 font-black text-xs md:text-sm border border-slate-200 shadow-sm transition-transform group-hover:scale-110">
                           {stat.val}
