@@ -17,8 +17,9 @@
 import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Inbox, Plus, Disc, ArrowRight, Settings, LayoutDashboard, Trash2 } from "lucide-react"
-import { createCollection, deleteCollection } from "@/app/actions/collections"
+import { createCollection } from "@/app/actions/collections"
 import { Header } from "@/components/Header"
+import VaultCard from "@/components/VaultCard"
 
 export const dynamic = 'force-dynamic'
 
@@ -92,53 +93,11 @@ export default async function LandingPage() {
 
         {/* List of Vaults */}
         {vaults.map((vault) => (
-          <div key={vault.id} className="group relative">
-            <Link 
-              href={`/v/${vault.id}`}
-              className="bg-white p-10 rounded-[48px] border border-slate-100 shadow-sm flex flex-col relative overflow-hidden transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1 active:scale-[0.98] h-full"
-            >
-              <div className="flex justify-between items-start mb-8 relative z-10">
-                <div className="p-5 bg-slate-50 rounded-3xl group-hover:bg-indigo-600 transition-all duration-500">
-                  <Inbox className="w-10 h-10 text-slate-400 group-hover:text-white transition-colors" />
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-full">
-                  <Disc className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm font-black text-slate-900">{vault._count.inventory}</span>
-                </div>
-              </div>
-
-              <div className="flex-1 relative z-10">
-                <h3 className="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">{vault.name}</h3>
-                <p className="text-slate-500 font-medium mt-3 leading-relaxed line-clamp-2 italic">
-                  {vault.description || 'No description provided.'}
-                </p>
-              </div>
-
-              <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between relative z-10">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-indigo-600 transition-colors">
-                  Enter Vault
-                </span>
-                <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-indigo-50 transition-colors">
-                  <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 transition-all group-hover:translate-x-1" />
-                </div>
-              </div>
-
-              {/* Decorative Background Glow */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full -mr-24 -mt-24 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-            </Link>
-
-            {/* Quick Actions (Delete) */}
-            {vault.name !== 'Main Vault' && (
-              <form 
-                action={async () => { 'use server'; await deleteCollection(vault.id); }}
-                className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <button className="p-3 bg-white/80 backdrop-blur rounded-2xl text-slate-300 hover:text-red-500 transition-all hover:scale-110 shadow-sm border border-slate-100">
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </form>
-            )}
-          </div>
+          <VaultCard 
+            key={vault.id} 
+            vault={vault} 
+            count={vault._count.inventory} 
+          />
         ))}
       </div>
     </div>
