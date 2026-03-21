@@ -2,11 +2,11 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       - DATABASE_URL=file:/app/data/dev.db
     volumes:
-      - ./data:/app/data
+      - local-data:/app/data
 
 volumes:
-  data:
+  local-data:

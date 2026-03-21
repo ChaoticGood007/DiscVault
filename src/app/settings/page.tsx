@@ -1,6 +1,7 @@
 import ThemeCustomizer from './ThemeCustomizer'
 import { getGlobalSettings } from '@/app/actions/settings'
 import { Settings2 } from 'lucide-react'
+import { Header } from "@/components/Header"
 
 export const dynamic = 'force-dynamic'
 
@@ -8,8 +9,11 @@ export default async function SettingsPage() {
   const settings = await getGlobalSettings()
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between">
+    <>
+      <Header />
+      <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
+        <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="p-4 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100">
             <Settings2 className="w-8 h-8 text-white" />
@@ -32,5 +36,7 @@ export default async function SettingsPage() {
         <ThemeCustomizer initialHex={settings.accentColor} />
       </div>
     </div>
+      </main>
+    </>
   )
 }

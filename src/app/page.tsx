@@ -18,6 +18,7 @@ import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Inbox, Plus, Disc, ArrowRight, Settings, LayoutDashboard, Trash2 } from "lucide-react"
 import { createCollection, deleteCollection } from "./actions/collections"
+import { Header } from "@/components/Header"
 
 export const dynamic = 'force-dynamic'
 
@@ -32,8 +33,11 @@ export default async function LandingPage() {
   })
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 py-10">
-      <div className="text-center space-y-4">
+    <>
+      <Header />
+      <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
+        <div className="max-w-6xl mx-auto space-y-12 py-10">
+          <div className="text-center space-y-4">
         <h1 className="text-6xl font-black text-slate-900 tracking-tighter">
           Your <span className="text-indigo-600">Vaults</span>
         </h1>
@@ -138,5 +142,7 @@ export default async function LandingPage() {
         ))}
       </div>
     </div>
+      </main>
+    </>
   )
 }
