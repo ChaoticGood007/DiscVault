@@ -13,9 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Vault Renaming:** Vaults can now be renamed directly from the management interface.
 
 ### Changed
-- **Minimalist Card Redesign:** Weight pill moved to top-right corner; Color swatch + Plastic moved inline under the disc title alongside Category, Stamp, and Foil (separated by 2px pill dividers). "Added" date is absolutely positioned at bottom-right, contributing no vertical height. Floating edit button removed — clicking the Mold name opens the edit page instead.
-- **Native UI Elements Replaced:** Browser `<select>` dropdowns for Category and Brand replaced with custom animated panels matching the app design. `type="number"` spinners in Advanced Search replaced with clean text inputs.
-- **Bug Fixes:** Fixed z-index collision causing the Fields dropdown to render behind the table header; fixed "Added" column misalignment in table view; removed duplicate navigation bar from the All Vaults page.
+- **Global Settings Expansion:** Relocated the "Sync Global DB" manual trigger out of vault stat dashboards into the global `/settings` panel under a dedicated Database Engine module.
+- **Analytics Theming:** Rewrote Recharts SVG properties to consume dynamically generated CSS `var()` targets matching the Global Accent Color rather than static hex codes.
+- **Global Header UX:** Decoupled `<header>` from `layout.tsx` and built a modular `<Header>` component to absorb localized metadata dynamically.
+- **TopBar Consolidation:** Moved vault name, total disc count, and nav tabs into the Global Top Navbar. Removed the secondary title banner, saving ~120px of vertical space.
+- **Workflow Protection:** Added GitHub Branch Protection rules locking `main` against direct pushes.
+- **Minimalist Card Redesign:** Weight pill moved to top-right corner; Color swatch + Plastic moved inline under disc title alongside Category, Stamp, and Foil (2px pill dividers). "Added" date absolutely positioned at bottom-right, contributing no vertical height. Floating edit button removed — clicking the Mold name opens the edit page instead.
+- **Native UI Elements Replaced:** Browser `<select>` dropdowns for Category and Brand replaced with custom animated panels. `type="number"` spinners in Advanced Search replaced with clean text inputs.
+- **Bug Fixes:** Fixed z-index collision causing the Fields dropdown to render behind the table header; fixed "Added" column misalignment in table view; removed duplicate nav bar from the All Vaults page.
 
 ## [0.1.2] - 2026-03-19
 
