@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.3] - 2026-03-20
 
 ### Changed
+- **Analytics Theming:** Rewrote `Recharts` SVG properties across the Analytics dashboard to aggressively consume dynamically generated CSS `var()` targets natively, matching the Global Accent Color configuration rather than rendering static legacy hex codes.
 - **Global Header UX:** Aggressively decoupled the `<header>` structural constraints from the `layout.tsx` wrapper mapping. Built a modular `<Header>` React artifact specifically to absorb localized metadata dynamically.
 - **TopBar Consolidation:** Transferred the "Active Workspace" contextual payload (Vault Name, Total Disc Inventory, and 4-Link Navigation Tabs) physically into the centralized Global Top Navbar. Eradicated the massive secondary title banner previously sitting underneath the header, saving over 120 pixels of vertical screen estate.
 - **Workflow Protection:** Initialized rigorous GitHub Branch Protection rules locking `main` against direct pushes natively. Workflows gracefully evaluate against standard container registry PR checks proactively.

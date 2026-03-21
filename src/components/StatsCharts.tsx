@@ -29,7 +29,15 @@ import {
   Cell,
 } from 'recharts'
 
-const COLORS = ['#4f46e5', '#818cf8', '#a5b4fc', '#c7d2fe', '#e0e7ff', '#6366f1', '#4338ca'];
+const COLORS = [
+  'var(--color-indigo-600)', 
+  'var(--color-indigo-400)', 
+  'var(--color-indigo-300)', 
+  'var(--color-indigo-200)', 
+  'var(--color-indigo-100)', 
+  'var(--color-indigo-500)', 
+  'var(--color-indigo-700)'
+];
 
 interface StatsChartsProps {
   stats: {
@@ -64,7 +72,7 @@ export default function StatsCharts({ stats }: StatsChartsProps) {
                 cursor={{ fill: '#f8fafc' }}
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
               />
-              <Bar dataKey="value" name="Discs" fill="#6366f1" radius={[0, 8, 8, 0]} barSize={24} />
+              <Bar dataKey="value" name="Discs" fill="var(--color-indigo-500)" radius={[0, 8, 8, 0]} barSize={24} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -116,7 +124,7 @@ export default function StatsCharts({ stats }: StatsChartsProps) {
               cursor={{ fill: '#f8fafc' }}
               contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
             />
-            <Bar dataKey="value" name="Discs" fill="#818cf8" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="value" name="Discs" fill="var(--color-indigo-400)" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
