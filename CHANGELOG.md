@@ -7,12 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.3] - 2026-03-20
 
+### Added
+- **Customizable Card Fields:** The Fields/Columns picker in the toolbar now controls which data points appear on inventory cards and table rows. Users can toggle: Bag, Brand, Mold, Category, Flight Numbers, Plastic, Weight, Color, Stamp, Cond, Ink, Location, Notes, and Added.
+- **Notes Field:** `Notes` was missing from the Fields selector entirely — now wired up across both Card and Table views.
+- **Color & Stamp Fields:** `Color` and `Stamp` were also missing from the selector — both are now fully togglable.
+- **Flight Numbers Grouped Toggle:** Replaced the four individual Speed/Glide/Turn/Fade toggles with a single "Flight Numbers" group toggle that shows/hides all four simultaneously.
+- **Vault Renaming:** Users can now rename vaults they have created directly from the vault management interface.
+- **Export Button Restored:** The CSV export button was lost during a previous UI refactor and has been re-added to both the single vault and All Vaults layouts.
+
 ### Changed
-- **Global Settings Expansion:** Relocated the "Sync Global DB" manual trigger completely out of localized Vault statistic dashboards and permanently mounted it natively inside the global `/settings` Configuration panel under a dedicated Database Engine module.
-- **Analytics Theming:** Rewrote `Recharts` SVG properties across the Analytics dashboard to aggressively consume dynamically generated CSS `var()` targets natively, matching the Global Accent Color configuration rather than rendering static legacy hex codes.
-- **Global Header UX:** Aggressively decoupled the `<header>` structural constraints from the `layout.tsx` wrapper mapping. Built a modular `<Header>` React artifact specifically to absorb localized metadata dynamically.
-- **TopBar Consolidation:** Transferred the "Active Workspace" contextual payload (Vault Name, Total Disc Inventory, and 4-Link Navigation Tabs) physically into the centralized Global Top Navbar. Eradicated the massive secondary title banner previously sitting underneath the header, saving over 120 pixels of vertical screen estate.
-- **Workflow Protection:** Initialized rigorous GitHub Branch Protection rules locking `main` against direct pushes natively. Workflows gracefully evaluate against standard container registry PR checks proactively.
+- **Card Layout — Minimalist Design:**
+  - Weight moved to top-right of the card (opposite the Brand pill), taking zero vertical space.
+  - Color swatch + label moved inline into the sub-header row alongside Category, Stamp, and Foil — separated by 2px vertical pill dividers instead of dots.
+  - Foil renders before Stamp in the tag sequence.
+  - Plastic and Weight removed from the bottom attribute grid; Plastic is now inline text, Weight is the top-right pill.
+  - "Added" date is now absolutely positioned at the bottom-right of the card, contributing zero vertical height.
+  - Reduced internal card padding across all sections.
+- **Attribute Grid:** Remaining bottom grid fields (Cond, Ink, Location) wrap in a `grid-cols-3` layout instead of a horizontal flex row — eliminates horizontal scrollbars when many fields are active.
+- **Edit Navigation:** Removed the floating hover Edit button from cards entirely. Clicking the Mold name now navigates to the edit page. Same change applied to the table — Mold name is now the edit link, Actions column removed.
+- **Mold Field Locked:** The "Mold" field in the Fields selector is now marked `Required` and cannot be toggled off, since it is the edit entry point.
+- **Toolbar Dropdowns:** Replaced the browser-native `<select>` elements for Category and Brand filters with custom animated dropdown menus matching the app's design language — pill buttons that turn solid indigo when active, animated panels with check marks, click-outside to dismiss.
+- **Advanced Search Inputs:** Replaced `type="number"` spinners with clean `type="text"` inputs with numeric-only key guards — eliminates the browser's native stepper arrows.
+- **All Vaults Page:** Removed redundant navigation bars and header elements. View now uses the global application shell consistently.
+- **Z-Index Fix:** Fixed a stacking context collision where the Fields/Columns dropdown was rendering behind the sticky table header.
+- **Table Column Alignment:** The "Added" date cell in the table is now correctly conditionalized, preventing a stray empty column from appearing when the field is hidden.
 
 ## [0.1.2] - 2026-03-19
 
