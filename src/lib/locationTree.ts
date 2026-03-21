@@ -108,3 +108,38 @@ export function buildTreeFromPaths(paths: string[]): LocationNode[] {
 
   return Array.from(rootMap.values())
 }
+
+/**
+ * Move `draggedId` to appear immediately before `targetId` anywhere in the tree.
+ * Works across parents (effectively reparents the dragged node).
+ */
+export function reorderInTree(
+  tree: LocationNode[],
+  draggedId: string,
+  targetId: string
+): LocationNode[] {
+  if (draggedId === targetId) return tree
+
+  // Step 1: extract the dragged node from the tree
+  let dragged: LocationNode | null = null
+  function extract(nodes: LocationNode[]): LocationNode[] {
+    return nodes
+      .filter(n => { if (n.id === draggedId) { dragged = n; return false } return true })
+      .map(n => ({ ...n, children: extract(n.children) }))
+  }
+  const pruned = extract(tree)
+  if (!dragged) return tree
+
+  // Step 2: insert it before the target
+  function insert(nodes: LocationNode[]): LocationNode[] {
+    const idx = nodes.findIndex(n => n.id === targetId)
+    if (idx >= 0) {
+      const result = [...nodes]
+      result.splice(idx, 0, dragged!)
+      return result
+    }
+    return nodes.map(n => ({ ...n, children: insert(n.children) }))
+  }
+  return insert(pruned)
+}
+

@@ -16,10 +16,10 @@
 
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Plus, Trash2, ChevronRight, Briefcase, GripVertical, FolderOpen } from 'lucide-react'
 import { saveLocationTree } from '@/app/actions/settings'
-import type { LocationNode } from '@/lib/locationTree'
+import { reorderInTree, type LocationNode } from '@/lib/locationTree'
 
 interface LocationTreeEditorProps {
   initialTree: LocationNode[]
@@ -32,27 +32,59 @@ function generateId() {
 interface NodeRowProps {
   node: LocationNode
   depth: number
+  isDragging: boolean
+  isDragOver: boolean
   onUpdate: (id: string, updates: Partial<LocationNode>) => void
   onDelete: (id: string) => void
   onAddChild: (parentId: string) => void
+  onDragStart: (id: string) => void
+  onDragOver: (id: string) => void
+  onDrop: (targetId: string) => void
+  onDragEnd: () => void
 }
 
-function NodeRow({ node, depth, onUpdate, onDelete, onAddChild }: NodeRowProps) {
+function NodeRow({
+  node, depth, isDragging, isDragOver,
+  onUpdate, onDelete, onAddChild,
+  onDragStart, onDragOver, onDrop, onDragEnd,
+}: NodeRowProps) {
   const [expanded, setExpanded] = useState(true)
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState(node.label === '')
   const [label, setLabel] = useState(node.label)
+
+  const commitLabel = () => {
+    onUpdate(node.id, { label })
+    setEditing(false)
+  }
 
   return (
     <div>
+      {/* Drop indicator above */}
+      {isDragOver && (
+        <div className="h-0.5 mx-3 bg-indigo-400 rounded-full" />
+      )}
+
       <div
-        className="flex items-center gap-2 py-2 px-3 rounded-xl hover:bg-slate-50 group transition-colors"
+        draggable
+        onDragStart={e => { e.stopPropagation(); onDragStart(node.id) }}
+        onDragOver={e => { e.preventDefault(); e.stopPropagation(); onDragOver(node.id) }}
+        onDrop={e => { e.preventDefault(); e.stopPropagation(); onDrop(node.id) }}
+        onDragEnd={onDragEnd}
+        className={`flex items-center gap-2 py-2 px-3 rounded-xl transition-all select-none ${
+          isDragging ? 'opacity-40 bg-slate-50' : 'hover:bg-slate-50'
+        }`}
         style={{ paddingLeft: `${12 + depth * 24}px` }}
       >
-        <GripVertical className="w-3 h-3 text-slate-200 shrink-0" />
+        {/* Grip handle */}
+        <GripVertical className="w-3 h-3 text-slate-300 shrink-0 cursor-grab active:cursor-grabbing" />
 
         {/* Expand toggle */}
         {node.children.length > 0 ? (
-          <button onClick={() => setExpanded(!expanded)} className="text-slate-400 transition-transform duration-150" style={{ transform: expanded ? 'rotate(90deg)' : 'none' }}>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-slate-400 transition-transform duration-150 shrink-0"
+            style={{ transform: expanded ? 'rotate(90deg)' : 'none' }}
+          >
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         ) : (
@@ -65,8 +97,8 @@ function NodeRow({ node, depth, onUpdate, onDelete, onAddChild }: NodeRowProps) 
             autoFocus
             value={label}
             onChange={e => setLabel(e.target.value)}
-            onBlur={() => { onUpdate(node.id, { label }); setEditing(false) }}
-            onKeyDown={e => { if (e.key === 'Enter') { onUpdate(node.id, { label }); setEditing(false) } }}
+            onBlur={commitLabel}
+            onKeyDown={e => { if (e.key === 'Enter') commitLabel() }}
             className="flex-1 text-sm font-bold text-slate-900 bg-white border border-indigo-200 rounded-lg px-2 py-0.5 outline-none focus:ring-2 focus:ring-indigo-100"
           />
         ) : (
@@ -116,18 +148,33 @@ function NodeRow({ node, depth, onUpdate, onDelete, onAddChild }: NodeRowProps) 
       </div>
 
       {expanded && node.children.map(child => (
-        <NodeRow
+        <ConnectedNodeRow
           key={child.id}
           node={child}
           depth={depth + 1}
           onUpdate={onUpdate}
           onDelete={onDelete}
           onAddChild={onAddChild}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          onDragEnd={onDragEnd}
         />
       ))}
     </div>
   )
 }
+
+// Wrapper that subscribes to drag state from context via props
+interface ConnectedNodeRowProps extends Omit<NodeRowProps, 'isDragging' | 'isDragOver'> {}
+
+function ConnectedNodeRow(props: ConnectedNodeRowProps) {
+  // isDragging/isDragOver are provided by the parent editor through a shared ref pattern
+  // We pass placeholder false here; the editor manages visual state differently
+  return <NodeRow {...props} isDragging={false} isDragOver={false} />
+}
+
+// ─── Tree helpers ─────────────────────────────────────────────────────────────
 
 function updateNode(tree: LocationNode[], id: string, updates: Partial<LocationNode>): LocationNode[] {
   return tree.map(n => {
@@ -151,10 +198,14 @@ function addChildNode(tree: LocationNode[], parentId: string): LocationNode[] {
   })
 }
 
+// ─── Main Editor ──────────────────────────────────────────────────────────────
+
 export default function LocationTreeEditor({ initialTree }: LocationTreeEditorProps) {
   const [tree, setTree] = useState<LocationNode[]>(initialTree)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const autoSave = (newTree: LocationNode[]) => {
@@ -175,6 +226,65 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
   const handleAddChild = (parentId: string) => autoSave(addChildNode(tree, parentId))
   const handleAddRoot = () => autoSave([...tree, { id: generateId(), label: '', inBag: false, children: [] }])
 
+  // DnD handlers
+  const handleDragStart = (id: string) => { setDraggedId(id); setDragOverId(null) }
+  const handleDragOver = (id: string) => { if (id !== draggedId) setDragOverId(id) }
+  const handleDrop = (targetId: string) => {
+    if (draggedId && draggedId !== targetId) {
+      autoSave(reorderInTree(tree, draggedId, targetId))
+    }
+    setDraggedId(null)
+    setDragOverId(null)
+  }
+  const handleDragEnd = () => { setDraggedId(null); setDragOverId(null) }
+
+  // Render each root node, injecting drag state directly
+  const renderNode = (node: LocationNode, depth: number) => (
+    <NodeRow
+      key={node.id}
+      node={node}
+      depth={depth}
+      isDragging={draggedId === node.id}
+      isDragOver={dragOverId === node.id}
+      onUpdate={handleUpdate}
+      onDelete={handleDelete}
+      onAddChild={handleAddChild}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onDragEnd={handleDragEnd}
+    />
+  )
+
+  // Override child rendering so we can inject drag state at all depths
+  // by patching NodeRow to use a recursive renderNode instead of ConnectedNodeRow
+  // (done by replacing ConnectedNodeRow usage in NodeRow with a prop)
+  // Since we need state from the editor, we flatten by re-rendering with a render prop approach:
+  const renderTree = (nodes: LocationNode[], depth = 0): React.ReactNode =>
+    nodes.map(node => {
+      const expanding = node.children.length > 0
+      return (
+        <div key={node.id}>
+          {dragOverId === node.id && (
+            <div className="h-0.5 mx-3 bg-indigo-400 rounded-full" />
+          )}
+          <DragNodeRow
+            node={node}
+            depth={depth}
+            isDragging={draggedId === node.id}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+            onAddChild={handleAddChild}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
+          />
+          {renderTree(node.children, depth + 1)}
+        </div>
+      )
+    })
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-1">
@@ -189,17 +299,11 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
       </div>
 
       {tree.length > 0 && (
-        <div className="border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-50">
-          {tree.map(node => (
-            <NodeRow
-              key={node.id}
-              node={node}
-              depth={0}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-              onAddChild={handleAddChild}
-            />
-          ))}
+        <div
+          className="border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-50"
+          onDragOver={e => e.preventDefault()}
+        >
+          {renderTree(tree)}
         </div>
       )}
 
@@ -212,8 +316,100 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
       </button>
 
       <p className="text-[10px] text-slate-400 leading-relaxed">
-        Click a name to rename. <Briefcase className="w-2.5 h-2.5 inline-block text-emerald-500" /> marks a location as "in bag" — children inherit this flag automatically.
+        Drag <GripVertical className="w-2.5 h-2.5 inline-block" /> to reorder. Click a name to rename. <Briefcase className="w-2.5 h-2.5 inline-block text-emerald-500" /> marks a location as &quot;in bag&quot; — children inherit this flag automatically.
       </p>
+    </div>
+  )
+}
+
+// ─── Stateless drag-aware row (used by renderTree) ───────────────────────────
+
+interface DragNodeRowProps {
+  node: LocationNode
+  depth: number
+  isDragging: boolean
+  onUpdate: (id: string, updates: Partial<LocationNode>) => void
+  onDelete: (id: string) => void
+  onAddChild: (parentId: string) => void
+  onDragStart: (id: string) => void
+  onDragOver: (id: string) => void
+  onDrop: (id: string) => void
+  onDragEnd: () => void
+}
+
+function DragNodeRow({
+  node, depth, isDragging,
+  onUpdate, onDelete, onAddChild,
+  onDragStart, onDragOver, onDrop, onDragEnd,
+}: DragNodeRowProps) {
+  const [editing, setEditing] = useState(node.label === '')
+  const [label, setLabel] = useState(node.label)
+
+  const commitLabel = () => { onUpdate(node.id, { label }); setEditing(false) }
+
+  return (
+    <div
+      draggable
+      onDragStart={e => { e.stopPropagation(); onDragStart(node.id) }}
+      onDragOver={e => { e.preventDefault(); e.stopPropagation(); onDragOver(node.id) }}
+      onDrop={e => { e.preventDefault(); e.stopPropagation(); onDrop(node.id) }}
+      onDragEnd={onDragEnd}
+      className={`flex items-center gap-2 py-2 px-3 rounded-xl transition-all select-none cursor-default ${
+        isDragging ? 'opacity-40 bg-slate-50' : 'hover:bg-slate-50'
+      }`}
+      style={{ paddingLeft: `${12 + depth * 24}px` }}
+    >
+      <GripVertical className="w-3 h-3 text-slate-300 shrink-0 cursor-grab active:cursor-grabbing" />
+      <span className="w-3.5 h-3.5 shrink-0" />
+
+      {editing ? (
+        <input
+          autoFocus
+          value={label}
+          onChange={e => setLabel(e.target.value)}
+          onBlur={commitLabel}
+          onKeyDown={e => { if (e.key === 'Enter') commitLabel() }}
+          className="flex-1 text-sm font-bold text-slate-900 bg-white border border-indigo-200 rounded-lg px-2 py-0.5 outline-none focus:ring-2 focus:ring-indigo-100"
+        />
+      ) : (
+        <button
+          onClick={() => setEditing(true)}
+          className="flex-1 text-left text-sm font-bold text-slate-700 hover:text-indigo-600 transition-colors truncate"
+        >
+          {node.label || <span className="text-slate-300 italic">Unnamed</span>}
+        </button>
+      )}
+
+      <button
+        onClick={() => onUpdate(node.id, { inBag: !node.inBag })}
+        title={node.inBag ? 'In Bag (children inherit)' : 'Mark as In Bag'}
+        className={`shrink-0 p-1 rounded-lg transition-all ${node.inBag ? 'text-emerald-600 bg-emerald-50' : 'text-slate-300 hover:text-emerald-500'}`}
+      >
+        <Briefcase className="w-3.5 h-3.5" />
+      </button>
+
+      <button
+        onClick={() => onAddChild(node.id)}
+        className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 text-[10px] font-black uppercase tracking-widest transition-all"
+      >
+        <Plus className="w-3 h-3" />
+        Child
+      </button>
+
+      <button
+        onClick={() => {
+          const countDescendants = (n: LocationNode): number =>
+            n.children.reduce((acc, c) => acc + 1 + countDescendants(c), 0)
+          const childCount = countDescendants(node)
+          if (childCount > 0) {
+            if (!confirm(`Delete "${node.label}" and its ${childCount} child location${childCount !== 1 ? 's' : ''}?`)) return
+          }
+          onDelete(node.id)
+        }}
+        className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-red-500 transition-all"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
     </div>
   )
 }
