@@ -142,4 +142,87 @@ export function reorderInTree(
   }
   return insert(pruned)
 }
+/** Find a node's parent id and its index within siblings (null parentId = root level). */
+export function getNodeInfo(
+  tree: LocationNode[],
+  nodeId: string,
+  parentId: string | null = null,
+  indexInParent = 0
+): { parentId: string | null; index: number; prevSiblingId: string | null } | null {
+  for (let i = 0; i < tree.length; i++) {
+    if (tree[i].id === nodeId) {
+      return {
+        parentId,
+        index: i,
+        prevSiblingId: i > 0 ? tree[i - 1].id : null,
+      }
+    }
+    const found = getNodeInfo(tree[i].children, nodeId, tree[i].id, i)
+    if (found) return found
+  }
+  return null
+}
 
+/**
+ * Indent: make nodeId the last child of its previous sibling.
+ * No-op if node has no previous sibling.
+ */
+export function indentNode(tree: LocationNode[], nodeId: string): LocationNode[] {
+  const info = getNodeInfo(tree, nodeId)
+  if (!info || !info.prevSiblingId) return tree
+
+  const prevSiblingId = info.prevSiblingId   // narrow for closure
+  let node: LocationNode | null = null
+
+  function extract(nodes: LocationNode[]): LocationNode[] {
+    return nodes
+      .filter(n => { if (n.id === nodeId) { node = n; return false } return true })
+      .map(n => ({ ...n, children: extract(n.children) }))
+  }
+  const pruned = extract(tree)
+  if (!node) return tree
+
+  function inject(nodes: LocationNode[]): LocationNode[] {
+    return nodes.map(n => {
+      if (n.id === prevSiblingId) {
+        return { ...n, children: [...n.children, node!] }
+      }
+      return { ...n, children: inject(n.children) }
+    })
+  }
+  return inject(pruned)
+}
+
+/**
+ * Dedent: promote nodeId to be a sibling of its parent, inserted after the parent.
+ * No-op if node is already at root level.
+ */
+export function dedentNode(tree: LocationNode[], nodeId: string): LocationNode[] {
+  const info = getNodeInfo(tree, nodeId)
+  if (!info || info.parentId === null) return tree // already at root
+
+  let node: LocationNode | null = null
+
+  // Extract node and also note the parent id so we can insert after it
+  function extract(nodes: LocationNode[]): LocationNode[] {
+    return nodes
+      .filter(n => { if (n.id === nodeId) { node = n; return false } return true })
+      .map(n => ({ ...n, children: extract(n.children) }))
+  }
+  const pruned = extract(tree)
+  if (!node) return tree
+
+  const parentId = info.parentId
+
+  // Insert node immediately after its former parent
+  function insertAfterParent(nodes: LocationNode[]): LocationNode[] {
+    const idx = nodes.findIndex(n => n.id === parentId)
+    if (idx >= 0) {
+      const result = [...nodes]
+      result.splice(idx + 1, 0, node!)
+      return result
+    }
+    return nodes.map(n => ({ ...n, children: insertAfterParent(n.children) }))
+  }
+  return insertAfterParent(pruned)
+}

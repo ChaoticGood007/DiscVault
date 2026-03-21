@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.3] - 2026-03-20
 
 ### Added
+- **Location Tree System:** Engineered a hierarchical "Vault-first" location system. Users can now define nested storage locations (e.g., `Main Bag` → `Putter Pocket`) in Settings with full Drag-and-Drop support and Indent/Dedent controls.
+- **Smart "In Bag" Automation:** Disc instances now automatically derive their "In Bag" status from the selected tree node. Suitcase icons (🎒) in the editor flag entire branches as part of the active bag.
+- **Location Migration Helper:** Added a one-click migrator in Settings that rebuilds the location tree from all existing free-text inventory strings.
 - **Customizable Fields:** The Fields/Columns picker now controls which data points render on cards and table rows — toggles include Bag, Brand, Mold, Category, Flight Numbers (grouped), Plastic, Weight, Color, Stamp, Cond, Ink, Location, Notes, and Added. Mold is locked as required since it doubles as the edit entry point.
 - **Export Button Restored:** CSV export was lost in a previous refactor and has been re-added to both vault and All Vaults layouts.
 - **Vault Renaming:** Vaults can now be renamed directly from the management interface.
 
 ### Changed
+- **Premium User Experience:** Integrated **Framer Motion** for high-fidelity animations, specifically for the new animated inline deletion confirmation UI.
+- **Zero-Vulnerability Security:** Patched critical Prisma/Effect vulnerabilities using surgical **npm dependency overrides** (Effect 3.20.0).
 - **Global Settings Expansion:** Relocated the "Sync Global DB" manual trigger out of vault stat dashboards into the global `/settings` panel under a dedicated Database Engine module.
 - **Analytics Theming:** Rewrote Recharts SVG properties to consume dynamically generated CSS `var()` targets matching the Global Accent Color rather than static hex codes.
 - **Global Header UX:** Decoupled `<header>` from `layout.tsx` and built a modular `<Header>` component to absorb localized metadata dynamically.
