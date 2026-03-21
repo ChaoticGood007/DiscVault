@@ -218,14 +218,9 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
               )}
             </div>
             
-            {(visibleColumns.includes('createdAt') || visibleColumns.includes('location')) && (
+            {visibleColumns.includes('createdAt') && (
               <div className="bg-slate-50 px-5 py-4 md:px-8 md:py-5 flex justify-between items-center group-hover:bg-indigo-50 transition-colors border-t border-slate-100">
-                {visibleColumns.includes('createdAt') && (
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Added {new Date(item.createdAt).toLocaleDateString()}</span>
-                )}
-                {visibleColumns.includes('location') && !visibleColumns.includes('createdAt') && (
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.location}</span>
-                )}
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Added {new Date(item.createdAt).toLocaleDateString()}</span>
               </div>
             )}
           </div>
