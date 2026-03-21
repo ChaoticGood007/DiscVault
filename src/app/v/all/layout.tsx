@@ -71,21 +71,6 @@ export default async function AllVaultsLayout({
               </div>
             </div>
 
-            <nav className="flex items-center gap-2 p-1.5 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
-              {navItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-300 group"
-                  >
-                    <Icon className="w-4 h-4 text-white/40 group-hover:text-indigo-300 transition-colors" />
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </nav>
           </div>
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col flex-1">
