@@ -1,0 +1,110 @@
+/*
+ * Copyright 2026 ChaoticGood007
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+export interface LocationNode {
+  id: string
+  label: string
+  inBag: boolean
+  children: LocationNode[]
+}
+
+export interface FlatLocation {
+  /** Fully qualified path, e.g. "Zac's Bag / Putter Pocket" */
+  path: string
+  /** Raw slash-joined key matching the DB value, e.g. "Zac's Bag/Putter Pocket" */
+  value: string
+  /** Whether this location (or any ancestor) is marked inBag */
+  inBag: boolean
+  node: LocationNode
+}
+
+/**
+ * Recursively flatten a tree into a list of { path, value, inBag, node }.
+ * Children inherit parent's inBag=true flag.
+ */
+export function flattenTree(
+  nodes: LocationNode[],
+  parentPath = '',
+  parentValue = '',
+  parentInBag = false
+): FlatLocation[] {
+  const result: FlatLocation[] = []
+  for (const node of nodes) {
+    const displayPath = parentPath ? `${parentPath} / ${node.label}` : node.label
+    const valuePath = parentValue ? `${parentValue}/${node.label}` : node.label
+    const effectiveInBag = parentInBag || node.inBag
+    result.push({ path: displayPath, value: valuePath, inBag: effectiveInBag, node })
+    if (node.children.length > 0) {
+      result.push(...flattenTree(node.children, displayPath, valuePath, effectiveInBag))
+    }
+  }
+  return result
+}
+
+/**
+ * Given a location string from the DB (e.g. "Zac's Bag/Putter Pocket"),
+ * find whether it or any ancestor is marked inBag in the tree.
+ */
+export function resolveInBag(location: string | null, tree: LocationNode[]): boolean | null {
+  if (!location) return null // no location = manual mode
+  const flat = flattenTree(tree)
+  const match = flat.find(f => f.value === location)
+  return match ? match.inBag : null // null = location not found in tree = manual mode
+}
+
+/**
+ * Parse existing location strings from the DB into a tree structure.
+ * Used for the one-time migration helper.
+ * e.g. ["Zac's Bag/Putter Pocket", "Zac's Bag/Main Pocket", "Storage/Shelf"]
+ * → tree with "Zac's Bag" and "Storage" as roots, children beneath.
+ */
+export function buildTreeFromPaths(paths: string[]): LocationNode[] {
+  const rootMap = new Map<string, LocationNode>()
+
+  for (const raw of paths) {
+    if (!raw) continue
+    const parts = raw.split('/').map(p => p.trim()).filter(Boolean)
+    if (parts.length === 0) continue
+
+    const rootLabel = parts[0]
+    if (!rootMap.has(rootLabel)) {
+      rootMap.set(rootLabel, {
+        id: crypto.randomUUID(),
+        label: rootLabel,
+        inBag: false,
+        children: [],
+      })
+    }
+
+    let current = rootMap.get(rootLabel)!
+    for (let i = 1; i < parts.length; i++) {
+      const childLabel = parts[i]
+      let child = current.children.find(c => c.label === childLabel)
+      if (!child) {
+        child = {
+          id: crypto.randomUUID(),
+          label: childLabel,
+          inBag: false,
+          children: [],
+        }
+        current.children.push(child)
+      }
+      current = child
+    }
+  }
+
+  return Array.from(rootMap.values())
+}

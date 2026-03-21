@@ -16,9 +16,12 @@
 
 'use client'
 
+import { useState } from 'react'
 import { updateDisc, deleteDisc } from '@/app/actions/inventory'
-import { Trash2, Save, ArrowLeft, Inbox } from 'lucide-react'
+import { Trash2, ArrowLeft, Inbox } from 'lucide-react'
 import Link from 'next/link'
+import LocationPicker, { InBagField } from '@/components/LocationPicker'
+import { resolveInBag, type LocationNode } from '@/lib/locationTree'
 
 interface Collection {
   id: string
@@ -46,9 +49,13 @@ interface EditDiscFormProps {
     }
   }
   collections: Collection[]
+  tree: LocationNode[]
 }
 
-export default function EditDiscForm({ disc, collections }: EditDiscFormProps) {
+export default function EditDiscForm({ disc, collections, tree }: EditDiscFormProps) {
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(disc.location)
+  const autoInBag = selectedLocation ? resolveInBag(selectedLocation, tree) : null
+
   const handleUpdate = async (formData: FormData) => {
     await updateDisc(disc.id, formData)
   }
@@ -149,11 +156,11 @@ export default function EditDiscForm({ disc, collections }: EditDiscFormProps) {
           </div>
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Location</label>
-            <input
-              type="text"
-              name="location"
-              defaultValue={disc.location || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            <LocationPicker
+              tree={tree}
+              value={selectedLocation}
+              onChange={(val, _auto) => setSelectedLocation(val)}
+              className="w-full"
             />
           </div>
         </div>
@@ -183,17 +190,11 @@ export default function EditDiscForm({ disc, collections }: EditDiscFormProps) {
               <option value="Both">Both</option>
             </select>
           </div>
-          <div className="flex items-center space-x-3 pb-4">
-            <input
-              type="checkbox"
-              name="inBag"
-              id="inBag"
-              defaultChecked={disc.inBag}
-              className="h-6 w-6 text-indigo-600 focus:ring-indigo-500 border-slate-200 rounded-lg"
-            />
-            <label htmlFor="inBag" className="text-xs font-black text-slate-400 uppercase tracking-widest">
-              Currently in Bag
-            </label>
+          <div className="flex items-center pb-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">In Bag</label>
+              <InBagField autoInBag={autoInBag} defaultChecked={disc.inBag} />
+            </div>
           </div>
         </div>
 
@@ -219,7 +220,6 @@ export default function EditDiscForm({ disc, collections }: EditDiscFormProps) {
             type="submit"
             className="flex-[2] bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all active:scale-95 shadow-xl shadow-indigo-100 flex items-center justify-center"
           >
-            <Save className="mr-2 h-6 w-6" />
             Save Changes
           </button>
         </div>

@@ -19,6 +19,8 @@
 import { db as prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { resolveInBag } from "@/lib/locationTree"
+import { getLocationTree } from "@/app/actions/settings"
 
 export async function addDisc(formData: FormData) {
   const moldId = formData.get('moldId') as string
@@ -28,31 +30,20 @@ export async function addDisc(formData: FormData) {
   const plastic = formData.get('plastic') as string
   const stamp = formData.get('stamp') as string
   const stampFoil = formData.get('stampFoil') as string
-  const location = formData.get('location') as string
+  const location = (formData.get('location') as string) || null
   const condition = parseInt(formData.get('condition') as string) || null
-  const inBag = formData.get('inBag') === 'on'
+  const manualInBag = formData.get('inBag') === 'on'
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
 
-  if (!moldId) {
-    throw new Error('Mold ID is required')
-  }
+  if (!moldId) throw new Error('Mold ID is required')
+
+  const tree = await getLocationTree()
+  const autoInBag = location ? resolveInBag(location, tree) : null
+  const inBag = autoInBag !== null ? autoInBag : manualInBag
 
   await prisma.inventory.create({
-    data: {
-      moldId,
-      collectionId,
-      weight,
-      color,
-      plastic,
-      stamp,
-      stampFoil,
-      location,
-      condition,
-      inBag,
-      ink,
-      notes,
-    },
+    data: { moldId, collectionId, weight, color, plastic, stamp, stampFoil, location, condition, inBag, ink, notes },
   })
 
   revalidatePath('/')
@@ -68,27 +59,19 @@ export async function updateDisc(id: string, formData: FormData) {
   const plastic = formData.get('plastic') as string
   const stamp = formData.get('stamp') as string
   const stampFoil = formData.get('stampFoil') as string
-  const location = formData.get('location') as string
+  const location = (formData.get('location') as string) || null
   const condition = parseInt(formData.get('condition') as string) || null
-  const inBag = formData.get('inBag') === 'on'
+  const manualInBag = formData.get('inBag') === 'on'
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
 
+  const tree = await getLocationTree()
+  const autoInBag = location ? resolveInBag(location, tree) : null
+  const inBag = autoInBag !== null ? autoInBag : manualInBag
+
   await prisma.inventory.update({
     where: { id },
-    data: {
-      collectionId,
-      weight,
-      color,
-      plastic,
-      stamp,
-      stampFoil,
-      location,
-      condition,
-      inBag,
-      ink,
-      notes,
-    },
+    data: { collectionId, weight, color, plastic, stamp, stampFoil, location, condition, inBag, ink, notes },
   })
 
   revalidatePath('/')
@@ -138,6 +121,7 @@ const BRAND_SYNONYMS: Record<string, string> = {
 
 export async function importDiscs(records: any[], targetCollectionId?: string) {
   let successCount = 0
+  const tree = await getLocationTree()
   
   for (const record of records) {
     try {
@@ -146,25 +130,18 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
 
       if (!moldName || !moldBrand) continue
 
-      // Check for brand synonyms
       const normalizedBrand = moldBrand.toLowerCase().trim()
       if (BRAND_SYNONYMS[normalizedBrand]) {
         moldBrand = BRAND_SYNONYMS[normalizedBrand]
       }
 
       let mold = await prisma.mold.findFirst({
-        where: {
-          name: { equals: moldName },
-          brand: { equals: moldBrand }
-        }
+        where: { name: { equals: moldName }, brand: { equals: moldBrand } }
       })
 
       if (!mold) {
         mold = await prisma.mold.findFirst({
-          where: {
-            name: { contains: moldName },
-            brand: { contains: moldBrand }
-          }
+          where: { name: { contains: moldName }, brand: { contains: moldBrand } }
         })
       }
 
@@ -173,21 +150,23 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
         const glide = parseFloat(record.glide) || 0
         const turn = parseFloat(record.turn) || 0
         const fade = parseFloat(record.fade) || 0
-        
         mold = await prisma.mold.create({
           data: {
-            name: moldName,
-            brand: moldBrand,
+            name: moldName, brand: moldBrand,
             category: record.category || 'Unknown',
-            speed,
-            glide,
-            turn,
-            fade,
+            speed, glide, turn, fade,
             stability: record.stability || getStability(turn, fade),
             isCustom: true
           }
         })
       }
+
+      const location = record.location || null
+      const autoInBag = location ? resolveInBag(location, tree) : null
+      const manualInBag = typeof record.inBag === 'string'
+        ? ['true', 'yes', '1', 'bag'].includes(record.inBag.toLowerCase().trim())
+        : record.inBag === true
+      const inBag = autoInBag !== null ? autoInBag : manualInBag
 
       await prisma.inventory.create({
         data: {
@@ -198,11 +177,9 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           color: record.color || null,
           stamp: record.stamp || null,
           stampFoil: record.stampFoil || null,
-          location: record.location || null,
+          location,
           condition: parseInt(record.condition) || null,
-          inBag: typeof record.inBag === 'string' 
-            ? ['true', 'yes', '1', 'bag'].includes(record.inBag.toLowerCase().trim())
-            : record.inBag === true,
+          inBag,
           ink: record.ink || null,
           notes: record.notes || null,
         }

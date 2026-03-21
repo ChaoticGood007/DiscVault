@@ -15,6 +15,7 @@
  */
 
 import AddDiscForm from "@/components/AddDiscForm";
+import { getLocationTree } from "@/app/actions/settings";
 
 export default async function ScopedAddPage({
   params,
@@ -22,6 +23,7 @@ export default async function ScopedAddPage({
   params: Promise<{ vaultId: string }>
 }) {
   const { vaultId } = await params
+  const tree = await getLocationTree()
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -31,7 +33,7 @@ export default async function ScopedAddPage({
           Select a mold and add specific details. This disc will be added directly to your current vault.
         </p>
       </div>
-      <AddDiscForm vaultId={vaultId} />
+      <AddDiscForm vaultId={vaultId} tree={tree} />
     </div>
   );
 }

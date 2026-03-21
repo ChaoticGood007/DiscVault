@@ -65,6 +65,7 @@ model Settings {
   id             String   @id @default("global")
   accentColor    String   @default("#4f46e5")
   primaryVaultId String?
+  locationTree   String   @default("[]")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
