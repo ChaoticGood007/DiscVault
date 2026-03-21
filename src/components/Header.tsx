@@ -22,7 +22,7 @@ export function Header({
             
             {/* Inject Vault Metadata */}
             {children && (
-               <div className="flex items-center gap-3 pl-4 sm:pl-6 ml-4 sm:ml-6 border-l border-slate-200 truncate min-w-0">
+               <div className="flex items-center gap-3 pl-4 sm:pl-6 ml-4 sm:ml-6 border-l border-slate-200 min-w-0">
                  {children}
                </div>
             )}
