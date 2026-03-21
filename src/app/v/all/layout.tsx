@@ -38,7 +38,7 @@ export default async function AllVaultsLayout({
             <LayoutDashboard className="w-8 h-8 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em] leading-none mb-1 block">Global Workspace</span>
+            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em] leading-none mb-1 block">Global Vault</span>
             <h1 className="text-3xl font-black leading-tight">All Vaults Combined</h1>
             <p className="text-sm text-indigo-200/60 font-medium">{totalCount} Discs across all collections</p>
           </div>

@@ -28,7 +28,7 @@ export default async function ScopedAddPage({
       <div className="mb-10">
         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Add to Vault</h1>
         <p className="mt-2 text-lg text-slate-600 font-medium text-center max-w-2xl mx-auto">
-          Select a mold and add specific details. This disc will be added directly to your current workspace.
+          Select a mold and add specific details. This disc will be added directly to your current vault.
         </p>
       </div>
       <AddDiscForm vaultId={vaultId} />

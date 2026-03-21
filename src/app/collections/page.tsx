@@ -44,7 +44,7 @@ export default async function CollectionsPage() {
       </div>
 
       <div>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Manage Workspaces</h1>
+        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Manage Vaults</h1>
         <p className="mt-2 text-lg text-slate-600 font-medium">Create, edit, or delete your disc vaults.</p>
       </div>
 

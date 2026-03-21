@@ -35,7 +35,7 @@ export default function VaultSwitcher({
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-xl font-black text-slate-900 leading-tight outline-none hover:text-indigo-600 transition-colors group active:scale-[0.98]"
       >
-        <span className="truncate max-w-[150px] sm:max-w-xs">{activeVault?.name || 'Select Workspace'}</span>
+        <span className="truncate max-w-[150px] sm:max-w-xs">{activeVault?.name || 'Select Vault'}</span>
         <ChevronDown 
           className={`w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-indigo-600 transition-transform duration-300 ease-in-out ${isOpen ? '-rotate-180' : ''}`} 
         />
@@ -91,7 +91,7 @@ export default function VaultSwitcher({
           <div className="p-2 rounded-xl bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600 transition-colors shrink-0">
             <Settings className="w-4 h-4" />
           </div>
-          <span className="font-bold text-sm">Manage Workspaces</span>
+          <span className="font-bold text-sm">Manage Vaults</span>
         </button>
       </div>
     </div>

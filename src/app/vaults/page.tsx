@@ -42,7 +42,7 @@ export default async function LandingPage() {
           Your <span className="text-indigo-600">Vaults</span>
         </h1>
         <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
-          Select a workspace to manage your collection or create a new one to start fresh.
+          Select a vault to manage your collection or create a new one to start fresh.
         </p>
       </div>
 
@@ -76,7 +76,7 @@ export default async function LandingPage() {
           <div className="p-5 bg-indigo-50 rounded-3xl mb-6 group-hover:scale-110 transition-transform">
             <Plus className="w-12 h-12 text-indigo-600" />
           </div>
-          <h3 className="text-2xl font-black text-slate-900 mb-6">New Workspace</h3>
+          <h3 className="text-2xl font-black text-slate-900 mb-6">New Vault</h3>
           <form action={createCollection} className="w-full space-y-4">
             <input 
               name="name" 
