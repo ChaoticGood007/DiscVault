@@ -1,7 +1,8 @@
 import ThemeCustomizer from './ThemeCustomizer'
 import { getGlobalSettings } from '@/app/actions/settings'
-import { Settings2 } from 'lucide-react'
+import { Settings2, Database } from 'lucide-react'
 import { Header } from "@/components/Header"
+import SyncButton from '@/components/SyncButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +35,23 @@ export default async function SettingsPage() {
         </div>
         
         <ThemeCustomizer initialHex={settings.accentColor} />
+      </div>
+
+      {/* Database Synchronization Module */}
+      <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-50 pb-6 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Database className="w-5 h-5 text-slate-400" />
+              <h2 className="text-lg font-black text-slate-900">Database Engine</h2>
+            </div>
+            <p className="text-sm text-slate-500 font-medium max-w-[450px]">Force a manual synchronization against the upstream registry API. This systematically evaluates global repositories and securely merges newly identified disc data straight into your application's Master Molds table.</p>
+          </div>
+        </div>
+        
+        <div className="flex justify-start">
+          <SyncButton />
+        </div>
       </div>
     </div>
       </main>

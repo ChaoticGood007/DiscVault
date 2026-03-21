@@ -16,7 +16,6 @@
 
 import { getInventoryStats } from "@/lib/analytics"
 import StatsCharts from "@/components/StatsCharts"
-import SyncButton from "@/components/SyncButton"
 import { BarChart3, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -86,10 +85,6 @@ export default async function ScopedStatsPage({
       </div>
 
       <StatsCharts stats={stats} />
-      
-      <div className="pt-10 flex justify-center">
-        <SyncButton />
-      </div>
     </div>
   )
 }
