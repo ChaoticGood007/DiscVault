@@ -223,7 +223,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
             </div>
             
             {visibleColumns.includes('createdAt') && (
-              <span className="absolute bottom-3 left-4 md:left-6 text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">
+              <span className="absolute bottom-3 right-4 md:right-6 text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">
                 Added {new Date(item.createdAt).toLocaleDateString()}
               </span>
             )}
