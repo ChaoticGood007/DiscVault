@@ -99,6 +99,10 @@ export default function DashboardToolbar({
   const selectorRef = useRef<HTMLDivElement>(null)
   const collectionRef = useRef<HTMLDivElement>(null)
   const advancedRef = useRef<HTMLDivElement>(null)
+  const categoryRef = useRef<HTMLDivElement>(null)
+  const brandRef = useRef<HTMLDivElement>(null)
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false)
   const [localSearch, setLocalSearch] = useState(searchQuery || '')
 
   useEffect(() => {
@@ -115,6 +119,12 @@ export default function DashboardToolbar({
       }
       if (advancedRef.current && !advancedRef.current.contains(event.target as Node)) {
         setShowAdvanced(false)
+      }
+      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
+        setShowCategoryDropdown(false)
+      }
+      if (brandRef.current && !brandRef.current.contains(event.target as Node)) {
+        setShowBrandDropdown(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -288,23 +298,85 @@ export default function DashboardToolbar({
             )}
           </div>
           
-          <select 
-            className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all"
-            value={currentCategory || ""}
-            onChange={(e) => updateParams({ category: e.target.value || null })}
-          >
-            <option value="">All Categories</option>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+          {/* Category Dropdown */}
+          <div className="relative" ref={categoryRef}>
+            <button
+              onClick={() => { setShowCategoryDropdown(!showCategoryDropdown); setShowBrandDropdown(false) }}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${
+                currentCategory ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
+              }`}
+            >
+              {currentCategory || 'All Categories'}
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left ${
+              showCategoryDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+            }`}>
+              <button
+                onClick={() => { updateParams({ category: null }); setShowCategoryDropdown(false) }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                  !currentCategory ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                All Categories
+                {!currentCategory && <Check className="w-4 h-4" />}
+              </button>
+              <div className="max-h-56 overflow-y-auto mt-1 space-y-0.5">
+                {categories.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => { updateParams({ category: c }); setShowCategoryDropdown(false) }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                      currentCategory === c ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {c}
+                    {currentCategory === c && <Check className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
-          <select 
-            className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all"
-            value={currentBrand || ""}
-            onChange={(e) => updateParams({ brand: e.target.value || null })}
-          >
-            <option value="">All Brands</option>
-            {brands.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
+          {/* Brand Dropdown */}
+          <div className="relative" ref={brandRef}>
+            <button
+              onClick={() => { setShowBrandDropdown(!showBrandDropdown); setShowCategoryDropdown(false) }}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${
+                currentBrand ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
+              }`}
+            >
+              {currentBrand || 'All Brands'}
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showBrandDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left ${
+              showBrandDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+            }`}>
+              <button
+                onClick={() => { updateParams({ brand: null }); setShowBrandDropdown(false) }}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                  !currentBrand ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                All Brands
+                {!currentBrand && <Check className="w-4 h-4" />}
+              </button>
+              <div className="max-h-56 overflow-y-auto mt-1 space-y-0.5">
+                {brands.map(b => (
+                  <button
+                    key={b}
+                    onClick={() => { updateParams({ brand: b }); setShowBrandDropdown(false) }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
+                      currentBrand === b ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {b}
+                    {currentBrand === b && <Check className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 ml-auto lg:ml-0">
