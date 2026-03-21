@@ -1,7 +1,8 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Inbox, Settings } from 'lucide-react'
 
 export default function VaultSwitcher({ 
   vaults, 
@@ -11,33 +12,84 @@ export default function VaultSwitcher({
   activeId: string 
 }) {
   const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  
+  const activeVault = vaults.find(v => v.id === activeId)
+
+  // Gracefully close the interactive dropdown if the user clicks anywhere else on the screen
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   return (
-    <div className="relative group flex items-center max-w-[200px] sm:max-w-xs">
-      <select
-        value={activeId}
-        onChange={(e) => {
-          if (e.target.value === 'manage') {
-            router.push('/vaults')
-          } else {
-            router.push(`/v/${e.target.value}`)
-          }
-        }}
-        className="appearance-none w-full bg-transparent text-sm sm:text-xl font-black text-slate-900 leading-tight outline-none focus:ring-0 cursor-pointer pr-6 sm:pr-8 truncate hover:text-indigo-600 transition-colors"
+    <div className="relative" ref={dropdownRef}>
+      {/* Primary Trigger Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-xl font-black text-slate-900 leading-tight outline-none hover:text-indigo-600 transition-colors group active:scale-[0.98]"
       >
-        {vaults.map(v => (
-          <option key={v.id} value={v.id} className="text-base font-bold text-slate-900">
-            {v.name}
-          </option>
-        ))}
-        <option disabled>──────────</option>
-        <option value="manage" className="text-base font-black text-indigo-600">
-          ⚙️ Manage Workspaces
-        </option>
-      </select>
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-600 transition-colors">
-        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-      </div>
+        <span className="truncate max-w-[150px] sm:max-w-xs">{activeVault?.name || 'Select Workspace'}</span>
+        <ChevronDown 
+          className={`w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-indigo-600 transition-transform duration-300 ease-in-out ${isOpen ? '-rotate-180' : ''}`} 
+        />
+      </button>
+
+      {/* Floating Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 overflow-hidden ring-1 ring-slate-900/5">
+          <div className="max-h-[60vh] overflow-y-auto no-scrollbar scroll-smooth">
+            {vaults.map(v => (
+              <button
+                key={v.id}
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push(`/v/${v.id}`)
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${
+                  activeId === v.id 
+                    ? 'bg-indigo-50/80 text-indigo-900' 
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <div className={`p-2 rounded-xl transition-colors duration-200 ${
+                  activeId === v.id 
+                    ? 'bg-indigo-100 text-indigo-600 shrink-0' 
+                    : 'bg-slate-100 text-slate-400 shrink-0'
+                }`}>
+                  <Inbox className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col truncate">
+                  <span className="font-bold text-sm">{v.name}</span>
+                  {activeId === v.id && <span className="text-[10px] uppercase font-black tracking-widest text-indigo-500 mt-0.5">Active</span>}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="h-px bg-slate-100 my-2 mx-4" />
+
+          {/* Settings Action Hub */}
+          <button
+            onClick={() => {
+              setIsOpen(false)
+              router.push('/vaults')
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 group"
+          >
+            <div className="p-2 rounded-xl bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600 transition-colors shrink-0">
+              <Settings className="w-4 h-4" />
+            </div>
+            <span className="font-bold text-sm">Manage Workspaces</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
