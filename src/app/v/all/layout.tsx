@@ -16,9 +16,10 @@
 
 import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
-import { LayoutDashboard, BarChart3 } from "lucide-react"
+import { LayoutDashboard, BarChart3, Plus, Upload } from "lucide-react"
 import { Header } from "@/components/Header"
 import VaultSwitcher from "@/components/VaultSwitcher"
+import ExportButton from "@/components/ExportButton"
 
 export default async function AllVaultsLayout({
   children,
@@ -33,6 +34,8 @@ export default async function AllVaultsLayout({
   const navItems = [
     { label: 'Total Inventory', href: `/v/all`, icon: LayoutDashboard },
     { label: 'Total Stats', href: `/v/all/stats`, icon: BarChart3 },
+    { label: 'Add Disc', href: `/v/all/add`, icon: Plus },
+    { label: 'Import', href: `/v/all/import`, icon: Upload },
   ]
 
   const navLinks = navItems.map((item) => {
@@ -51,7 +54,7 @@ export default async function AllVaultsLayout({
 
   return (
     <>
-      <Header actions={<>{navLinks}</>}>
+      <Header actions={<>{navLinks}<ExportButton variant="header" /></>}>
         <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:block">Global Vault</span>
         <VaultSwitcher vaults={allVaults} activeId="all" />
         <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-slate-100 rounded-md text-[8px] sm:text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] hidden sm:inline-block shrink-0">{totalCount} Discs</span>

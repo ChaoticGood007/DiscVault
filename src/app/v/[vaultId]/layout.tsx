@@ -20,6 +20,7 @@ import { notFound } from "next/navigation"
 import { LayoutDashboard, BarChart3, Plus, Upload } from "lucide-react"
 import { Header } from "@/components/Header"
 import VaultSwitcher from "@/components/VaultSwitcher"
+import ExportButton from "@/components/ExportButton"
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,7 @@ export default async function WorkspaceLayout({
 
   return (
     <>
-      <Header actions={<>{navLinks}</>}>
+      <Header actions={<>{navLinks}<ExportButton variant="header" /></>}>
         <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:block">Vault</span>
         <VaultSwitcher vaults={allVaults} activeId={vault.id} />
         <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-slate-100 rounded-md text-[8px] sm:text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] hidden sm:inline-block shrink-0">{vault._count.inventory} Discs</span>

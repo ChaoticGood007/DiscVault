@@ -17,9 +17,8 @@
 import { db as prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
 import Link from "next/link"
-import { Disc, Plus, Upload } from "lucide-react"
+import { Disc } from "lucide-react"
 import DashboardToolbar from "@/components/DashboardToolbar"
-import ExportButton from "@/components/ExportButton"
 import InventoryList from "@/components/InventoryList"
 import InventoryInfiniteList from "@/components/InventoryInfiniteList"
 
@@ -130,28 +129,9 @@ export default async function AllVaultsDashboard({
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
-        <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Global Inventory</h2>
-          <p className="text-sm text-slate-500 font-medium">Viewing {totalCount} discs across all active filters.</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <ExportButton />
-          <Link
-            href="/v/all/import"
-            className="inline-flex items-center px-6 py-3 border border-slate-200 text-sm font-black rounded-xl text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95 shadow-sm"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Import
-          </Link>
-          <Link
-            href="/v/all/add"
-            className="inline-flex items-center px-8 py-4 border border-transparent text-base font-black rounded-2xl shadow-xl shadow-indigo-100 text-white bg-indigo-600 hover:bg-indigo-700 transition-all transform hover:-translate-y-1 active:scale-95"
-          >
-            <Plus className="mr-2 h-6 w-6" />
-            Add Disc
-          </Link>
-        </div>
+      <div className="px-4">
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Global Inventory</h2>
+        <p className="text-sm text-slate-500 font-medium">Viewing {totalCount} discs across all active filters.</p>
       </div>
 
       <DashboardToolbar 
