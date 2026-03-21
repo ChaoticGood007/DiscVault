@@ -328,7 +328,11 @@ export default function InventoryList({
                   {visibleColumns.includes('ink') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.ink || "—"}</td>}
                   {visibleColumns.includes('location') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.location || "—"}</td>}
                   {visibleColumns.includes('notes') && <td className="px-6 py-5 text-xs font-medium text-slate-500 max-w-[200px] truncate">{item.notes || "—"}</td>}
-                  <td className="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString()}</td>
+                  {visibleColumns.includes('createdAt') && (
+                    <td className="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </td>
+                  )}
                   <td className="px-6 py-5 text-right">
                     <Link 
                       href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`}
