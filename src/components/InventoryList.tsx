@@ -263,6 +263,8 @@ export default function InventoryList({
                 <TableHeader field="fade" label="F" center />
                 <TableHeader field="plastic" label="Plastic" />
                 <TableHeader field="weight" label="Weight" />
+                <TableHeader field="color" label="Color" />
+                <TableHeader field="stamp" label="Stamp" />
                 <TableHeader field="condition" label="Cond" />
                 <TableHeader field="ink" label="Ink" />
                 <TableHeader field="location" label="Location" />
@@ -303,6 +305,20 @@ export default function InventoryList({
                   {visibleColumns.includes('fade') && <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.fade}</td>}
                   {visibleColumns.includes('plastic') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.plastic || "—"}</td>}
                   {visibleColumns.includes('weight') && <td className="px-6 py-5 text-sm font-black text-indigo-600">{item.weight ? `${item.weight}g` : "—"}</td>}
+                  {visibleColumns.includes('color') && (
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2">
+                        {item.color && (
+                          <div 
+                            className="w-3 h-3 rounded-full border border-slate-200 shrink-0" 
+                            style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
+                          />
+                        )}
+                        <span className="text-sm font-bold text-slate-700">{item.color || "—"}</span>
+                      </div>
+                    </td>
+                  )}
+                  {visibleColumns.includes('stamp') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.stampFoil ? `${item.stamp} (${item.stampFoil})` : item.stamp || "—"}</td>}
                   {visibleColumns.includes('condition') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.condition ? `${item.condition}/10` : "—"}</td>}
                   {visibleColumns.includes('ink') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.ink || "—"}</td>}
                   {visibleColumns.includes('location') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.location || "—"}</td>}

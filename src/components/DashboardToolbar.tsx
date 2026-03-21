@@ -71,6 +71,8 @@ const ALL_COLUMNS = [
   { id: 'fade', label: 'Fade' },
   { id: 'plastic', label: 'Plastic' },
   { id: 'weight', label: 'Weight' },
+  { id: 'color', label: 'Color' },
+  { id: 'stamp', label: 'Stamp' },
   { id: 'condition', label: 'Cond' },
   { id: 'ink', label: 'Ink' },
   { id: 'location', label: 'Location' },
