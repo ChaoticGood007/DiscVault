@@ -20,7 +20,8 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Filter, LayoutGrid, List, Columns, Check, Search, Inbox, ChevronDown, Settings, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useCallback } from 'react'
-import AdvancedSearch from './AdvancedSearch'
+import AdvancedSearch, { type AdvancedFilters } from './AdvancedSearch'
+import MobileFilterDrawer from './MobileFilterDrawer'
 
 interface Collection {
   id: string
@@ -28,26 +29,11 @@ interface Collection {
   description: string | null
 }
 
-interface AdvancedFilters {
-  minSpeed?: number
-  maxSpeed?: number
-  minGlide?: number
-  maxGlide?: number
-  minTurn?: number
-  maxTurn?: number
-  minFade?: number
-  maxFade?: number
-  minWeight?: number
-  maxWeight?: number
-  minCond?: number
-  maxCond?: number
-  ink?: string
-}
-
 interface DashboardToolbarProps {
   brands: string[]
   categories: string[]
   collections: Collection[]
+  availableLocations: string[]
   currentCollectionIds: string[]
   currentCategory?: string
   currentBrand?: string
@@ -81,6 +67,7 @@ export default function DashboardToolbar({
   brands,
   categories,
   collections,
+  availableLocations,
   currentCollectionIds,
   currentCategory,
   currentBrand,
@@ -103,6 +90,7 @@ export default function DashboardToolbar({
   const brandRef = useRef<HTMLDivElement>(null)
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   const [showBrandDropdown, setShowBrandDropdown] = useState(false)
+  const [showMobileDrawer, setShowMobileDrawer] = useState(false)
   const [localSearch, setLocalSearch] = useState(searchQuery || '')
 
   useEffect(() => {
@@ -165,6 +153,7 @@ export default function DashboardToolbar({
       newCols = [...visibleColumns, colId]
     }
     if (newCols.length === 0) return
+    document.cookie = `discVaultVisibleCols=${newCols.join(',')}; path=/; max-age=31536000`
     updateParams({ cols: newCols.join(',') })
   }
 
@@ -179,6 +168,7 @@ export default function DashboardToolbar({
   }
 
   const activeAdvancedCount = Object.values(advancedFilters).filter(v => v !== undefined && v !== '').length
+  const activeFilterCount = (currentCategory ? 1 : 0) + (currentBrand ? 1 : 0) + (isInBag ? 1 : 0) + activeAdvancedCount
   const isAllMode = pathname === '/v/all'
 
   return (
@@ -251,35 +241,37 @@ export default function DashboardToolbar({
       )}
 
       {/* Main Toolbar */}
-      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-40">
-        <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-          <div className="hidden sm:flex items-center text-slate-400 mr-2">
+      <div className="bg-white p-2 sm:p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-40">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+          <div className="hidden sm:flex items-center text-slate-400 mr-2 shrink-0">
             <Filter className="h-5 w-5 mr-2" />
             <span className="font-bold text-[10px] uppercase tracking-widest hidden md:inline">Filter</span>
           </div>
           
-          <div className="relative flex-grow md:flex-grow-0 md:w-64">
+          <div className="relative flex-grow sm:flex-grow-0 w-full sm:w-64">
             <input
               type="text"
+              id="toolbar-search"
               placeholder="Search discs..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all placeholder:text-slate-400 placeholder:font-medium"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all placeholder:text-slate-400 placeholder:font-medium"
             />
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
           </div>
 
-          <button
-            onClick={() => updateParams({ inBag: isInBag ? null : 'true' })}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 ${isInBag ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-white border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600'}`}
-          >
-            In Bag
-          </button>
+          <div className="hidden sm:flex items-center gap-2">
+            <button
+              onClick={() => updateParams({ inBag: isInBag ? null : 'true' })}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 shrink-0 ${isInBag ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-white border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600'}`}
+            >
+              In Bag
+            </button>
 
           <div className="relative" ref={advancedRef}>
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${showAdvanced || activeAdvancedCount > 0 ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${showAdvanced || activeAdvancedCount > 0 ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
             >
               <SlidersHorizontal className="w-4 h-4" />
               Advanced
@@ -292,7 +284,8 @@ export default function DashboardToolbar({
 
             {showAdvanced && (
               <AdvancedSearch 
-                filters={advancedFilters} 
+                filters={advancedFilters}
+                availableLocations={availableLocations}
                 onClose={() => setShowAdvanced(false)} 
               />
             )}
@@ -302,14 +295,14 @@ export default function DashboardToolbar({
           <div className="relative" ref={categoryRef}>
             <button
               onClick={() => { setShowCategoryDropdown(!showCategoryDropdown); setShowBrandDropdown(false) }}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${
                 currentCategory ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
               }`}
             >
               {currentCategory || 'All Categories'}
               <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
             </button>
-            <div className={`absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left ${
+            <div className={`absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left sm:origin-top-right ${
               showCategoryDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
             }`}>
               <button
@@ -342,14 +335,14 @@ export default function DashboardToolbar({
           <div className="relative" ref={brandRef}>
             <button
               onClick={() => { setShowBrandDropdown(!showBrandDropdown); setShowCategoryDropdown(false) }}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${
                 currentBrand ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
               }`}
             >
               {currentBrand || 'All Brands'}
               <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showBrandDropdown ? 'rotate-180' : ''}`} />
             </button>
-            <div className={`absolute top-full left-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left ${
+            <div className={`absolute top-full right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-right ${
               showBrandDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
             }`}>
               <button
@@ -371,13 +364,34 @@ export default function DashboardToolbar({
                     }`}
                   >
                     {b}
-                    {currentBrand === b && <Check className="w-4 h-4" />}
+                    {currentBrand === b && <Check className="h-4 w-4" />}
                   </button>
                 ))}
               </div>
             </div>
           </div>
+          </div>
+
+          <button
+            onClick={() => setShowMobileDrawer(true)}
+            className={`sm:hidden px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${
+              activeFilterCount > 0 
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
+            }`}
+          >
+            <Filter className="w-3 h-3" />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="bg-white text-indigo-600 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
+
+
+
 
         <div className="flex items-center gap-3 ml-auto lg:ml-0">
           <div className="relative" ref={selectorRef}>
@@ -434,6 +448,18 @@ export default function DashboardToolbar({
           </div>
         </div>
       </div>
+
+      <MobileFilterDrawer
+        isOpen={showMobileDrawer}
+        onClose={() => setShowMobileDrawer(false)}
+        categories={categories}
+        brands={brands}
+        availableLocations={availableLocations}
+        currentCategory={currentCategory}
+        currentBrand={currentBrand}
+        isInBag={isInBag}
+        advancedFilters={advancedFilters}
+      />
     </div>
   )
 }

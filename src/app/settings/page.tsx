@@ -1,20 +1,23 @@
 import ThemeCustomizer from './ThemeCustomizer'
-import { getGlobalSettings, getLocationTree } from '@/app/actions/settings'
-import { Settings2, Database, MapPin } from 'lucide-react'
+import { getGlobalSettings, getLocationTree, getCategoryColors } from '@/app/actions/settings'
+import { Settings2, Database, MapPin, Palette } from 'lucide-react'
 import { Header } from "@/components/Header"
 import SyncButton from '@/components/SyncButton'
 import PrimaryVaultSelector from '@/components/PrimaryVaultSelector'
 import LocationTreeEditor from '@/components/LocationTreeEditor'
 import LocationMigrator from '@/components/LocationMigrator'
+import CategoryColorEditor from '@/components/CategoryColorEditor'
 import { db as prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
-  const [settings, vaults, locationTree] = await Promise.all([
+  const [settings, vaults, locationTree, categoryColors, categories] = await Promise.all([
     getGlobalSettings(),
     prisma.discCollection.findMany({ orderBy: { name: 'asc' } }),
     getLocationTree(),
+    getCategoryColors(),
+    prisma.mold.findMany({ select: { category: true }, distinct: ['category'] }).then((m: { category: string }[]) => m.map((c) => c.category)),
   ])
 
   return (
@@ -53,6 +56,21 @@ export default async function SettingsPage() {
         </div>
         
         <PrimaryVaultSelector vaults={vaults} currentPrimary={settings.primaryVaultId} />
+      </div>
+
+      {/* Category Colors Module */}
+      <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-6">
+        <div className="border-b border-slate-50 pb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Palette className="w-5 h-5 text-slate-400" />
+            <h2 className="text-lg font-black text-slate-900">Organizational Colors</h2>
+          </div>
+          <p className="text-sm text-slate-500 font-medium max-w-[480px] mt-1">
+            Assign custom color codes to disc categories. These colors will appear as organizational accents on disc cards.
+          </p>
+        </div>
+        
+        <CategoryColorEditor initialColors={categoryColors} categories={categories} />
       </div>
 
       {/* Location Tree Module */}

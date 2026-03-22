@@ -172,32 +172,33 @@ export default function InventoryList({
   return (
     <div className="flex flex-col h-full space-y-4">
       {selectedIds.length > 0 && (
-        <div className="sticky top-4 z-[140] bg-indigo-600 px-6 py-4 rounded-2xl shadow-2xl shadow-indigo-100 flex items-center justify-between animate-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center gap-4 text-white">
-            <span className="text-sm font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-lg">
+        <div className="sticky top-4 z-[140] bg-indigo-600 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-2xl shadow-indigo-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-2 sm:gap-4 text-white">
+            <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest bg-white/20 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap">
               {selectedIds.length} Selected
             </span>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
             <button 
               onClick={() => setShowBulkEdit(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white font-black text-xs rounded-xl transition-all active:scale-95 shadow-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white font-black text-[10px] sm:text-xs rounded-xl transition-all active:scale-95 shadow-sm whitespace-nowrap"
             >
-              <Edit3 className="w-4 h-4" />
-              Edit Selected
+              <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Edit Selected</span>
+              <span className="xs:hidden">Edit</span>
             </button>
             <div className="relative">
               <button 
                 onClick={() => setShowMoveMenu(!showMoveMenu)}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 font-black text-xs rounded-xl hover:bg-indigo-50 transition-all active:scale-95 shadow-sm"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white text-indigo-600 font-black text-[10px] sm:text-xs rounded-xl hover:bg-indigo-50 transition-all active:scale-95 shadow-sm whitespace-nowrap"
               >
-                <MoveRight className="w-4 h-4" />
-                Move to Collection
+                <MoveRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                Move
               </button>
               
               {showMoveMenu && (
-                <div className="absolute bottom-full right-0 mb-3 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[150]">
+                <div className="absolute bottom-full right-0 mb-3 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[150] animate-in fade-in zoom-in-95 duration-200">
                   <div className="px-3 py-2 border-b border-slate-50 mb-1">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Target Vault</span>
                   </div>
@@ -222,7 +223,7 @@ export default function InventoryList({
             
             <button 
               onClick={() => setSelectedIds([])}
-              className="px-4 py-2 bg-white/10 text-white font-black text-xs rounded-xl hover:bg-white/20 transition-all"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 text-white font-black text-[10px] sm:text-xs rounded-xl hover:bg-white/20 transition-all"
             >
               Cancel
             </button>
@@ -246,7 +247,7 @@ export default function InventoryList({
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead className="sticky top-0 z-20 bg-slate-50 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
               <tr className="border-b border-slate-100">
-                <th className="px-6 py-4 text-center">
+                <th className="sticky left-0 z-30 bg-slate-50 px-6 py-4 text-center border-r border-slate-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                   <input 
                     type="checkbox" 
                     checked={selectedIds.length === items.length && items.length > 0}
@@ -254,6 +255,7 @@ export default function InventoryList({
                     className="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" 
                   />
                 </th>
+
                 <TableHeader field="inBag" label="Bag" />
                 <TableHeader field="brand" label="Brand" />
                 <TableHeader field="name" label="Mold" />
@@ -279,7 +281,7 @@ export default function InventoryList({
                   key={item.id} 
                   className={`hover:bg-indigo-50/30 transition-colors group ${selectedIds.includes(item.id) ? 'bg-indigo-50/50' : ''}`}
                 >
-                  <td className="px-6 py-5 text-center">
+                  <td className="sticky left-0 z-10 bg-white group-hover:bg-indigo-50/30 px-6 py-5 text-center border-r border-slate-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] transition-colors">
                     <input 
                       type="checkbox" 
                       checked={selectedIds.includes(item.id)}
@@ -299,7 +301,7 @@ export default function InventoryList({
                   {visibleColumns.includes('brand') && <td className="px-6 py-5 text-sm font-black text-slate-400 uppercase tracking-tighter group-hover:text-indigo-400">{item.mold.brand}</td>}
                   {visibleColumns.includes('name') && (
                     <td className="px-6 py-5 text-sm font-black text-indigo-600">
-                      <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`} className="hover:text-indigo-800 hover:underline">
+                      <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}`} className="hover:text-indigo-800 hover:underline">
                         {item.mold.name}
                       </Link>
                     </td>

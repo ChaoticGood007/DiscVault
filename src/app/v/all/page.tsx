@@ -16,11 +16,14 @@
 
 import { db as prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
+import { cookies } from "next/headers"
 import Link from "next/link"
 import { Disc } from "lucide-react"
 import DashboardToolbar from "@/components/DashboardToolbar"
 import InventoryList from "@/components/InventoryList"
 import InventoryInfiniteList from "@/components/InventoryInfiniteList"
+import { getLocationTree } from "@/app/actions/settings"
+import { flattenTree } from "@/lib/locationTree"
 
 type SortField = 'name' | 'brand' | 'category' | 'speed' | 'glide' | 'turn' | 'fade' | 'createdAt' | 'plastic' | 'weight' | 'color' | 'stamp' | 'stampFoil' | 'location' | 'condition' | 'inBag' | 'ink';
 type SortOrder = 'asc' | 'desc';
@@ -39,7 +42,11 @@ export default async function AllVaultsDashboard({
   const view = typeof searchP.view === 'string' ? searchP.view : 'cards'
   const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : 'createdAt') as SortField
   const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : 'desc') as SortOrder
-  const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : DEFAULT_COLUMNS
+
+  const cookieStore = await cookies()
+  const savedColsCookie = cookieStore.get('discVaultVisibleCols')
+  const cookieCols = savedColsCookie ? savedColsCookie.value.split(',') : DEFAULT_COLUMNS
+  const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : cookieCols
   const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
   const isInBag = searchP.inBag === 'true'
@@ -58,6 +65,10 @@ export default async function AllVaultsDashboard({
   const minCond = searchP.minCond ? parseInt(searchP.minCond as string) : undefined
   const maxCond = searchP.maxCond ? parseInt(searchP.maxCond as string) : undefined
   const inkFilter = searchP.ink as string | undefined
+  const plasticFilter = typeof searchP.plastic === 'string' ? searchP.plastic : undefined
+  const colorFilter = typeof searchP.color === 'string' ? searchP.color : undefined
+  const stampFilter = typeof searchP.stamp === 'string' ? searchP.stamp : undefined
+  const locationsFilter = typeof searchP.locations === 'string' ? searchP.locations.split(',').filter(Boolean) : []
 
   const pageSize = 24
   const page = typeof searchP.page === 'string' ? Math.max(1, parseInt(searchP.page)) : 1
@@ -90,6 +101,10 @@ export default async function AllVaultsDashboard({
     weight: (minWeight !== undefined || maxWeight !== undefined) ? { gte: minWeight, lte: maxWeight } : undefined,
     condition: (minCond !== undefined || maxCond !== undefined) ? { gte: minCond, lte: maxCond } : undefined,
     ink: inkFilter === 'none' ? { equals: 'None' } : inkFilter === 'exists' ? { not: 'None' } : undefined,
+    plastic: plasticFilter ? { contains: plasticFilter } : undefined,
+    color: colorFilter ? { contains: colorFilter } : undefined,
+    stamp: stampFilter ? { contains: stampFilter } : undefined,
+    location: locationsFilter.length > 0 ? { in: locationsFilter } : undefined,
     mold: {
       name: searchQuery ? { contains: searchQuery } : undefined,
       brand: brand ? { contains: brand } : (searchQuery ? { contains: searchQuery } : undefined),
@@ -101,7 +116,7 @@ export default async function AllVaultsDashboard({
     },
   }
 
-  const [inventoryBrands, inventoryCategories, collections, inventory, totalCount] = await Promise.all([
+  const [inventoryBrands, inventoryCategories, collections, inventory, totalCount, locationTree] = await Promise.all([
     prisma.inventory.findMany({
       where: selectedCollectionIds.length > 0 ? { collectionId: { in: selectedCollectionIds } } : {},
       select: { mold: { select: { brand: true } } },
@@ -120,11 +135,13 @@ export default async function AllVaultsDashboard({
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.inventory.count({ where: whereClause })
+    prisma.inventory.count({ where: whereClause }),
+    getLocationTree(),
   ])
 
-  const brandsList = Array.from(new Set(inventoryBrands.map(i => i.mold.brand))).sort()
-  const categoriesList = Array.from(new Set(inventoryCategories.map(i => i.mold.category))).sort()
+  const brandsList = Array.from(new Set(inventoryBrands.map((i: { mold: { brand: string } }) => i.mold.brand))).sort() as string[]
+  const categoriesList = Array.from(new Set(inventoryCategories.map((i: { mold: { category: string } }) => i.mold.category))).sort() as string[]
+  const locationsList = flattenTree(locationTree).map(f => f.value)
 
   const activeFiltersCount = (category ? 1 : 0) + (brand ? 1 : 0) + (searchQuery ? 1 : 0) + (isInBag ? 1 : 0) + selectedCollectionIds.length + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0) - (searchP.collections ? 1 : 0)
 
@@ -139,6 +156,7 @@ export default async function AllVaultsDashboard({
         brands={brandsList}
         categories={categoriesList}
         collections={collections as any}
+        availableLocations={locationsList}
         currentCollectionIds={selectedCollectionIds}
         currentCategory={category}
         currentBrand={brand}
@@ -152,7 +170,11 @@ export default async function AllVaultsDashboard({
           minFade, maxFade,
           minWeight, maxWeight,
           minCond, maxCond,
-          ink: inkFilter
+          ink: inkFilter,
+          plastic: plasticFilter,
+          color: colorFilter,
+          stamp: stampFilter,
+          locations: locationsFilter.length ? locationsFilter.join(',') : undefined,
         }}
         sortBy={sortBy}
         sortOrder={sortOrder}

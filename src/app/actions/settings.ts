@@ -3,6 +3,7 @@
 import { db as prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { type LocationNode, buildTreeFromPaths } from '@/lib/locationTree'
+import { DEFAULT_CATEGORY_COLORS } from '@/lib/constants'
 
 export async function getGlobalSettings() {
   let settings = await prisma.settings.findUnique({
@@ -58,6 +59,30 @@ export async function saveLocationTree(tree: LocationNode[]) {
     where: { id: 'global' },
     update: { locationTree: JSON.stringify(tree) },
     create: { id: 'global', locationTree: JSON.stringify(tree) },
+  })
+  revalidatePath('/settings')
+  revalidatePath('/', 'layout')
+}
+
+export async function getCategoryColors(): Promise<Record<string, string>> {
+  const settings = await prisma.settings.findUnique({ where: { id: 'global' } })
+  
+  const savedColors = (() => {
+    try {
+      return JSON.parse(settings?.categoryColors || '{}') as Record<string, string>
+    } catch {
+      return {}
+    }
+  })();
+
+  return { ...DEFAULT_CATEGORY_COLORS, ...savedColors }
+}
+
+export async function saveCategoryColors(colors: Record<string, string>) {
+  await prisma.settings.upsert({
+    where: { id: 'global' },
+    update: { categoryColors: JSON.stringify(colors) },
+    create: { id: 'global', categoryColors: JSON.stringify(colors) },
   })
   revalidatePath('/settings')
   revalidatePath('/', 'layout')

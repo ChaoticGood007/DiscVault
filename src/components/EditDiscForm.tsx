@@ -95,7 +95,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
           <select
             name="collectionId"
             defaultValue={disc.collectionId || ''}
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           >
             <option value="">No Collection</option>
             {collections.map(col => (
@@ -112,7 +112,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               step="0.1"
               name="weight"
               defaultValue={disc.weight || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -121,7 +121,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="plastic"
               defaultValue={disc.plastic || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -130,7 +130,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="color"
               defaultValue={disc.color || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="stamp"
               defaultValue={disc.stamp || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -151,7 +151,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="stampFoil"
               defaultValue={disc.stampFoil || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -174,7 +174,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               max="10"
               name="condition"
               defaultValue={disc.condition || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -182,7 +182,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
             <select
               name="ink"
               defaultValue={disc.ink || 'None'}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             >
               <option value="None">None</option>
               <option value="Rim">Rim</option>
@@ -204,7 +204,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
             name="notes"
             rows={4}
             defaultValue={disc.notes || ''}
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none resize-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none resize-none shadow-sm"
           ></textarea>
         </div>
 

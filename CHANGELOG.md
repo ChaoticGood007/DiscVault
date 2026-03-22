@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-21
+
+### Added
+- **Focus Mode (Detail View)**: Created a dedicated read-only screen for viewing detailed disc metadata, decoupling the interface from the generic Edit Form.
+- **Mobile Filter Drawer**: Replaced standard top-bar inline dropdowns with a full-screen, slide-out UI on mobile devices for vastly superior usability.
+- **Organizational Colors**: Users can now bind custom HEX targets to specific disc categories from settings. Natively renders as vibrant visual accent strips on dashboard cards.
+- **Persistent Table Columns**: Converted the Visible Columns tracking state natively out of rigid URL properties into global browser Cookies. The table layout perfectly remembers itself organically across completely disconnected page routes.
+- **Universal Filter Panel**: Extended the Advanced Filters panel with text-search fields for Plastic, Color, and Stamp. Location filtering is now a fully interactive folder-style tree picker sourced from the configured Location Tree in Settings — supports multi-select, parent-selects-children, partial selection indicators, and expand/collapse per folder.
+
+### Changed
+- **Visual Focus & Hierarchy**: Heavily audited form-input paddings, typography contrasts, and spacing to decrease visual density natively and improve primary data scannability.
+
+
 ## [0.1.3] - 2026-03-20
 
 ### Added
