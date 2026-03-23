@@ -77,7 +77,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
     <div className="space-y-6 md:space-y-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
         {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all border border-slate-100 overflow-hidden group relative flex flex-col">
+          <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}`} key={item.id} className="bg-white rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all border border-slate-100 overflow-hidden group relative flex flex-col cursor-pointer">
             {/* Organizational Color Accent */}
             {categoryColors && item.mold?.category && categoryColors[item.mold.category] && (
               <div 
@@ -109,11 +109,11 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
 
               <div className="mb-3 md:mb-5 mt-1">
                 {visibleColumns.includes('name') && (
-                  <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}`} className="inline-block group/title">
-                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover/title:text-indigo-600 transition-colors leading-tight break-words group-hover:text-indigo-600">
+                  <div className="inline-block">
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 transition-colors leading-tight break-words group-hover:text-indigo-600">
                       {item.mold.name}
                     </h3>
-                  </Link>
+                  </div>
                 )}
                 {(visibleColumns.includes('plastic') || visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
                   <div className="flex flex-wrap items-center gap-y-2 mt-2">
@@ -235,7 +235,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 Added {new Date(item.createdAt).toLocaleDateString()}
               </span>
             )}
-          </div>
+          </Link>
         ))}
       </div>
 

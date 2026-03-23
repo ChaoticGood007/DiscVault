@@ -17,12 +17,24 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { Filter, LayoutGrid, List, Columns, Check, Search, Inbox, ChevronDown, Settings, SlidersHorizontal } from 'lucide-react'
+import { Filter, LayoutGrid, List, Columns, Check, Search, Inbox, ChevronDown, Settings, SlidersHorizontal, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import AdvancedSearch, { type AdvancedFilters } from './AdvancedSearch'
 import MobileFilterDrawer from './MobileFilterDrawer'
 import MultiSelectDropdown from './MultiSelectDropdown'
+
+const SORT_OPTIONS = [
+  { id: 'createdAt', label: 'Date Added' },
+  { id: 'name', label: 'Mold Name' },
+  { id: 'brand', label: 'Brand' },
+  { id: 'speed', label: 'Speed' },
+  { id: 'weight', label: 'Weight' },
+  { id: 'plastic', label: 'Plastic' },
+  { id: 'color', label: 'Color' },
+  { id: 'stamp', label: 'Stamp' },
+  { id: 'condition', label: 'Condition' },
+]
 
 interface Collection {
   id: string
@@ -84,15 +96,19 @@ export default function DashboardToolbar({
   searchQuery,
   isInBag,
   advancedFilters,
+  sortBy,
+  sortOrder,
   visibleColumns,
 }: DashboardToolbarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const [showColSelector, setShowColSelector] = useState(false)
+  const [showSortSelector, setShowSortSelector] = useState(false)
   const [showCollectionSelector, setShowCollectionSelector] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const selectorRef = useRef<HTMLDivElement>(null)
+  const sortRef = useRef<HTMLDivElement>(null)
   const collectionRef = useRef<HTMLDivElement>(null)
   const advancedRef = useRef<HTMLDivElement>(null)
   const categoryRef = useRef<HTMLDivElement>(null)
@@ -110,6 +126,9 @@ export default function DashboardToolbar({
     const handleClickOutside = (event: MouseEvent) => {
       if (selectorRef.current && !selectorRef.current.contains(event.target as Node)) {
         setShowColSelector(false)
+      }
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setShowSortSelector(false)
       }
       if (collectionRef.current && !collectionRef.current.contains(event.target as Node)) {
         setShowCollectionSelector(false)
@@ -345,6 +364,53 @@ export default function DashboardToolbar({
 
 
         <div className="flex items-center gap-3 ml-auto lg:ml-0">
+          <div className="relative" ref={sortRef}>
+            <button
+              onClick={() => setShowSortSelector(!showSortSelector)}
+              className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 ${showSortSelector ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
+              title="Sort Inventory"
+            >
+              <ArrowUpDown className="h-5 w-5" />
+              <span className="text-xs font-black uppercase tracking-widest px-1 hidden sm:inline-block">Sort</span>
+            </button>
+
+            <div className={`absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-3 grid grid-cols-1 gap-1 z-[110] transition-all duration-300 ease-out origin-top-right ${
+              showSortSelector 
+                ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+                : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+            }`}>
+              <div className="px-3 py-2 mb-1 border-b border-slate-50">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort By</span>
+              </div>
+              {SORT_OPTIONS.map((opt) => {
+                const isActive = sortBy === opt.id
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      if (isActive) {
+                        updateParams({ sortOrder: sortOrder === 'asc' ? 'desc' : 'asc' })
+                      } else {
+                        updateParams({ sortBy: opt.id, sortOrder: opt.id === 'createdAt' || opt.id === 'speed' || opt.id === 'condition' || opt.id === 'weight' ? 'desc' : 'asc' })
+                      }
+                      setShowSortSelector(false)
+                    }}
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors group hover:bg-slate-50`}
+                  >
+                    <span className={`text-sm font-bold ${isActive ? 'text-indigo-600' : 'text-slate-500'}`}>
+                      {opt.label}
+                    </span>
+                    {isActive && (
+                      <div className="flex items-center text-indigo-600">
+                        {sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           <div className="relative" ref={selectorRef}>
             <button
               onClick={() => setShowColSelector(!showColSelector)}
