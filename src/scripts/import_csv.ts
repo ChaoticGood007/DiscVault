@@ -50,8 +50,6 @@ const HEADER_MAP: Record<string, string> = {
   
   // Status
   'location': 'location',
-  'bag': 'inBag',
-  'in bag': 'inBag',
   'condition': 'condition',
   'ink': 'ink',
   'notes': 'notes',
@@ -188,7 +186,6 @@ async function smartImport(filePath: string) {
           stampFoil: data.stampFoil || null,
           location: data.location || null,
           condition: parseInt(data.condition) || null,
-          inBag: typeof data.inBag === 'string' ? data.inBag.toLowerCase() === 'true' || data.inBag.toLowerCase().includes('bag') : false,
           ink: data.ink || null,
           notes: data.notes || null,
         }

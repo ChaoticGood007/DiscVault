@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-23
+
+### Added
+- **Multi-Bag Selector UI**: Replaced the binary "In Bag" toggle with a professional Bag Selector dropdown. Users can now filter their vault by "All Bags", "No Bag", or select a specific named bag (e.g., "Main Bag", "Storage Bin") defined in their vault's location tree.
+- **Global Bag Aggregation**: The "All Vaults" dashboard now intelligently aggregates all unique bag names from every vault, allowing for cross-vault bag filtering.
+- **Multi-Bag Mobile Support**: Integrated the bag selector into the Mobile Filter Drawer for a consistent experience on all devices.
+- **Multi-Select Filters**: Upgraded the generic filtering experience natively across the board. Brand, Category, Plastic, Color, Stamp, and Stamp Foil are now fully multi-selectable via a newly engineered dropdown component dynamically populated with distinct values from your inventory database. Free-text database entry is fully preserved while enabling powerful multi-value query combinations in the UI.
+- **Focus Mode (Detail View)**: Created a dedicated read-only screen for viewing detailed disc metadata, decoupling the interface from the generic Edit Form.
+- **Mobile Filter Drawer**: Replaced standard top-bar inline dropdowns with a full-screen, slide-out UI on mobile devices for vastly superior usability.
+- **Organizational Colors**: Users can now bind custom HEX targets to specific disc categories from settings. Natively renders as vibrant visual accent strips on dashboard cards.
+- **Persistent Table Columns**: Converted the Visible Columns tracking state natively out of rigid URL properties into global browser Cookies. The table layout perfectly remembers itself organically across completely disconnected page routes.
+- **Universal Filter Panel**: Extended the Advanced Filters panel with text-search fields for Plastic, Color, and Stamp. Location filtering is now a fully interactive folder-style tree picker sourced from the configured Location Tree in Settings — supports multi-select, parent-selects-children, partial selection indicators, and expand/collapse per folder.
+
+### Changed
+- **Pure Multi-Bag Architecture**: Transitioned the entire bagging system to be derived from the Vault's location tree. The redundant `inBag` database property has been removed, significantly simplifying the data model. 
+- **Inherited Bag Status**: Locations in the settings tree now visually indicate if they are part of a bag through inheritance. Manual "In Bag" toggling is automatically disabled for child nodes of existing bags to prevent conflicting definitions.
+- **Refactored Dashboard Logic**: Dashboard filtering (All Bags, No Bag, Specific Bags) now utilizes location-prefix matching, ensuring that discs in sub-locations (e.g., "Main Bag / Putters") are correctly included in their parent bag's categories.
+- **Streamlined UI**: Removed redundant "In Bag" toggles from Add/Edit forms, Bulk Edit, and CSV Importer. Bag status is now purely a function of where a disc is placed.
+- **Visual Focus & Hierarchy**: Heavily audited form-input paddings, typography contrasts, and spacing to decrease visual density natively and improve primary data scannability.
+
+
 ## [0.1.3] - 2026-03-20
 
 ### Added

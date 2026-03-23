@@ -11,34 +11,35 @@ datasource db {
 }
 
 model Mold {
-  id              String      @id @default(uuid())
-  name            String
-  brand           String
-  category        String
-  speed           Float
-  glide           Float
-  turn            Float
-  fade            Float
-  stability       String
-  link            String?
-  pic             String?
-  name_slug       String?
-  brand_slug      String?
-  category_slug   String?
-  stability_slug  String?
-  color           String?
+  id               String      @id @default(uuid())
+  name             String
+  brand            String
+  category         String
+  speed            Float
+  glide            Float
+  turn             Float
+  fade             Float
+  stability        String
+  link             String?
+  pic              String?
+  name_slug        String?
+  brand_slug       String?
+  category_slug    String?
+  stability_slug   String?
+  color            String?
   background_color String?
-  isCustom        Boolean     @default(false)
-  inventory       Inventory[]
+  isCustom         Boolean     @default(false)
+  inventory        Inventory[]
 }
 
 model DiscCollection {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  inventory   Inventory[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  name         String
+  description  String?
+  locationTree String      @default("[]")
+  inventory    Inventory[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Inventory {
@@ -54,7 +55,6 @@ model Inventory {
   stampFoil    String?
   location     String?
   condition    Int?
-  inBag        Boolean         @default(false)
   ink          String?
   notes        String?
   createdAt    DateTime        @default(now())
@@ -66,6 +66,7 @@ model Settings {
   accentColor    String   @default("#4f46e5")
   primaryVaultId String?
   locationTree   String   @default("[]")
+  categoryColors String   @default("{}")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

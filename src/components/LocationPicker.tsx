@@ -23,7 +23,7 @@ import { flattenTree, type LocationNode, type FlatLocation } from '@/lib/locatio
 interface LocationPickerProps {
   tree: LocationNode[]
   value: string | null
-  onChange: (value: string | null, autoInBag: boolean | null) => void
+  onChange: (value: string | null) => void
   className?: string
 }
 
@@ -43,7 +43,7 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
   }, [])
 
   const select = (loc: FlatLocation | null) => {
-    onChange(loc ? loc.value : null, loc ? loc.inBag : null)
+    onChange(loc ? loc.value : null)
     setOpen(false)
   }
 
@@ -135,78 +135,3 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
   )
 }
 
-// ─── InBag field with tooltip ────────────────────────────────────────────────
-
-interface InBagFieldProps {
-  autoInBag: boolean | null
-  defaultChecked: boolean
-}
-
-export function InBagField({ autoInBag, defaultChecked }: InBagFieldProps) {
-  const [showTip, setShowTip] = useState(false)
-  const isAuto = autoInBag !== null
-
-  return (
-    <div className="flex items-center gap-3">
-      {isAuto ? (
-        <>
-          {/* Auto mode: read-only indicator */}
-          <input type="hidden" name="inBag" value={autoInBag ? 'on' : 'off'} />
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest border ${
-            autoInBag
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-              : 'bg-slate-50 border-slate-200 text-slate-400'
-          }`}>
-            <Briefcase className="w-3.5 h-3.5" />
-            {autoInBag ? 'In Bag (Auto)' : 'Not In Bag (Auto)'}
-          </div>
-          <button
-            type="button"
-            onMouseEnter={() => setShowTip(true)}
-            onMouseLeave={() => setShowTip(false)}
-            className="relative text-slate-300 hover:text-indigo-400 transition-colors"
-          >
-            <Info className="w-4 h-4" />
-            {showTip && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-slate-800 text-white text-xs font-medium rounded-xl px-3 py-2 leading-relaxed z-50 pointer-events-none shadow-xl">
-                In Bag is automatically set because your selected location is marked as a bag location (or inherits from a parent bag location). Change the location to override.
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
-              </div>
-            )}
-          </button>
-        </>
-      ) : (
-        <>
-          {/* Manual mode */}
-          <label className="flex items-center gap-3 cursor-pointer select-none">
-            <div className="relative">
-              <input
-                type="checkbox"
-                name="inBag"
-                defaultChecked={defaultChecked}
-                className="sr-only peer"
-              />
-              <div className="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-emerald-500 transition-colors" />
-              <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5" />
-            </div>
-            <span className="text-sm font-bold text-slate-700">In Bag</span>
-          </label>
-          <button
-            type="button"
-            onMouseEnter={() => setShowTip(true)}
-            onMouseLeave={() => setShowTip(false)}
-            className="relative text-slate-300 hover:text-indigo-400 transition-colors"
-          >
-            <Info className="w-4 h-4" />
-            {showTip && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-slate-800 text-white text-xs font-medium rounded-xl px-3 py-2 leading-relaxed z-50 pointer-events-none shadow-xl">
-                No location is set — toggle In Bag manually. Set a location that is marked as a bag location in Settings to make this automatic.
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
-              </div>
-            )}
-          </button>
-        </>
-      )}
-    </div>
-  )
-}

@@ -29,10 +29,25 @@ interface InventoryInfiniteListProps {
   orderBy: any
   pageSize: number
   totalCount: number
+  bagPaths?: string[]
   visibleColumns?: string[]
+  categoryColors?: Record<string, string>
 }
 
-export default function InventoryInfiniteList({ initialItems, where, orderBy, pageSize, totalCount, visibleColumns = ['brand', 'category', 'flight_numbers', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'] }: InventoryInfiniteListProps) {
+export default function InventoryInfiniteList({ 
+  initialItems, 
+  where, 
+  orderBy, 
+  pageSize, 
+  totalCount, 
+  visibleColumns = ['brand', 'category', 'flight_numbers', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'], 
+  categoryColors,
+  bagPaths = []
+}: InventoryInfiniteListProps) {
+  const isInBag = (loc: string | null) => {
+    if (!loc) return false
+    return bagPaths.some(p => loc === p || loc.startsWith(p + '/'))
+  }
   const [items, setItems] = useState(initialItems)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialItems.length < totalCount)
@@ -76,9 +91,16 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
     <div className="space-y-6 md:space-y-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
         {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all border border-slate-100 overflow-hidden group relative flex flex-col">
+          <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}`} key={item.id} className="bg-white rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all border border-slate-100 overflow-hidden group relative flex flex-col cursor-pointer">
+            {/* Organizational Color Accent */}
+            {categoryColors && item.mold?.category && categoryColors[item.mold.category] && (
+              <div 
+                className="absolute left-0 top-0 bottom-0 w-2.5 z-10"
+                style={{ backgroundColor: categoryColors[item.mold.category] }} 
+              />
+            )}
 
-            <div className="p-4 md:p-6 flex-1">
+            <div className={`p-4 md:p-6 flex-1 ${categoryColors && item.mold?.category && categoryColors[item.mold.category] ? 'pl-6 md:pl-8' : ''}`}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {visibleColumns.includes('brand') && (
@@ -86,7 +108,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                       {item.mold.brand}
                     </span>
                   )}
-                  {visibleColumns.includes('inBag') && item.inBag && (
+                  {visibleColumns.includes('inBag') && isInBag(item.location) && (
                     <span className="inline-flex items-center px-4 h-[28px] rounded-full text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-100 whitespace-nowrap">
                       In Bag
                     </span>
@@ -101,11 +123,11 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
 
               <div className="mb-3 md:mb-5 mt-1">
                 {visibleColumns.includes('name') && (
-                  <Link href={`/v/${item.collectionId || 'all'}/inventory/${item.id}/edit`} className="inline-block group/title">
-                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 group-hover/title:text-indigo-600 transition-colors leading-tight break-words group-hover:text-indigo-600">
+                  <div className="inline-block">
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 transition-colors leading-tight break-words group-hover:text-indigo-600">
                       {item.mold.name}
                     </h3>
-                  </Link>
+                  </div>
                 )}
                 {(visibleColumns.includes('plastic') || visibleColumns.includes('category') || visibleColumns.includes('stamp') || visibleColumns.includes('color')) && (
                   <div className="flex flex-wrap items-center gap-y-2 mt-2">
@@ -227,7 +249,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                 Added {new Date(item.createdAt).toLocaleDateString()}
               </span>
             )}
-          </div>
+          </Link>
         ))}
       </div>
 

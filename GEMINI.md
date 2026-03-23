@@ -52,6 +52,7 @@ DiscVault is a professional-grade, self-hosted disc golf inventory management sy
 - **Validation:** Always revalidate paths using `revalidatePath` after a mutation to ensure the UI stays in sync.
 - **Copyright Headers:** Files should include the appropriate license header as specified in the LICENSE (GPLv3) and README (Apache-2.0 for source headers) files. Use 'Copyright 2026 ChaoticGood007' for new files.
 - **Agent Workflows:** Automatically execute `docker compose up --build -d` natively via the terminal whenever completing any substantive code edits or feature deployments to ensure the user's mapped container gracefully syncs the new architecture.
+- **Keep the Changelog up to date** - Always update the changelog after completing any substantive code edits or feature deployments. Try to keep to one entry per actual feature that a user might notice as they use the app.
 
 ## 📊 Data Model (Prisma)
 

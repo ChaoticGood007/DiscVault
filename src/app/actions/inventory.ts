@@ -32,18 +32,13 @@ export async function addDisc(formData: FormData) {
   const stampFoil = formData.get('stampFoil') as string
   const location = (formData.get('location') as string) || null
   const condition = parseInt(formData.get('condition') as string) || null
-  const manualInBag = formData.get('inBag') === 'on'
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
 
   if (!moldId) throw new Error('Mold ID is required')
 
-  const tree = await getLocationTree()
-  const autoInBag = location ? resolveInBag(location, tree) : null
-  const inBag = autoInBag !== null ? autoInBag : manualInBag
-
   await prisma.inventory.create({
-    data: { moldId, collectionId, weight, color, plastic, stamp, stampFoil, location, condition, inBag, ink, notes },
+    data: { moldId, collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes },
   })
 
   revalidatePath('/')
@@ -61,17 +56,12 @@ export async function updateDisc(id: string, formData: FormData) {
   const stampFoil = formData.get('stampFoil') as string
   const location = (formData.get('location') as string) || null
   const condition = parseInt(formData.get('condition') as string) || null
-  const manualInBag = formData.get('inBag') === 'on'
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
 
-  const tree = await getLocationTree()
-  const autoInBag = location ? resolveInBag(location, tree) : null
-  const inBag = autoInBag !== null ? autoInBag : manualInBag
-
   await prisma.inventory.update({
     where: { id },
-    data: { collectionId, weight, color, plastic, stamp, stampFoil, location, condition, inBag, ink, notes },
+    data: { collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes },
   })
 
   revalidatePath('/')
@@ -121,7 +111,7 @@ const BRAND_SYNONYMS: Record<string, string> = {
 
 export async function importDiscs(records: any[], targetCollectionId?: string) {
   let successCount = 0
-  const tree = await getLocationTree()
+  const tree = await getLocationTree(targetCollectionId)
   
   for (const record of records) {
     try {
@@ -162,11 +152,6 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
       }
 
       const location = record.location || null
-      const autoInBag = location ? resolveInBag(location, tree) : null
-      const manualInBag = typeof record.inBag === 'string'
-        ? ['true', 'yes', '1', 'bag'].includes(record.inBag.toLowerCase().trim())
-        : record.inBag === true
-      const inBag = autoInBag !== null ? autoInBag : manualInBag
 
       await prisma.inventory.create({
         data: {
@@ -179,7 +164,6 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           stampFoil: record.stampFoil || null,
           location,
           condition: parseInt(record.condition) || null,
-          inBag,
           ink: record.ink || null,
           notes: record.notes || null,
         }

@@ -17,7 +17,6 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
 
   // Track which fields the user actually wants to update
   const [enabledFields, setEnabledFields] = useState<Record<string, boolean>>({
-    inBag: false,
     condition: false,
     weight: false,
     plastic: false,
@@ -26,7 +25,6 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
 
   // Track the actual values
   const [values, setValues] = useState<Record<string, any>>({
-    inBag: true,
     condition: '',
     weight: '',
     plastic: '',
@@ -47,7 +45,7 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
 
     const updates: Record<string, any> = {}
     
-    if (enabledFields.inBag) updates.inBag = values.inBag
+
     if (enabledFields.condition) updates.condition = parseInt(values.condition) || null
     if (enabledFields.weight) updates.weight = parseFloat(values.weight) || null
     if (enabledFields.plastic) updates.plastic = values.plastic || null
@@ -105,16 +103,6 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
             Check the box next to a field to overwrite that value on all selected discs. Unchecked fields will be left untouched.
           </div>
 
-          <FieldRow field="inBag" label="Currently in Bag">
-            <select
-              value={values.inBag.toString()}
-              onChange={(e) => updateValue('inBag', e.target.value === 'true')}
-              className="w-full px-5 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-            >
-              <option value="true">Yes, In Bag</option>
-              <option value="false">No, In Storage</option>
-            </select>
-          </FieldRow>
 
           <FieldRow field="condition" label="Condition (1-10)">
             <input

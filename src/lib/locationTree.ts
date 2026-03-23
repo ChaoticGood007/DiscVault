@@ -71,6 +71,15 @@ export function resolveInBag(location: string | null, tree: LocationNode[]): boo
  * e.g. ["Zac's Bag/Putter Pocket", "Zac's Bag/Main Pocket", "Storage/Shelf"]
  * → tree with "Zac's Bag" and "Storage" as roots, children beneath.
  */
+/** Generate a unique ID without requiring a secure context. */
+let _idCounter = 0
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try { return crypto.randomUUID() } catch { /* non-secure context */ }
+  }
+  return `_loc_${Date.now()}_${++_idCounter}`
+}
+
 export function buildTreeFromPaths(paths: string[]): LocationNode[] {
   const rootMap = new Map<string, LocationNode>()
 
@@ -82,7 +91,7 @@ export function buildTreeFromPaths(paths: string[]): LocationNode[] {
     const rootLabel = parts[0]
     if (!rootMap.has(rootLabel)) {
       rootMap.set(rootLabel, {
-        id: crypto.randomUUID(),
+        id: generateId(),
         label: rootLabel,
         inBag: false,
         children: [],
@@ -95,7 +104,7 @@ export function buildTreeFromPaths(paths: string[]): LocationNode[] {
       let child = current.children.find(c => c.label === childLabel)
       if (!child) {
         child = {
-          id: crypto.randomUUID(),
+          id: generateId(),
           label: childLabel,
           inBag: false,
           children: [],

@@ -20,12 +20,13 @@ import { useState } from 'react'
 import { updateDisc, deleteDisc } from '@/app/actions/inventory'
 import { Trash2, ArrowLeft, Inbox } from 'lucide-react'
 import Link from 'next/link'
-import LocationPicker, { InBagField } from '@/components/LocationPicker'
-import { resolveInBag, type LocationNode } from '@/lib/locationTree'
+import LocationPicker from '@/components/LocationPicker'
+import { type LocationNode } from '@/lib/locationTree'
 
 interface Collection {
   id: string
   name: string
+  locationTree: string
 }
 
 interface EditDiscFormProps {
@@ -39,7 +40,6 @@ interface EditDiscFormProps {
     stampFoil: string | null
     location: string | null
     condition: number | null
-    inBag: boolean
     ink: string | null
     notes: string | null
     mold: {
@@ -52,9 +52,18 @@ interface EditDiscFormProps {
   tree: LocationNode[]
 }
 
-export default function EditDiscForm({ disc, collections, tree }: EditDiscFormProps) {
+export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormProps, 'tree'>) {
+  const [selectedVaultId, setSelectedVaultId] = useState<string>(disc.collectionId || '')
   const [selectedLocation, setSelectedLocation] = useState<string | null>(disc.location)
-  const autoInBag = selectedLocation ? resolveInBag(selectedLocation, tree) : null
+  
+  const currentTree = (() => {
+    if (!selectedVaultId) return []
+    const vault = collections.find(c => c.id === selectedVaultId)
+    if (!vault) return []
+    try { return JSON.parse(vault.locationTree) } catch { return [] }
+  })()
+
+
 
   const handleUpdate = async (formData: FormData) => {
     await updateDisc(disc.id, formData)
@@ -86,18 +95,22 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
       </div>
 
       <form action={handleUpdate} className="space-y-8 bg-white p-10 rounded-[40px] shadow-2xl shadow-indigo-50 border border-slate-100 max-w-2xl mx-auto">
-        {/* Collection Mover */}
+        {/* Vault Mover */}
         <div className="space-y-3 pb-8 border-b border-slate-50">
           <div className="flex items-center gap-2 text-slate-400">
             <Inbox className="w-4 h-4" />
-            <label className="text-xs font-black uppercase tracking-widest">Target Collection</label>
+            <label className="text-xs font-black uppercase tracking-widest">Target Vault</label>
           </div>
           <select
             name="collectionId"
-            defaultValue={disc.collectionId || ''}
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            value={selectedVaultId}
+            onChange={(e) => {
+              setSelectedVaultId(e.target.value)
+              setSelectedLocation(null) // Reset location when switching vaults
+            }}
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           >
-            <option value="">No Collection</option>
+            <option value="">No Vault</option>
             {collections.map(col => (
               <option key={col.id} value={col.id}>{col.name}</option>
             ))}
@@ -112,7 +125,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               step="0.1"
               name="weight"
               defaultValue={disc.weight || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -121,7 +134,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="plastic"
               defaultValue={disc.plastic || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -130,7 +143,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="color"
               defaultValue={disc.color || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
         </div>
@@ -142,7 +155,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="stamp"
               defaultValue={disc.stamp || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -151,21 +164,21 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               type="text"
               name="stampFoil"
               defaultValue={disc.stampFoil || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Location</label>
-            <LocationPicker
-              tree={tree}
+            <LocationPicker 
+              tree={currentTree} 
               value={selectedLocation}
-              onChange={(val, _auto) => setSelectedLocation(val)}
+              onChange={(val) => setSelectedLocation(val)}
               className="w-full"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Condition (1-10)</label>
             <input
@@ -174,7 +187,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
               max="10"
               name="condition"
               defaultValue={disc.condition || ''}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
           <div className="space-y-2">
@@ -182,19 +195,13 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
             <select
               name="ink"
               defaultValue={disc.ink || 'None'}
-              className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             >
               <option value="None">None</option>
               <option value="Rim">Rim</option>
               <option value="Flight Plate">Flight Plate</option>
               <option value="Both">Both</option>
             </select>
-          </div>
-          <div className="flex items-center pb-4">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">In Bag</label>
-              <InBagField autoInBag={autoInBag} defaultChecked={disc.inBag} />
-            </div>
           </div>
         </div>
 
@@ -204,7 +211,7 @@ export default function EditDiscForm({ disc, collections, tree }: EditDiscFormPr
             name="notes"
             rows={4}
             defaultValue={disc.notes || ''}
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none resize-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none resize-none shadow-sm"
           ></textarea>
         </div>
 

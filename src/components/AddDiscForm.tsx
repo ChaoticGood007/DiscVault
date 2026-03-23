@@ -19,8 +19,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { addDisc } from '@/app/actions/inventory'
 import { Search, Loader2 } from 'lucide-react'
-import LocationPicker, { InBagField } from '@/components/LocationPicker'
-import { resolveInBag, type LocationNode } from '@/lib/locationTree'
+import LocationPicker from '@/components/LocationPicker'
+import { type LocationNode } from '@/lib/locationTree'
 
 interface Mold {
   id: string
@@ -41,7 +41,6 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
   const [loading, setLoading] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
-  const autoInBag = selectedLocation ? resolveInBag(selectedLocation, tree) : null
 
   const searchMolds = useCallback(async (q: string) => {
     if (q.length < 2) {
@@ -92,7 +91,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
               }}
               onFocus={() => setIsSearching(true)}
               placeholder="Search by name or brand (e.g. Innova Aviar)"
-              className="w-full pl-12 pr-4 py-5 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-300 placeholder:font-bold"
+              className="w-full pl-12 pr-4 py-5 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all placeholder:text-slate-300 placeholder:font-bold shadow-sm"
               required
             />
             <Search className="absolute left-4 top-5 h-6 w-6 text-slate-300" />
@@ -126,7 +125,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             step="0.1"
             name="weight"
             placeholder="175"
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
         <div className="space-y-2">
@@ -135,7 +134,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             type="text"
             name="plastic"
             placeholder="Star, Champion..."
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
         <div className="space-y-2">
@@ -144,7 +143,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             type="text"
             name="color"
             placeholder="Blue, Pink..."
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
       </div>
@@ -156,7 +155,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             type="text"
             name="stamp"
             placeholder="Stock, Tournament..."
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
         <div className="space-y-2">
@@ -165,7 +164,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             type="text"
             name="stampFoil"
             placeholder="Gold, Silver, Holo..."
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
         <div className="space-y-2">
@@ -178,7 +177,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
         <div className="space-y-2">
           <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Condition (1-10)</label>
           <input
@@ -187,26 +186,20 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             max="10"
             name="condition"
             placeholder="10"
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
         <div className="space-y-2">
           <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Ink</label>
           <select
             name="ink"
-            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none bg-white"
+            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
           >
             <option value="None">None</option>
             <option value="Rim">Rim</option>
             <option value="Flight Plate">Flight Plate</option>
             <option value="Both">Both</option>
           </select>
-        </div>
-        <div className="flex items-center pb-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">In Bag</label>
-            <InBagField autoInBag={autoInBag} defaultChecked={false} />
-          </div>
         </div>
       </div>
 
@@ -216,7 +209,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
           name="notes"
           rows={3}
           placeholder="Flight characteristics, condition, etc."
-          className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none resize-none"
+          className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none resize-none shadow-sm"
         ></textarea>
       </div>
 

@@ -28,10 +28,9 @@ export default async function ScopedEditPage({
 }) {
   const { id, vaultId } = await params
 
-  const [disc, collections, tree] = await Promise.all([
+  const [disc, collections] = await Promise.all([
     prisma.inventory.findUnique({ where: { id }, include: { mold: true } }),
     prisma.discCollection.findMany({ orderBy: { name: 'asc' } }),
-    getLocationTree(),
   ])
 
   if (!disc) {
@@ -44,7 +43,7 @@ export default async function ScopedEditPage({
         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Edit Disc</h1>
         <p className="mt-2 text-lg text-slate-600 font-medium">Update the details of this specific disc in your vault.</p>
       </div>
-      <EditDiscForm disc={disc as any} collections={collections as any} tree={tree} />
+      <EditDiscForm disc={disc as any} collections={collections as any} />
     </div>
   )
 }
