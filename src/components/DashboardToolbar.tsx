@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import AdvancedSearch, { type AdvancedFilters } from './AdvancedSearch'
 import MobileFilterDrawer from './MobileFilterDrawer'
+import MultiSelectDropdown from './MultiSelectDropdown'
 
 interface Collection {
   id: string
@@ -32,6 +33,10 @@ interface Collection {
 interface DashboardToolbarProps {
   brands: string[]
   categories: string[]
+  plastics: string[]
+  colors: string[]
+  stamps: string[]
+  stampFoils: string[]
   collections: Collection[]
   availableLocations: string[]
   currentCollectionIds: string[]
@@ -66,6 +71,10 @@ const ALL_COLUMNS = [
 export default function DashboardToolbar({
   brands,
   categories,
+  plastics,
+  colors,
+  stamps,
+  stampFoils,
   collections,
   availableLocations,
   currentCollectionIds,
@@ -107,12 +116,6 @@ export default function DashboardToolbar({
       }
       if (advancedRef.current && !advancedRef.current.contains(event.target as Node)) {
         setShowAdvanced(false)
-      }
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
-        setShowCategoryDropdown(false)
-      }
-      if (brandRef.current && !brandRef.current.contains(event.target as Node)) {
-        setShowBrandDropdown(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -168,7 +171,11 @@ export default function DashboardToolbar({
   }
 
   const activeAdvancedCount = Object.values(advancedFilters).filter(v => v !== undefined && v !== '').length
-  const activeFilterCount = (currentCategory ? 1 : 0) + (currentBrand ? 1 : 0) + (isInBag ? 1 : 0) + activeAdvancedCount
+  
+  const currentCategoryArray = currentCategory ? currentCategory.split(',').filter(Boolean) : []
+  const currentBrandArray = currentBrand ? currentBrand.split(',').filter(Boolean) : []
+  
+  const activeFilterCount = currentCategoryArray.length + currentBrandArray.length + (isInBag ? 1 : 0) + activeAdvancedCount
   const isAllMode = pathname === '/v/all'
 
   return (
@@ -286,89 +293,33 @@ export default function DashboardToolbar({
               <AdvancedSearch 
                 filters={advancedFilters}
                 availableLocations={availableLocations}
+                plastics={plastics}
+                colors={colors}
+                stamps={stamps}
+                stampFoils={stampFoils}
                 onClose={() => setShowAdvanced(false)} 
               />
             )}
           </div>
           
-          {/* Category Dropdown */}
-          <div className="relative" ref={categoryRef}>
-            <button
-              onClick={() => { setShowCategoryDropdown(!showCategoryDropdown); setShowBrandDropdown(false) }}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${
-                currentCategory ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
-              }`}
-            >
-              {currentCategory || 'All Categories'}
-              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            <div className={`absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-left sm:origin-top-right ${
-              showCategoryDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
-            }`}>
-              <button
-                onClick={() => { updateParams({ category: null }); setShowCategoryDropdown(false) }}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
-                  !currentCategory ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                All Categories
-                {!currentCategory && <Check className="w-4 h-4" />}
-              </button>
-              <div className="max-h-56 overflow-y-auto mt-1 space-y-0.5">
-                {categories.map(c => (
-                  <button
-                    key={c}
-                    onClick={() => { updateParams({ category: c }); setShowCategoryDropdown(false) }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
-                      currentCategory === c ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {c}
-                    {currentCategory === c && <Check className="w-4 h-4" />}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="w-32 hidden lg:block">
+            <MultiSelectDropdown
+              label="Category"
+              options={categories}
+              selectedValues={currentCategoryArray}
+              onChange={(vals) => updateParams({ category: vals.length ? vals.join(',') : null })}
+              placeholder="Categories"
+            />
           </div>
 
-          {/* Brand Dropdown */}
-          <div className="relative" ref={brandRef}>
-            <button
-              onClick={() => { setShowBrandDropdown(!showBrandDropdown); setShowCategoryDropdown(false) }}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${
-                currentBrand ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'
-              }`}
-            >
-              {currentBrand || 'All Brands'}
-              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showBrandDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            <div className={`absolute top-full right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-[110] transition-all duration-200 ease-out origin-top-right ${
-              showBrandDropdown ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
-            }`}>
-              <button
-                onClick={() => { updateParams({ brand: null }); setShowBrandDropdown(false) }}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
-                  !currentBrand ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                All Brands
-                {!currentBrand && <Check className="w-4 h-4" />}
-              </button>
-              <div className="max-h-56 overflow-y-auto mt-1 space-y-0.5">
-                {brands.map(b => (
-                  <button
-                    key={b}
-                    onClick={() => { updateParams({ brand: b }); setShowBrandDropdown(false) }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-between transition-colors ${
-                      currentBrand === b ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {b}
-                    {currentBrand === b && <Check className="h-4 w-4" />}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="w-32 hidden lg:block">
+            <MultiSelectDropdown
+              label="Brand"
+              options={brands}
+              selectedValues={currentBrandArray}
+              onChange={(vals) => updateParams({ brand: vals.length ? vals.join(',') : null })}
+              placeholder="Brands"
+            />
           </div>
           </div>
 
@@ -454,6 +405,10 @@ export default function DashboardToolbar({
         onClose={() => setShowMobileDrawer(false)}
         categories={categories}
         brands={brands}
+        plastics={plastics}
+        colors={colors}
+        stamps={stamps}
+        stampFoils={stampFoils}
         availableLocations={availableLocations}
         currentCategory={currentCategory}
         currentBrand={currentBrand}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { X, Check, RotateCcw, SlidersHorizontal, Package, Tag, Layers, Filter } from 'lucide-react'
 import { type AdvancedFilters, ADVANCED_KEYS } from './AdvancedSearch'
 import dynamic from 'next/dynamic'
+import MultiSelectDropdown from './MultiSelectDropdown'
 const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
 interface MobileFilterDrawerProps {
@@ -12,6 +13,10 @@ interface MobileFilterDrawerProps {
   onClose: () => void
   categories: string[]
   brands: string[]
+  plastics: string[]
+  colors: string[]
+  stamps: string[]
+  stampFoils: string[]
   availableLocations: string[]
   currentCategory?: string
   currentBrand?: string
@@ -32,6 +37,10 @@ export default function MobileFilterDrawer({
   onClose,
   categories,
   brands,
+  plastics,
+  colors,
+  stamps,
+  stampFoils,
   availableLocations,
   currentCategory,
   currentBrand,
@@ -159,24 +168,13 @@ export default function MobileFilterDrawer({
             <Layers className="w-4 h-4 text-indigo-500" />
             <span className="text-xs font-black uppercase tracking-widest text-slate-400">Category</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocalCategory(undefined)}
-              className={`px-3 py-3 rounded-xl border text-sm font-bold transition-all ${
-                !localCategory ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600'
-              }`}
-            >
-              All
-            </button>
-            {categories.map(c => (
-              <button key={c} onClick={() => setLocalCategory(c)}
-                className={`px-3 py-3 rounded-xl border text-sm font-bold transition-all truncate ${
-                  localCategory === c ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 text-left'
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
+          <MultiSelectDropdown
+            label="Category"
+            options={categories}
+            selectedValues={localCategory ? localCategory.split(',').filter(Boolean) : []}
+            onChange={(vals) => setLocalCategory(vals.length ? vals.join(',') : undefined)}
+            placeholder="All Categories"
+          />
         </div>
 
         {/* Brands */}
@@ -185,24 +183,13 @@ export default function MobileFilterDrawer({
             <Tag className="w-4 h-4 text-indigo-500" />
             <span className="text-xs font-black uppercase tracking-widest text-slate-400">Brand</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocalBrand(undefined)}
-              className={`px-3 py-3 rounded-xl border text-sm font-bold transition-all ${
-                !localBrand ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600'
-              }`}
-            >
-              All
-            </button>
-            {brands.map(b => (
-              <button key={b} onClick={() => setLocalBrand(b)}
-                className={`px-3 py-3 rounded-xl border text-sm font-bold transition-all truncate ${
-                  localBrand === b ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 text-left'
-                }`}
-              >
-                {b}
-              </button>
-            ))}
-          </div>
+          <MultiSelectDropdown
+            label="Brand"
+            options={brands}
+            selectedValues={localBrand ? localBrand.split(',').filter(Boolean) : []}
+            onChange={(vals) => setLocalBrand(vals.length ? vals.join(',') : undefined)}
+            placeholder="All Brands"
+          />
         </div>
 
         {/* Location Tree Picker */}
@@ -271,19 +258,49 @@ export default function MobileFilterDrawer({
             ))}
 
             {/* Text filters */}
-            {([
-              ['Plastic', 'plastic', 'e.g. Champion, Star...'],
-              ['Color', 'color', 'e.g. Red, Blue...'],
-              ['Stamp', 'stamp', 'e.g. Swirly, Stars...'],
-            ] as [string, keyof AdvancedFilters, string][]).map(([label, key, ph]) => (
-              <div key={key} className="space-y-2 col-span-2">
-                <label className={labelCls}>{label}</label>
-                <input type="text" placeholder={ph}
-                  value={(localAdvanced[key] as string) ?? ''}
-                  onChange={(e) => handleUpdateAdvanced(key, e.target.value || undefined)}
-                  className={inputCls} />
-              </div>
-            ))}
+            <div className="space-y-2 col-span-2 mt-2">
+              <label className={labelCls}>Plastic</label>
+              <MultiSelectDropdown
+                label="Plastic"
+                options={plastics}
+                selectedValues={(localAdvanced.plastic as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdateAdvanced('plastic', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Plastics"
+              />
+            </div>
+            
+            <div className="space-y-2 col-span-2">
+              <label className={labelCls}>Color</label>
+              <MultiSelectDropdown
+                label="Color"
+                options={colors}
+                selectedValues={(localAdvanced.color as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdateAdvanced('color', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Colors"
+              />
+            </div>
+            
+            <div className="space-y-2 col-span-2">
+              <label className={labelCls}>Stamp</label>
+              <MultiSelectDropdown
+                label="Stamp"
+                options={stamps}
+                selectedValues={(localAdvanced.stamp as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdateAdvanced('stamp', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Stamps"
+              />
+            </div>
+            
+            <div className="space-y-2 col-span-2">
+              <label className={labelCls}>Stamp Foil</label>
+              <MultiSelectDropdown
+                label="Foil"
+                options={stampFoils}
+                selectedValues={(localAdvanced.stampFoil as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdateAdvanced('stampFoil', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Foils"
+              />
+            </div>
 
             {/* Ink status */}
             <div className="space-y-2 col-span-2">

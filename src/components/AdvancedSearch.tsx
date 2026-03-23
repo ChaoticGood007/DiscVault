@@ -20,6 +20,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { X, SlidersHorizontal, RotateCcw } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import MultiSelectDropdown from './MultiSelectDropdown'
 const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
 export interface AdvancedFilters {
@@ -39,6 +40,7 @@ export interface AdvancedFilters {
   plastic?: string
   color?: string
   stamp?: string
+  stampFoil?: string
   // locations stored as comma-separated string in URL
   locations?: string
 }
@@ -46,7 +48,7 @@ export interface AdvancedFilters {
 export const ADVANCED_KEYS: (keyof AdvancedFilters)[] = [
   'minSpeed', 'maxSpeed', 'minGlide', 'maxGlide', 'minTurn', 'maxTurn',
   'minFade', 'maxFade', 'minWeight', 'maxWeight', 'minCond', 'maxCond',
-  'ink', 'plastic', 'color', 'stamp', 'locations'
+  'ink', 'plastic', 'color', 'stamp', 'stampFoil', 'locations'
 ]
 
 const allowNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -60,10 +62,18 @@ const labelCls = "text-[10px] font-black text-slate-400 uppercase tracking-wides
 interface AdvancedSearchProps {
   filters: AdvancedFilters
   availableLocations: string[]
+  plastics: string[]
+  colors: string[]
+  stamps: string[]
+  stampFoils: string[]
   onClose: () => void
 }
 
-export default function AdvancedSearch({ filters, availableLocations, onClose }: AdvancedSearchProps) {
+export default function AdvancedSearch({ 
+  filters, availableLocations, 
+  plastics, colors, stamps, stampFoils,
+  onClose 
+}: AdvancedSearchProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -163,19 +173,46 @@ export default function AdvancedSearch({ filters, availableLocations, onClose }:
                 </div>
               </div>
             ))}
-            {([
-              ['Plastic', 'plastic', 'e.g. Champion, Star...'],
-              ['Color', 'color', 'e.g. Red, Blue...'],
-              ['Stamp', 'stamp', 'e.g. Swirly, Stars...'],
-            ] as [string, keyof AdvancedFilters, string][]).map(([label, key, ph]) => (
-              <div key={key} className="space-y-2">
-                <label className={labelCls}>{label}</label>
-                <input type="text" placeholder={ph}
-                  value={(localFilters[key] as string) ?? ''}
-                  onChange={(e) => handleUpdate(key, e.target.value || undefined)}
-                  className={inputCls} />
-              </div>
-            ))}
+            <div className="space-y-2">
+              <label className={labelCls}>Plastic</label>
+              <MultiSelectDropdown
+                label="Plastic"
+                options={plastics}
+                selectedValues={(localFilters.plastic as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('plastic', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Plastics"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Color</label>
+              <MultiSelectDropdown
+                label="Color"
+                options={colors}
+                selectedValues={(localFilters.color as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('color', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Colors"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Stamp</label>
+              <MultiSelectDropdown
+                label="Stamp"
+                options={stamps}
+                selectedValues={(localFilters.stamp as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('stamp', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Stamps"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Stamp Foil</label>
+              <MultiSelectDropdown
+                label="Foil"
+                options={stampFoils}
+                selectedValues={(localFilters.stampFoil as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('stampFoil', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Foils"
+              />
+            </div>
 
             {/* Location tree picker */}
             {availableLocations.length > 0 && (

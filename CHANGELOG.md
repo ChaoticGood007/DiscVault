@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-03-21
 
 ### Added
+- **Multi-Select Filters**: Upgraded the generic filtering experience natively across the board. Brand, Category, Plastic, Color, Stamp, and Stamp Foil are now fully multi-selectable via a newly engineered dropdown component dynamically populated with distinct values from your inventory database. Free-text database entry is fully preserved while enabling powerful multi-value query combinations in the UI.
 - **Focus Mode (Detail View)**: Created a dedicated read-only screen for viewing detailed disc metadata, decoupling the interface from the generic Edit Form.
 - **Mobile Filter Drawer**: Replaced standard top-bar inline dropdowns with a full-screen, slide-out UI on mobile devices for vastly superior usability.
 - **Organizational Colors**: Users can now bind custom HEX targets to specific disc categories from settings. Natively renders as vibrant visual accent strips on dashboard cards.
