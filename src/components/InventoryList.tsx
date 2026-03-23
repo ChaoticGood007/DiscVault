@@ -34,7 +34,6 @@ interface InventoryItem {
   stampFoil: string | null
   location: string | null
   condition: number | null
-  inBag: boolean
   ink: string | null
   notes: string | null
   createdAt: Date
@@ -58,6 +57,7 @@ interface InventoryListProps {
   initialItems: InventoryItem[]
   collections: Collection[]
   visibleColumns: string[]
+  bagPaths?: string[]
   sortBy: string
   where: any
   orderBy: any
@@ -73,8 +73,13 @@ export default function InventoryList({
   where,
   orderBy,
   pageSize,
-  totalCount
+  totalCount,
+  bagPaths = []
 }: InventoryListProps) {
+  const isInBag = (loc: string | null) => {
+    if (!loc) return false
+    return bagPaths.some(p => loc === p || loc.startsWith(p + '/'))
+  }
   const [items, setItems] = useState(initialItems)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [showMoveMenu, setShowMoveMenu] = useState(false)
@@ -291,7 +296,7 @@ export default function InventoryList({
                   </td>
                   {visibleColumns.includes('inBag') && (
                     <td className="px-6 py-5">
-                      {item.inBag ? (
+                      {isInBag(item.location) ? (
                         <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200" title="In Bag" />
                       ) : (
                         <div className="w-2.5 h-2.5 rounded-full bg-slate-200" title="In Storage" />

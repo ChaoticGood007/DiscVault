@@ -28,10 +28,10 @@ import { getCategoryColors, getLocationTree } from "@/app/actions/settings"
 import { flattenTree } from "@/lib/locationTree"
 
 
-type SortField = 'name' | 'brand' | 'category' | 'speed' | 'glide' | 'turn' | 'fade' | 'createdAt' | 'plastic' | 'weight' | 'color' | 'stamp' | 'stampFoil' | 'location' | 'condition' | 'inBag' | 'ink';
+type SortField = 'name' | 'brand' | 'category' | 'speed' | 'glide' | 'turn' | 'fade' | 'createdAt' | 'plastic' | 'weight' | 'color' | 'stamp' | 'stampFoil' | 'location' | 'condition' | 'ink';
 type SortOrder = 'asc' | 'desc';
 
-const DEFAULT_COLUMNS = ['inBag', 'brand', 'name', 'speed', 'glide', 'turn', 'fade', 'plastic', 'weight'];
+const DEFAULT_COLUMNS = ['brand', 'name', 'speed', 'glide', 'turn', 'fade', 'plastic', 'weight'];
 
 export default async function VaultDashboard({
   params,
@@ -55,7 +55,7 @@ export default async function VaultDashboard({
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : cookieCols
   const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
-  const isInBag = searchP.inBag === 'true'
+  const inBagParam = typeof searchP.inBag === 'string' ? searchP.inBag : undefined
 
   const minSpeed = searchP.minSpeed ? parseFloat(searchP.minSpeed as string) : undefined
   const maxSpeed = searchP.maxSpeed ? parseFloat(searchP.maxSpeed as string) : undefined
@@ -79,8 +79,13 @@ export default async function VaultDashboard({
   const pageSize = 24
   const page = typeof searchP.page === 'string' ? Math.max(1, parseInt(searchP.page)) : 1
 
+  const locationTree = await getLocationTree(vaultId)
+  const flatLocs = flattenTree(locationTree)
+  const bagPaths = flatLocs.filter(l => l.node.inBag).map(l => l.value)
+  const bagOptions = flatLocs.filter(l => l.node.inBag).map(l => ({ label: l.path, value: l.value }))
+
   const getOrderBy = (field: SortField, order: SortOrder): any => {
-    if (['createdAt', 'plastic', 'weight', 'color', 'stamp', 'stampFoil', 'location', 'condition', 'inBag', 'ink'].includes(field)) {
+    if (['createdAt', 'plastic', 'weight', 'color', 'stamp', 'stampFoil', 'location', 'condition', 'ink'].includes(field)) {
       return { [field]: order }
     }
     return { mold: { [field]: order } }
@@ -127,11 +132,9 @@ export default async function VaultDashboard({
   const whereClause: any = {
     ...searchFilter,
     collectionId: vaultId,
-    inBag: isInBag || undefined,
     weight: (minWeight !== undefined || maxWeight !== undefined) ? { gte: minWeight, lte: maxWeight } : undefined,
     condition: (minCond !== undefined || maxCond !== undefined) ? { gte: minCond, lte: maxCond } : undefined,
     ink: inkFilter === 'none' ? { equals: 'None' } : inkFilter === 'exists' ? { not: 'None' } : undefined,
-    location: locationsFilter.length > 0 ? { in: locationsFilter } : undefined,
     mold: {
       name: searchQuery ? { contains: searchQuery } : undefined,
       brand: brand ? { contains: brand } : (searchQuery ? { contains: searchQuery } : undefined),
@@ -144,10 +147,39 @@ export default async function VaultDashboard({
     AND: andConditions.length > 0 ? andConditions : undefined,
   }
 
+  // Bag / Location logic
+  if (inBagParam === 'true') {
+    if (bagPaths.length > 0) {
+      whereClause.OR = bagPaths.flatMap(p => [
+        { location: p },
+        { location: { startsWith: p + '/' } }
+      ])
+    } else {
+      whereClause.id = 'none'
+    }
+  } else if (inBagParam === 'false') {
+    if (bagPaths.length > 0) {
+      whereClause.AND = [
+        ...(whereClause.AND || []),
+        { NOT: { OR: bagPaths.flatMap(p => [
+          { location: p },
+          { location: { startsWith: p + '/' } }
+        ]) } }
+      ]
+    }
+  } else if (inBagParam) {
+    whereClause.OR = [
+      { location: inBagParam },
+      { location: { startsWith: inBagParam + '/' } }
+    ]
+  } else if (locationsFilter.length > 0) {
+    whereClause.location = { in: locationsFilter }
+  }
+
   const [
     inventoryBrands, inventoryCategories, 
     inventoryPlastics, inventoryColors, inventoryStamps, inventoryStampFoils,
-    collections, inventory, totalCount, categoryColors, locationTree
+    collections, inventory, totalCount, categoryColors
   ] = await Promise.all([
     prisma.inventory.findMany({ where: { collectionId: vaultId }, select: { mold: { select: { brand: true } } }, distinct: ['moldId'] }),
     prisma.inventory.findMany({ where: { collectionId: vaultId }, select: { mold: { select: { category: true } } }, distinct: ['moldId'] }),
@@ -165,7 +197,6 @@ export default async function VaultDashboard({
     }),
     prisma.inventory.count({ where: whereClause }),
     getCategoryColors(),
-    getLocationTree(),
   ])
 
   const brandsList = Array.from(new Set(inventoryBrands.map((i: any) => i.mold.brand))).filter(Boolean).sort() as string[]
@@ -174,9 +205,11 @@ export default async function VaultDashboard({
   const colorsList = ['Not Defined', ...Array.from(new Set(inventoryColors.map((i: any) => i.color))).filter(Boolean).sort() as string[]]
   const stampsList = ['Not Defined', ...Array.from(new Set(inventoryStamps.map((i: any) => i.stamp))).filter(Boolean).sort() as string[]]
   const stampFoilsList = ['Not Defined', ...Array.from(new Set(inventoryStampFoils.map((i: any) => i.stampFoil))).filter(Boolean).sort() as string[]]
-  const locationsList = flattenTree(locationTree).map(f => f.value)
+  
+  const locationsList = flatLocs.map(f => f.value)
 
-  const activeFiltersCount = (category ? category.split(',').length : 0) + (brand ? brand.split(',').length : 0) + (searchQuery ? 1 : 0) + (isInBag ? 1 : 0) + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0)
+  const activeFiltersCount = (category ? category.split(',').length : 0) + (brand ? brand.split(',').length : 0) + (searchQuery ? 1 : 0) + (inBagParam ? 1 : 0) + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0)
+
 
 
   return (
@@ -196,8 +229,9 @@ export default async function VaultDashboard({
           currentBrand={brand}
           currentView={view}
           searchQuery={searchQuery}
-        isInBag={isInBag}
-        advancedFilters={{
+          currentBag={inBagParam}
+          bagOptions={bagOptions}
+          advancedFilters={{
           minSpeed, maxSpeed,
           minGlide, maxGlide,
           minTurn, maxTurn,
@@ -258,6 +292,7 @@ export default async function VaultDashboard({
             totalCount={totalCount}
             visibleColumns={visibleCols}
             categoryColors={categoryColors}
+            bagPaths={bagPaths}
           />
         </div>
       ) : (
@@ -271,6 +306,7 @@ export default async function VaultDashboard({
             orderBy={getOrderBy(sortBy, sortOrder)}
             pageSize={pageSize}
             totalCount={totalCount}
+            bagPaths={bagPaths}
           />
         </div>
       )}

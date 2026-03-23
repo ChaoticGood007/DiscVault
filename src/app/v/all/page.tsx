@@ -23,12 +23,12 @@ import DashboardToolbar from "@/components/DashboardToolbar"
 import InventoryList from "@/components/InventoryList"
 import InventoryInfiniteList from "@/components/InventoryInfiniteList"
 import { getLocationTree } from "@/app/actions/settings"
-import { flattenTree } from "@/lib/locationTree"
+import { flattenTree, type LocationNode } from "@/lib/locationTree"
 
-type SortField = 'name' | 'brand' | 'category' | 'speed' | 'glide' | 'turn' | 'fade' | 'createdAt' | 'plastic' | 'weight' | 'color' | 'stamp' | 'stampFoil' | 'location' | 'condition' | 'inBag' | 'ink';
+type SortField = 'name' | 'brand' | 'category' | 'speed' | 'glide' | 'turn' | 'fade' | 'createdAt' | 'plastic' | 'weight' | 'color' | 'stamp' | 'stampFoil' | 'location' | 'condition' | 'ink';
 type SortOrder = 'asc' | 'desc';
 
-const DEFAULT_COLUMNS = ['inBag', 'brand', 'name', 'speed', 'glide', 'turn', 'fade', 'plastic', 'weight'];
+const DEFAULT_COLUMNS = ['brand', 'name', 'speed', 'glide', 'turn', 'fade', 'plastic', 'weight'];
 
 export default async function AllVaultsDashboard({
   searchParams,
@@ -49,7 +49,7 @@ export default async function AllVaultsDashboard({
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : cookieCols
   const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
-  const isInBag = searchP.inBag === 'true'
+  const inBagParam = typeof searchP.inBag === 'string' ? searchP.inBag : undefined
   const selectedCollectionIds = typeof searchP.collections === 'string' ? searchP.collections.split(',') : []
 
   const minSpeed = searchP.minSpeed ? parseFloat(searchP.minSpeed as string) : undefined
@@ -75,7 +75,7 @@ export default async function AllVaultsDashboard({
   const page = typeof searchP.page === 'string' ? Math.max(1, parseInt(searchP.page)) : 1
 
   const getOrderBy = (field: SortField, order: SortOrder): any => {
-    if (['createdAt', 'plastic', 'weight', 'color', 'stamp', 'stampFoil', 'location', 'condition', 'inBag', 'ink'].includes(field)) {
+    if (['createdAt', 'plastic', 'weight', 'color', 'stamp', 'stampFoil', 'location', 'condition', 'ink'].includes(field)) {
       return { [field]: order }
     }
     return { mold: { [field]: order } }
@@ -119,14 +119,27 @@ export default async function AllVaultsDashboard({
   addNullableMultiSelect('stamp', stampFilter);
   addNullableMultiSelect('stampFoil', stampFoilFilter);
 
+  const baseColWhere = selectedCollectionIds.length > 0 ? { collectionId: { in: selectedCollectionIds } } : {}
+
+  const collectionsTrees = await prisma.discCollection.findMany({ select: { locationTree: true } })
+  let allBags: { label: string, value: string }[] = []
+  collectionsTrees.forEach((v: { locationTree: string | null }) => {
+    try {
+      const tree = JSON.parse(v.locationTree || '[]') as LocationNode[]
+      const flat = flattenTree(tree)
+      const bags = flat.filter(l => l.node.inBag).map(l => ({ label: l.path, value: l.value }))
+      allBags = [...allBags, ...bags]
+    } catch {}
+  })
+  const bagOptions = Array.from(new Map(allBags.map(b => [b.value, b])).values())
+  const bagPaths = bagOptions.map(b => b.value)
+
   const whereClause: any = {
     ...searchFilter,
     collectionId: selectedCollectionIds.length > 0 ? { in: selectedCollectionIds } : undefined,
-    inBag: isInBag || undefined,
     weight: (minWeight !== undefined || maxWeight !== undefined) ? { gte: minWeight, lte: maxWeight } : undefined,
     condition: (minCond !== undefined || maxCond !== undefined) ? { gte: minCond, lte: maxCond } : undefined,
     ink: inkFilter === 'none' ? { equals: 'None' } : inkFilter === 'exists' ? { not: 'None' } : undefined,
-    location: locationsFilter.length > 0 ? { in: locationsFilter } : undefined,
     mold: {
       name: searchQuery ? { contains: searchQuery } : undefined,
       brand: brand ? { contains: brand } : (searchQuery ? { contains: searchQuery } : undefined),
@@ -139,12 +152,39 @@ export default async function AllVaultsDashboard({
     AND: andConditions.length > 0 ? andConditions : undefined,
   }
 
-  const baseColWhere = selectedCollectionIds.length > 0 ? { collectionId: { in: selectedCollectionIds } } : {}
+  // Bag / Location logic
+  if (inBagParam === 'true') {
+    if (bagPaths.length > 0) {
+      whereClause.OR = bagPaths.flatMap(p => [
+        { location: p },
+        { location: { startsWith: p + '/' } }
+      ])
+    } else {
+      whereClause.id = 'none'
+    }
+  } else if (inBagParam === 'false') {
+    if (bagPaths.length > 0) {
+      whereClause.AND = [
+        ...(whereClause.AND || []),
+        { NOT: { OR: bagPaths.flatMap(p => [
+          { location: p },
+          { location: { startsWith: p + '/' } }
+        ]) } }
+      ]
+    }
+  } else if (inBagParam) {
+    whereClause.OR = [
+      { location: inBagParam },
+      { location: { startsWith: inBagParam + '/' } }
+    ]
+  } else if (locationsFilter.length > 0) {
+    whereClause.location = { in: locationsFilter }
+  }
 
   const [
     inventoryBrands, inventoryCategories, 
     inventoryPlastics, inventoryColors, inventoryStamps, inventoryStampFoils,
-    collections, inventory, totalCount, locationTree
+    collections, inventory, totalCount
   ] = await Promise.all([
     prisma.inventory.findMany({ where: baseColWhere, select: { mold: { select: { brand: true } } }, distinct: ['moldId'] }),
     prisma.inventory.findMany({ where: baseColWhere, select: { mold: { select: { category: true } } }, distinct: ['moldId'] }),
@@ -161,7 +201,6 @@ export default async function AllVaultsDashboard({
       take: pageSize,
     }),
     prisma.inventory.count({ where: whereClause }),
-    getLocationTree(),
   ])
 
   const brandsList = Array.from(new Set(inventoryBrands.map((i: any) => i.mold.brand))).filter(Boolean).sort() as string[]
@@ -170,9 +209,9 @@ export default async function AllVaultsDashboard({
   const colorsList = ['Not Defined', ...Array.from(new Set(inventoryColors.map((i: any) => i.color))).filter(Boolean).sort() as string[]]
   const stampsList = ['Not Defined', ...Array.from(new Set(inventoryStamps.map((i: any) => i.stamp))).filter(Boolean).sort() as string[]]
   const stampFoilsList = ['Not Defined', ...Array.from(new Set(inventoryStampFoils.map((i: any) => i.stampFoil))).filter(Boolean).sort() as string[]]
-  const locationsList = flattenTree(locationTree).map(f => f.value)
+  const locationsList = Array.from(new Set(bagOptions.map(b => b.value))).sort() // Fallback or aggregate list
 
-  const activeFiltersCount = (category ? category.split(',').length : 0) + (brand ? brand.split(',').length : 0) + (searchQuery ? 1 : 0) + (isInBag ? 1 : 0) + selectedCollectionIds.length + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0) - (searchP.collections ? 1 : 0)
+  const activeFiltersCount = (category ? category.split(',').length : 0) + (brand ? brand.split(',').length : 0) + (searchQuery ? 1 : 0) + (inBagParam ? 1 : 0) + selectedCollectionIds.length + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0) - (searchP.collections ? 1 : 0)
 
   return (
     <div className="space-y-8">
@@ -195,7 +234,8 @@ export default async function AllVaultsDashboard({
         currentBrand={brand}
         currentView={view}
         searchQuery={searchQuery}
-        isInBag={isInBag}
+        currentBag={inBagParam}
+        bagOptions={bagOptions}
         advancedFilters={{
           minSpeed, maxSpeed,
           minGlide, maxGlide,
@@ -245,6 +285,7 @@ export default async function AllVaultsDashboard({
           pageSize={pageSize}
           totalCount={totalCount}
           visibleColumns={visibleCols}
+          bagPaths={bagPaths}
         />
       ) : (
         <InventoryList 
@@ -256,6 +297,7 @@ export default async function AllVaultsDashboard({
           orderBy={getOrderBy(sortBy, sortOrder)}
           pageSize={pageSize}
           totalCount={totalCount}
+          bagPaths={bagPaths}
         />
       )}
     </div>

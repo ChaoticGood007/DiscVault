@@ -45,21 +45,23 @@ export async function setPrimaryVault(vaultId: string) {
   revalidatePath('/', 'layout')
 }
 
-export async function getLocationTree(): Promise<LocationNode[]> {
-  const settings = await prisma.settings.findUnique({ where: { id: 'global' } })
+export async function getLocationTree(vaultId?: string | null): Promise<LocationNode[]> {
+  if (!vaultId || vaultId === 'all') return []
+  const vault = await prisma.discCollection.findUnique({ where: { id: vaultId } })
   try {
-    return JSON.parse(settings?.locationTree || '[]') as LocationNode[]
+    return JSON.parse(vault?.locationTree || '[]') as LocationNode[]
   } catch {
     return []
   }
 }
 
-export async function saveLocationTree(tree: LocationNode[]) {
-  await prisma.settings.upsert({
-    where: { id: 'global' },
-    update: { locationTree: JSON.stringify(tree) },
-    create: { id: 'global', locationTree: JSON.stringify(tree) },
+export async function saveLocationTree(vaultId: string, tree: LocationNode[]) {
+  if (!vaultId || vaultId === 'all') return
+  await prisma.discCollection.update({
+    where: { id: vaultId },
+    data: { locationTree: JSON.stringify(tree) }
   })
+  revalidatePath(`/v/${vaultId}`)
   revalidatePath('/settings')
   revalidatePath('/', 'layout')
 }
@@ -93,14 +95,14 @@ export async function saveCategoryColors(colors: Record<string, string>) {
  * Inventory table, builds a tree from them, and saves it to Settings.
  * Existing tree is replaced.
  */
-export async function migrateLocationsFromInventory() {
+export async function migrateLocationsFromInventory(vaultId: string) {
   const rows = await prisma.inventory.findMany({
-    where: { location: { not: null } },
+    where: { location: { not: null }, collectionId: vaultId },
     select: { location: true },
     distinct: ['location'],
   })
   const paths = rows.map((r: { location: string | null }) => r.location!).filter(Boolean)
   const tree = buildTreeFromPaths(paths)
-  await saveLocationTree(tree)
+  await saveLocationTree(vaultId, tree)
   return { count: paths.length, nodes: tree.length }
 }

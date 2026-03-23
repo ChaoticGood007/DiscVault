@@ -38,7 +38,6 @@ const SCHEMA_FIELDS = [
   { id: 'location', label: 'Location' },
   { id: 'condition', label: 'Condition (1-10)' },
   { id: 'ink', label: 'Ink Status' },
-  { id: 'inBag', label: 'Currently in Bag?' },
   { id: 'notes', label: 'Notes' },
 ]
 

@@ -23,6 +23,7 @@ import { saveLocationTree } from '@/app/actions/settings'
 import { reorderInTree, indentNode, dedentNode, getNodeInfo, type LocationNode } from '@/lib/locationTree'
 
 interface LocationTreeEditorProps {
+  vaultId: string
   initialTree: LocationNode[]
 }
 
@@ -61,7 +62,7 @@ function addChildNode(tree: LocationNode[], parentId: string): LocationNode[] {
 
 // ─── Main Editor ──────────────────────────────────────────────────────────────
 
-export default function LocationTreeEditor({ initialTree }: LocationTreeEditorProps) {
+export default function LocationTreeEditor({ vaultId, initialTree }: LocationTreeEditorProps) {
   const [tree, setTree] = useState<LocationNode[]>(initialTree)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -75,7 +76,7 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       setSaving(true)
-      await saveLocationTree(newTree)
+      await saveLocationTree(vaultId, newTree)
       setSaving(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -107,8 +108,9 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
   // by patching NodeRow to use a recursive renderNode instead of ConnectedNodeRow
   // (done by replacing ConnectedNodeRow usage in NodeRow with a prop)
   // Since we need state from the editor, we flatten by re-rendering with a render prop approach:
-  const renderTree = (nodes: LocationNode[], depth = 0): React.ReactNode =>
+  const renderTree = (nodes: LocationNode[], depth = 0, isParentInBag = false): React.ReactNode =>
     nodes.map(node => {
+      const isEffectiveInBag = isParentInBag || node.inBag
       const expanding = node.children.length > 0
       return (
         <div key={node.id}>
@@ -118,6 +120,7 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
           <DragNodeRow
             node={node}
             depth={depth}
+            isParentInBag={isParentInBag}
             isDragging={draggedId === node.id}
             onUpdate={handleUpdate}
             onDelete={handleDelete}
@@ -129,7 +132,7 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
             onDrop={handleDrop}
             onDragEnd={handleDragEnd}
           />
-          {renderTree(node.children, depth + 1)}
+          {renderTree(node.children, depth + 1, isEffectiveInBag)}
         </div>
       )
     })
@@ -176,6 +179,7 @@ export default function LocationTreeEditor({ initialTree }: LocationTreeEditorPr
 interface DragNodeRowProps {
   node: LocationNode
   depth: number
+  isParentInBag: boolean
   isDragging: boolean
   onUpdate: (id: string, updates: Partial<LocationNode>) => void
   onDelete: (id: string) => void
@@ -189,7 +193,7 @@ interface DragNodeRowProps {
 }
 
 function DragNodeRow({
-  node, depth, isDragging,
+  node, depth, isParentInBag, isDragging,
   onUpdate, onDelete, onAddChild, onIndent, onDedent,
   onDragStart, onDragOver, onDrop, onDragEnd,
 }: DragNodeRowProps) {
@@ -252,11 +256,18 @@ function DragNodeRow({
       </button>
 
       <button
+        disabled={isParentInBag}
         onClick={e => { e.stopPropagation(); onUpdate(node.id, { inBag: !node.inBag }) }}
-        title={node.inBag ? 'In Bag (children inherit)' : 'Mark as In Bag'}
-        className={`shrink-0 p-1 rounded-lg transition-all ${node.inBag ? 'text-emerald-600 bg-emerald-50' : 'text-slate-300 hover:text-emerald-500'}`}
+        title={isParentInBag ? 'Inside a bag (inherited)' : (node.inBag ? 'Bag (children inherit)' : 'Mark as Bag')}
+        className={`shrink-0 p-1 rounded-lg transition-all ${
+          node.inBag 
+            ? 'text-emerald-600 bg-emerald-50 shadow-sm ring-1 ring-emerald-100' 
+            : isParentInBag
+              ? 'text-emerald-300'
+              : 'text-slate-300 hover:text-emerald-500 hover:bg-emerald-50'
+        } ${isParentInBag ? 'cursor-not-allowed opacity-50' : ''}`}
       >
-        <Briefcase className="w-3.5 h-3.5" />
+        {isParentInBag ? <Check className="w-3.5 h-3.5" /> : <Briefcase className="w-3.5 h-3.5" />}
       </button>
 
       <button

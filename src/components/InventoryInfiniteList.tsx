@@ -29,11 +29,25 @@ interface InventoryInfiniteListProps {
   orderBy: any
   pageSize: number
   totalCount: number
+  bagPaths?: string[]
   visibleColumns?: string[]
   categoryColors?: Record<string, string>
 }
 
-export default function InventoryInfiniteList({ initialItems, where, orderBy, pageSize, totalCount, visibleColumns = ['brand', 'category', 'flight_numbers', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'], categoryColors }: InventoryInfiniteListProps) {
+export default function InventoryInfiniteList({ 
+  initialItems, 
+  where, 
+  orderBy, 
+  pageSize, 
+  totalCount, 
+  visibleColumns = ['brand', 'category', 'flight_numbers', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'], 
+  categoryColors,
+  bagPaths = []
+}: InventoryInfiniteListProps) {
+  const isInBag = (loc: string | null) => {
+    if (!loc) return false
+    return bagPaths.some(p => loc === p || loc.startsWith(p + '/'))
+  }
   const [items, setItems] = useState(initialItems)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialItems.length < totalCount)
@@ -94,7 +108,7 @@ export default function InventoryInfiniteList({ initialItems, where, orderBy, pa
                       {item.mold.brand}
                     </span>
                   )}
-                  {visibleColumns.includes('inBag') && item.inBag && (
+                  {visibleColumns.includes('inBag') && isInBag(item.location) && (
                     <span className="inline-flex items-center px-4 h-[28px] rounded-full text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-100 whitespace-nowrap">
                       In Bag
                     </span>

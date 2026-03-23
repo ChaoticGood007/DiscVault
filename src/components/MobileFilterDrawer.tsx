@@ -20,7 +20,8 @@ interface MobileFilterDrawerProps {
   availableLocations: string[]
   currentCategory?: string
   currentBrand?: string
-  isInBag?: boolean
+  currentBag?: string
+  bagOptions: { label: string, value: string }[]
   advancedFilters: AdvancedFilters
 }
 
@@ -44,7 +45,8 @@ export default function MobileFilterDrawer({
   availableLocations,
   currentCategory,
   currentBrand,
-  isInBag,
+  currentBag,
+  bagOptions,
   advancedFilters,
 }: MobileFilterDrawerProps) {
   const router = useRouter()
@@ -53,21 +55,21 @@ export default function MobileFilterDrawer({
 
   const [localCategory, setLocalCategory] = useState<string | undefined>(currentCategory)
   const [localBrand, setLocalBrand] = useState<string | undefined>(currentBrand)
-  const [localInBag, setLocalInBag] = useState<boolean>(!!isInBag)
+  const [localBag, setLocalBag] = useState<string | undefined>(currentBag)
   const [localAdvanced, setLocalAdvanced] = useState<AdvancedFilters>(advancedFilters)
 
   useEffect(() => {
     if (isOpen) {
       setLocalCategory(currentCategory)
       setLocalBrand(currentBrand)
-      setLocalInBag(!!isInBag)
+      setLocalBag(currentBag)
       setLocalAdvanced(advancedFilters)
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => { document.body.style.overflow = '' }
-  }, [isOpen, currentCategory, currentBrand, isInBag, advancedFilters])
+  }, [isOpen, currentCategory, currentBrand, currentBag, advancedFilters])
 
   if (!isOpen) return null
 
@@ -93,7 +95,7 @@ export default function MobileFilterDrawer({
     if (localBrand) params.set('brand', localBrand)
     else params.delete('brand')
 
-    if (localInBag) params.set('inBag', 'true')
+    if (localBag) params.set('inBag', localBag)
     else params.delete('inBag')
 
     ADVANCED_KEYS.forEach(key => {
@@ -113,14 +115,14 @@ export default function MobileFilterDrawer({
   const resetFilters = () => {
     setLocalCategory(undefined)
     setLocalBrand(undefined)
-    setLocalInBag(false)
+    setLocalBag(undefined)
     setLocalAdvanced({})
   }
 
   const activeCount = 
     (localCategory ? 1 : 0) + 
     (localBrand ? 1 : 0) + 
-    (localInBag ? 1 : 0) + 
+    (localBag ? 1 : 0) + 
     Object.values(localAdvanced).filter(v => v !== undefined && v !== '').length
 
   return (
@@ -147,19 +149,34 @@ export default function MobileFilterDrawer({
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-slate-800 mb-4 border-b border-slate-200 pb-2">
             <Package className="w-4 h-4 text-indigo-500" />
-            <span className="text-xs font-black uppercase tracking-widest text-slate-400">Quick Filters</span>
+            <span className="text-xs font-black uppercase tracking-widest text-slate-400">Bag Select</span>
           </div>
-          <button
-            onClick={() => setLocalInBag(!localInBag)}
-            className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl border-2 transition-all ${
-              localInBag 
-                ? 'bg-emerald-50 border-emerald-500 text-emerald-700' 
-                : 'bg-white border-slate-100 text-slate-600 hover:border-slate-200'
-            }`}
-          >
-            <span className="font-bold">In Bag Only</span>
-            {localInBag && <Check className="w-5 h-5 text-emerald-500" />}
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setLocalBag(localBag === 'true' ? undefined : 'true')}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${localBag === 'true' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-100 text-slate-600'}`}
+            >
+              <span className="text-xs font-bold">All Bags</span>
+              {localBag === 'true' && <Check className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => setLocalBag(localBag === 'false' ? undefined : 'false')}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${localBag === 'false' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-100 text-slate-600'}`}
+            >
+              <span className="text-xs font-bold">No Bag</span>
+              {localBag === 'false' && <Check className="w-4 h-4" />}
+            </button>
+            {bagOptions.map(bag => (
+              <button
+                key={bag.value}
+                onClick={() => setLocalBag(localBag === bag.value ? undefined : bag.value)}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${localBag === bag.value ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-100 text-slate-600'}`}
+              >
+                <span className="text-xs font-bold truncate pr-2">{bag.label.split(' / ').pop()}</span>
+                {localBag === bag.value && <Check className="w-4 h-4 flex-shrink-0" />}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Categories */}

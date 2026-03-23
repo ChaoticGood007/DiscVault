@@ -23,7 +23,7 @@ export default async function ScopedAddPage({
   params: Promise<{ vaultId: string }>
 }) {
   const { vaultId } = await params
-  const tree = await getLocationTree()
+  const tree = await getLocationTree(vaultId)
 
   return (
     <div className="max-w-4xl mx-auto">

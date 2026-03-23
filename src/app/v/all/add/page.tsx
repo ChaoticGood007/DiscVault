@@ -29,10 +29,8 @@ export default async function AllVaultsAddPage({
   const searchP = await searchParams
   const collectionId = typeof searchP.collection === 'string' ? searchP.collection : undefined
 
-  const [collections, tree] = await Promise.all([
-    prisma.discCollection.findMany({ orderBy: { name: 'asc' } }),
-    getLocationTree(),
-  ])
+  const collections = await prisma.discCollection.findMany({ orderBy: { name: 'asc' } })
+  const tree = collectionId ? await getLocationTree(collectionId) : []
 
   return (
     <div className="max-w-4xl mx-auto space-y-10">
@@ -50,7 +48,7 @@ export default async function AllVaultsAddPage({
         </div>
         
         <div className="flex flex-wrap justify-center gap-3">
-          {collections.map((col) => (
+          {collections.map((col: any) => (
             <Link
               key={col.id}
               href={`/v/all/add?collection=${col.id}`}

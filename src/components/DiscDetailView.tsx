@@ -14,7 +14,6 @@ interface DiscDetailViewProps {
     stampFoil: string | null
     location: string | null
     condition: number | null
-    inBag: boolean
     ink: string | null
     notes: string | null
     createdAt: Date
@@ -30,10 +29,16 @@ interface DiscDetailViewProps {
   }
   categoryColors: Record<string, string>
   vaultId: string
+  bagPaths?: string[]
 }
 
-export default function DiscDetailView({ disc, categoryColors, vaultId }: DiscDetailViewProps) {
+export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths = [] }: DiscDetailViewProps) {
   const categoryColor = categoryColors[disc.mold.category] || '#cbd5e1'
+
+  const isInBag = (loc: string | null) => {
+    if (!loc) return false
+    return bagPaths.some(p => loc === p || loc.startsWith(p + '/'))
+  }
 
   return (
     <div className="space-y-8 pb-20">
@@ -55,7 +60,7 @@ export default function DiscDetailView({ disc, categoryColors, vaultId }: DiscDe
               </h2>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em]">{disc.mold.category}</span>
-                {disc.inBag && (
+                {isInBag(disc.location) && (
                   <>
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
                     <span className="text-sm font-bold text-emerald-600 uppercase tracking-widest">In Bag</span>

@@ -4,18 +4,16 @@ import { Settings2, Database, MapPin, Palette } from 'lucide-react'
 import { Header } from "@/components/Header"
 import SyncButton from '@/components/SyncButton'
 import PrimaryVaultSelector from '@/components/PrimaryVaultSelector'
-import LocationTreeEditor from '@/components/LocationTreeEditor'
-import LocationMigrator from '@/components/LocationMigrator'
+import VaultLocationSettings from '@/components/VaultLocationSettings'
 import CategoryColorEditor from '@/components/CategoryColorEditor'
 import { db as prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
-  const [settings, vaults, locationTree, categoryColors, categories] = await Promise.all([
+  const [settings, vaults, categoryColors, categories] = await Promise.all([
     getGlobalSettings(),
     prisma.discCollection.findMany({ orderBy: { name: 'asc' } }),
-    getLocationTree(),
     getCategoryColors(),
     prisma.mold.findMany({ select: { category: true }, distinct: ['category'] }).then((m: { category: string }[]) => m.map((c) => c.category)),
   ])
@@ -81,14 +79,10 @@ export default async function SettingsPage() {
             <h2 className="text-lg font-black text-slate-900">Location Tree</h2>
           </div>
           <p className="text-sm text-slate-500 font-medium max-w-[480px] mt-1">
-            Define a hierarchy of storage locations (e.g. <span className="font-bold text-slate-700">Zac&apos;s Bag / Main Pocket</span>). Mark any node as a bag location — discs assigned there will automatically be flagged &quot;In Bag&quot;. Children inherit the bag flag from their parent.
+            Define a hierarchy of storage locations for specific vaults (e.g. <span className="font-bold text-slate-700">Tournament Bag / Main Pocket</span>). Mark any node as a bag location — discs assigned there will automatically be flagged &quot;In Bag&quot;. Children inherit the bag flag from their parent.
           </p>
         </div>
-        <LocationTreeEditor initialTree={locationTree} />
-        <div className="border-t border-slate-50 pt-5">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">One-Time Migration</p>
-          <LocationMigrator />
-        </div>
+        <VaultLocationSettings vaults={vaults as any} />
       </div>
 
       {/* Database Synchronization Module */}
