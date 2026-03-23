@@ -128,7 +128,7 @@ function TreeNodeRow({ node, nodeValue, depth, selectedLocations, availableSet, 
         <div>
           {node.children.map(child => (
             <TreeNodeRow
-              key={child.id}
+              key={`${nodeValue}/${child.label}`}
               node={child}
               nodeValue={`${nodeValue}/${child.label}`}
               depth={depth + 1}
@@ -168,7 +168,7 @@ export default function LocationTreePicker({
     <div className={`rounded-2xl border border-slate-100 overflow-y-auto bg-white max-h-44 ${className ?? ''}`}>
       {tree.map(rootNode => (
         <TreeNodeRow
-          key={rootNode.id}
+          key={rootNode.label}
           node={rootNode}
           nodeValue={rootNode.label}
           depth={0}

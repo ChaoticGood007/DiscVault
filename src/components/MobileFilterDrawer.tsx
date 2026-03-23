@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { X, Check, RotateCcw, SlidersHorizontal, Package, Tag, Layers, Filter } from 'lucide-react'
 import { type AdvancedFilters, ADVANCED_KEYS } from './AdvancedSearch'
-import LocationTreePicker from './LocationTreePicker'
+import dynamic from 'next/dynamic'
+const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
 interface MobileFilterDrawerProps {
   isOpen: boolean

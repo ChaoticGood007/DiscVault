@@ -19,7 +19,8 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { X, SlidersHorizontal, RotateCcw } from 'lucide-react'
-import LocationTreePicker from './LocationTreePicker'
+import dynamic from 'next/dynamic'
+const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
 export interface AdvancedFilters {
   minSpeed?: number
