@@ -48,6 +48,8 @@ interface InventoryItem {
   }
 }
 
+import { Prisma } from '@prisma/client'
+
 interface Collection {
   id: string
   name: string
@@ -59,8 +61,8 @@ interface InventoryListProps {
   visibleColumns: string[]
   bagPaths?: string[]
   sortBy: string
-  where: any
-  orderBy: any
+  where: Prisma.InventoryWhereInput
+  orderBy: Prisma.InventoryOrderByWithRelationInput
   pageSize: number
   totalCount: number
 }
@@ -100,12 +102,6 @@ export default function InventoryList({
     setSelectedIds([])
   }, [initialItems, totalCount])
 
-  useEffect(() => {
-    if (inView && hasMore && !loading) {
-      loadMore()
-    }
-  }, [inView, hasMore, loading])
-
   const loadMore = async () => {
     setLoading(true)
     const nextPage = page + 1
@@ -125,6 +121,12 @@ export default function InventoryList({
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      loadMore()
+    }
+  }, [inView, hasMore, loading])
 
   const getSortUrl = (field: string) => {
     const currentOrder = searchParams.get('sortOrder') || 'desc'

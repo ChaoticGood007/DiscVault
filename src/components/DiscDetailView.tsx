@@ -2,6 +2,7 @@
 
 import { Edit3, ArrowLeft, MapPin } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface DiscDetailViewProps {
   disc: {
@@ -33,6 +34,7 @@ interface DiscDetailViewProps {
 }
 
 export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths = [] }: DiscDetailViewProps) {
+  const router = useRouter()
   const categoryColor = categoryColors[disc.mold.category] || '#cbd5e1'
 
   const isInBag = (loc: string | null) => {
@@ -148,13 +150,14 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          href={`/v/${vaultId}`}
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="flex-1 inline-flex justify-center items-center px-8 py-5 text-base font-black rounded-2xl text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
         >
           <ArrowLeft className="mr-2 h-5 w-5" />
           Back to Vault
-        </Link>
+        </button>
         <Link
           href={`/v/${vaultId}/inventory/${disc.id}/edit`}
           className="flex-[2] bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all active:scale-95 shadow-xl shadow-indigo-100 flex items-center justify-center text-lg gap-3"

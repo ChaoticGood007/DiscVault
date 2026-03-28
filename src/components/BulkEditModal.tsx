@@ -11,6 +11,40 @@ interface BulkEditModalProps {
   onSuccess: () => void
 }
 
+const FieldRow = ({ 
+  field, 
+  label, 
+  enabledFields,
+  toggleField,
+  children 
+}: { 
+  field: string, 
+  label: string, 
+  enabledFields: Record<string, boolean>,
+  toggleField: (field: string) => void,
+  children: React.ReactNode 
+}) => (
+  <div className={`p-4 rounded-2xl border transition-all ${enabledFields[field] ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-100 bg-slate-50/50'}`}>
+    <div className="flex items-center gap-4">
+      <button 
+        type="button"
+        onClick={() => toggleField(field)}
+        className={`flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${enabledFields[field] ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-300'}`}
+      >
+        {enabledFields[field] && <Check className="w-4 h-4" />}
+      </button>
+      <div className="flex-1 space-y-2">
+        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{label}</label>
+        <div className={enabledFields[field] ? 'opacity-100' : 'opacity-50 pointer-events-none'}>
+          {children}
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+
+
 export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkEditModalProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -60,25 +94,6 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
     onSuccess()
   }
 
-  const FieldRow = ({ field, label, children }: { field: string, label: string, children: React.ReactNode }) => (
-    <div className={`p-4 rounded-2xl border transition-all ${enabledFields[field] ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-100 bg-slate-50/50'}`}>
-      <div className="flex items-center gap-4">
-        <button 
-          type="button"
-          onClick={() => toggleField(field)}
-          className={`flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${enabledFields[field] ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-300'}`}
-        >
-          {enabledFields[field] && <Check className="w-4 h-4" />}
-        </button>
-        <div className="flex-1 space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{label}</label>
-          <div className={enabledFields[field] ? 'opacity-100' : 'opacity-50 pointer-events-none'}>
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -104,7 +119,7 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
           </div>
 
 
-          <FieldRow field="condition" label="Condition (1-10)">
+          <FieldRow field="condition" label="Condition (1-10)" enabledFields={enabledFields} toggleField={toggleField}>
             <input
               type="number"
               min="1"
@@ -116,7 +131,7 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
             />
           </FieldRow>
 
-          <FieldRow field="weight" label="Weight (g)">
+          <FieldRow field="weight" label="Weight (g)" enabledFields={enabledFields} toggleField={toggleField}>
             <input
               type="number"
               step="0.1"
@@ -127,7 +142,7 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
             />
           </FieldRow>
           
-          <FieldRow field="plastic" label="Plastic">
+          <FieldRow field="plastic" label="Plastic" enabledFields={enabledFields} toggleField={toggleField}>
             <input
               type="text"
               value={values.plastic}
@@ -137,7 +152,7 @@ export default function BulkEditModal({ selectedIds, onClose, onSuccess }: BulkE
             />
           </FieldRow>
 
-          <FieldRow field="location" label="Location">
+          <FieldRow field="location" label="Location" enabledFields={enabledFields} toggleField={toggleField}>
             <input
               type="text"
               value={values.location}

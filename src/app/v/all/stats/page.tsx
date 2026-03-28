@@ -18,7 +18,6 @@ import { getInventoryStats } from "@/lib/analytics"
 import StatsCharts from "@/components/StatsCharts"
 import SyncButton from "@/components/SyncButton"
 import { BarChart3 } from "lucide-react"
-import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
 
