@@ -1,13 +1,17 @@
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
+import { cookies } from 'next/headers';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 
-export function Header({ 
+export async function Header({ 
   children, 
   actions 
 }: { 
   children?: React.ReactNode; 
   actions?: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const theme = (cookieStore.get('dv_theme')?.value ?? 'light') as 'light' | 'soft' | 'dark' | 'solarized';
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,6 +46,7 @@ export function Header({
                {actions && (
                  <div className="hidden md:block lg:hidden pl-2 border-l border-slate-200 mr-1" />
                )}
+               <ThemeSwitcher initialTheme={theme} />
                <Link href="/settings" className="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-slate-50 transition-colors">
                  <Settings className="w-5 h-5" />
                </Link>
