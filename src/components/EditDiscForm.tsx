@@ -19,7 +19,7 @@
 import { useState } from 'react'
 import { updateDisc, deleteDisc } from '@/app/actions/inventory'
 import { Trash2, ArrowLeft, Inbox } from 'lucide-react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import LocationPicker from '@/components/LocationPicker'
 import { type LocationNode } from '@/lib/locationTree'
 
@@ -53,6 +53,7 @@ interface EditDiscFormProps {
 }
 
 export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormProps, 'tree'>) {
+  const router = useRouter()
   const [selectedVaultId, setSelectedVaultId] = useState<string>(disc.collectionId || '')
   const [selectedLocation, setSelectedLocation] = useState<string | null>(disc.location)
   
@@ -67,11 +68,13 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
 
   const handleUpdate = async (formData: FormData) => {
     await updateDisc(disc.id, formData)
+    router.back()
   }
 
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this disc from your inventory?')) {
       await deleteDisc(disc.id, disc.collectionId || '')
+      router.back()
     }
   }
 
@@ -216,13 +219,14 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
         </div>
 
         <div className="pt-6 flex gap-4">
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="flex-1 inline-flex justify-center items-center px-8 py-5 text-base font-black rounded-2xl text-slate-400 bg-slate-50 hover:bg-slate-100 transition-all active:scale-95"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
             Cancel
-          </Link>
+          </button>
           <button
             type="submit"
             className="flex-[2] bg-indigo-600 text-white font-black py-5 rounded-2xl hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all active:scale-95 shadow-xl shadow-indigo-100 flex items-center justify-center"

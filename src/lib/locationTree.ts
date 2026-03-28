@@ -73,7 +73,7 @@ export function resolveInBag(location: string | null, tree: LocationNode[]): boo
  */
 /** Generate a unique ID without requiring a secure context. */
 let _idCounter = 0
-function generateId(): string {
+export function generateId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     try { return crypto.randomUUID() } catch { /* non-secure context */ }
   }
@@ -155,8 +155,7 @@ export function reorderInTree(
 export function getNodeInfo(
   tree: LocationNode[],
   nodeId: string,
-  parentId: string | null = null,
-  indexInParent = 0
+  parentId: string | null = null
 ): { parentId: string | null; index: number; prevSiblingId: string | null } | null {
   for (let i = 0; i < tree.length; i++) {
     if (tree[i].id === nodeId) {
@@ -166,7 +165,7 @@ export function getNodeInfo(
         prevSiblingId: i > 0 ? tree[i - 1].id : null,
       }
     }
-    const found = getNodeInfo(tree[i].children, nodeId, tree[i].id, i)
+    const found = getNodeInfo(tree[i].children, nodeId, tree[i].id)
     if (found) return found
   }
   return null

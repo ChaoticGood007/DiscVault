@@ -18,15 +18,39 @@
 
 import { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { Prisma } from '@prisma/client'
 import { getPaginatedInventory } from '@/app/actions/inventory'
 import Link from 'next/link'
-import { Edit3, ArrowUpRight, Loader2 } from 'lucide-react'
-import Tooltip from './Tooltip'
+import { Loader2 } from 'lucide-react'
+
+export interface InventoryItem {
+  id: string
+  collectionId: string | null
+  weight: number | null
+  color: string | null
+  plastic: string | null
+  stamp: string | null
+  stampFoil: string | null
+  location: string | null
+  condition: number | null
+  ink: string | null
+  notes: string | null
+  createdAt: Date
+  mold: {
+    name: string
+    brand: string
+    category: string
+    speed: number
+    glide: number
+    turn: number
+    fade: number
+  }
+}
 
 interface InventoryInfiniteListProps {
-  initialItems: any[]
-  where: any
-  orderBy: any
+  initialItems: InventoryItem[]
+  where: Prisma.InventoryWhereInput
+  orderBy: Prisma.InventoryOrderByWithRelationInput
   pageSize: number
   totalCount: number
   bagPaths?: string[]
@@ -61,12 +85,6 @@ export default function InventoryInfiniteList({
     setHasMore(initialItems.length < totalCount)
   }, [initialItems, totalCount])
 
-  useEffect(() => {
-    if (inView && hasMore && !loading) {
-      loadMore()
-    }
-  }, [inView, hasMore, loading])
-
   const loadMore = async () => {
     setLoading(true)
     const nextPage = page + 1
@@ -86,6 +104,12 @@ export default function InventoryInfiniteList({
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      loadMore()
+    }
+  }, [inView, hasMore, loading])
 
   return (
     <div className="space-y-6 md:space-y-12">
@@ -239,7 +263,7 @@ export default function InventoryInfiniteList({
 
               {visibleColumns.includes('notes') && item.notes && (
                 <div className="mt-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                  <p className="text-xs text-slate-600 leading-relaxed italic line-clamp-2">"{item.notes}"</p>
+                  <p className="text-xs text-slate-600 leading-relaxed italic line-clamp-2">&quot;{item.notes}&quot;</p>
                 </div>
               )}
             </div>

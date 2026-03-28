@@ -17,18 +17,14 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Plus, Trash2, ChevronRight, Briefcase, GripVertical, FolderOpen, Check } from 'lucide-react'
+import { Plus, Trash2, ChevronRight, Briefcase, GripVertical, FolderOpen, Check, Download } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { saveLocationTree } from '@/app/actions/settings'
-import { reorderInTree, indentNode, dedentNode, getNodeInfo, type LocationNode } from '@/lib/locationTree'
+import { saveLocationTree, migrateLocationsFromInventory } from '@/app/actions/settings'
+import { reorderInTree, indentNode, dedentNode, getNodeInfo, generateId, type LocationNode } from '@/lib/locationTree'
 
 interface LocationTreeEditorProps {
   vaultId: string
   initialTree: LocationNode[]
-}
-
-function generateId() {
-  return crypto.randomUUID()
 }
 
 function countDescendants(node: LocationNode): number {
@@ -68,7 +64,21 @@ export default function LocationTreeEditor({ vaultId, initialTree }: LocationTre
   const [saved, setSaved] = useState(false)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [isMigrating, setIsMigrating] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMigrate = async () => {
+    if (!confirm('This will replace your current location tree with one generated from your existing inventory. Proceed?')) return
+    setIsMigrating(true)
+    try {
+      await migrateLocationsFromInventory(vaultId)
+      window.location.reload()
+    } catch (e) {
+      console.error(e)
+      alert("Failed to migrate locations.")
+      setIsMigrating(false)
+    }
+  }
 
   const autoSave = (newTree: LocationNode[]) => {
     setTree(newTree)
@@ -140,9 +150,20 @@ export default function LocationTreeEditor({ vaultId, initialTree }: LocationTre
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-          <FolderOpen className="w-3.5 h-3.5" />
-          <span>{tree.length === 0 ? 'No locations defined' : `${tree.length} root location${tree.length !== 1 ? 's' : ''}`}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+            <FolderOpen className="w-3.5 h-3.5" />
+            <span>{tree.length === 0 ? 'No locations defined' : `${tree.length} root location${tree.length !== 1 ? 's' : ''}`}</span>
+          </div>
+          <button 
+            type="button" 
+            onClick={handleMigrate} 
+            disabled={isMigrating}
+            className="ml-2 px-2 py-1 text-[10px] font-black uppercase tracking-widest border border-indigo-200 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
+            title="Import locations from existing inventory"
+          >
+            {isMigrating ? 'Importing...' : 'Import from Inventory'}
+          </button>
         </div>
         <div className="flex items-center gap-2">
           {saving && <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest animate-pulse">Saving…</span>}

@@ -57,19 +57,26 @@ export default function MobileFilterDrawer({
   const [localBrand, setLocalBrand] = useState<string | undefined>(currentBrand)
   const [localBag, setLocalBag] = useState<string | undefined>(currentBag)
   const [localAdvanced, setLocalAdvanced] = useState<AdvancedFilters>(advancedFilters)
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
 
-  useEffect(() => {
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen)
     if (isOpen) {
       setLocalCategory(currentCategory)
       setLocalBrand(currentBrand)
       setLocalBag(currentBag)
       setLocalAdvanced(advancedFilters)
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => { document.body.style.overflow = '' }
-  }, [isOpen, currentCategory, currentBrand, currentBag, advancedFilters])
+  }, [isOpen])
 
   if (!isOpen) return null
 

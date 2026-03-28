@@ -94,7 +94,7 @@ async function smartImport(filePath: string) {
   }
 
   // Detect column mapping based on the first record's keys
-  const csvHeaders = Object.keys(records[0] as any)
+  const csvHeaders = Object.keys(records[0] as Record<string, unknown>)
   const mapping: Record<string, string> = {}
   
   csvHeaders.forEach(header => {
@@ -110,16 +110,16 @@ async function smartImport(filePath: string) {
   let successCount = 0
   let errorCount = 0
 
-  for (const record of records as any[]) {
+  for (const record of records as Record<string, string>[]) {
     try {
       // 1. Extract and normalize data
-      const data: any = {}
+      const data: Record<string, string> = {}
       Object.entries(mapping).forEach(([csvHeader, internalField]) => {
         data[internalField] = record[csvHeader]
       })
 
       // 2. Resolve or Create Mold
-      let moldName = (data.name || '').trim()
+      const moldName = (data.name || '').trim()
       let moldBrand = (data.brand || '').trim()
 
       if (!moldName || !moldBrand) {

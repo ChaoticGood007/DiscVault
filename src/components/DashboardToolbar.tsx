@@ -182,7 +182,9 @@ export default function DashboardToolbar({
       newCols = [...visibleColumns, colId]
     }
     if (newCols.length === 0) return
-    document.cookie = `discVaultVisibleCols=${newCols.join(',')}; path=/; max-age=31536000`
+    if (typeof document !== 'undefined') {
+      document.cookie = `discVaultVisibleCols=${newCols.join(',')}; path=/; max-age=31536000`
+    }
     updateParams({ cols: newCols.join(',') })
   }
 

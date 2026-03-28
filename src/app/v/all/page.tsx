@@ -22,6 +22,7 @@ import { Disc } from "lucide-react"
 import DashboardToolbar from "@/components/DashboardToolbar"
 import InventoryList from "@/components/InventoryList"
 import InventoryInfiniteList from "@/components/InventoryInfiniteList"
+import FilterPreserver from "@/components/FilterPreserver"
 import { getLocationTree } from "@/app/actions/settings"
 import { flattenTree, type LocationNode } from "@/lib/locationTree"
 
@@ -81,21 +82,23 @@ export default async function AllVaultsDashboard({
     return { mold: { [field]: order } }
   }
 
-  const searchFilter: any = searchQuery ? {
-    OR: [
-      { mold: { name: { contains: searchQuery } } },
-      { mold: { brand: { contains: searchQuery } } },
-      { mold: { category: { contains: searchQuery } } },
-      { plastic: { contains: searchQuery } },
-      { color: { contains: searchQuery } },
-      { stamp: { contains: searchQuery } },
-      { stampFoil: { contains: searchQuery } },
-      { location: { contains: searchQuery } },
-      { notes: { contains: searchQuery } },
-    ]
-  } : {}
-
   const andConditions: any[] = []
+
+  if (searchQuery) {
+    andConditions.push({
+      OR: [
+        { mold: { name: { contains: searchQuery } } },
+        { mold: { brand: { contains: searchQuery } } },
+        { mold: { category: { contains: searchQuery } } },
+        { plastic: { contains: searchQuery } },
+        { color: { contains: searchQuery } },
+        { stamp: { contains: searchQuery } },
+        { stampFoil: { contains: searchQuery } },
+        { location: { contains: searchQuery } },
+        { notes: { contains: searchQuery } },
+      ]
+    })
+  }
 
   const addNullableMultiSelect = (field: string, filterStr?: string) => {
     if (!filterStr) return;
@@ -134,51 +137,52 @@ export default async function AllVaultsDashboard({
   const bagOptions = Array.from(new Map(allBags.map(b => [b.value, b])).values())
   const bagPaths = bagOptions.map(b => b.value)
 
+  // Bag / Location logic
+  if (inBagParam === 'true') {
+    if (bagPaths.length > 0) {
+      andConditions.push({
+        OR: bagPaths.flatMap(p => [
+          { location: p },
+          { location: { startsWith: p + '/' } }
+        ])
+      })
+    } else {
+      andConditions.push({ id: 'none' })
+    }
+  } else if (inBagParam === 'false') {
+    if (bagPaths.length > 0) {
+      andConditions.push({
+        NOT: { OR: bagPaths.flatMap(p => [
+          { location: p },
+          { location: { startsWith: p + '/' } }
+        ])}
+      })
+    }
+  } else if (inBagParam) {
+    andConditions.push({
+      OR: [
+        { location: inBagParam },
+        { location: { startsWith: inBagParam + '/' } }
+      ]
+    })
+  } else if (locationsFilter.length > 0) {
+    andConditions.push({ location: { in: locationsFilter } })
+  }
+
   const whereClause: any = {
-    ...searchFilter,
     collectionId: selectedCollectionIds.length > 0 ? { in: selectedCollectionIds } : undefined,
     weight: (minWeight !== undefined || maxWeight !== undefined) ? { gte: minWeight, lte: maxWeight } : undefined,
     condition: (minCond !== undefined || maxCond !== undefined) ? { gte: minCond, lte: maxCond } : undefined,
     ink: inkFilter === 'none' ? { equals: 'None' } : inkFilter === 'exists' ? { not: 'None' } : undefined,
     mold: {
-      name: searchQuery ? { contains: searchQuery } : undefined,
-      brand: brand ? { contains: brand } : (searchQuery ? { contains: searchQuery } : undefined),
-      category: category ? { contains: category } : (searchQuery ? { contains: searchQuery } : undefined),
+      brand: brand ? { in: brand.split(',') } : undefined,
+      category: category ? { in: category.split(',') } : undefined,
       speed: (minSpeed !== undefined || maxSpeed !== undefined) ? { gte: minSpeed, lte: maxSpeed } : undefined,
       glide: (minGlide !== undefined || maxGlide !== undefined) ? { gte: minGlide, lte: maxGlide } : undefined,
       turn: (minTurn !== undefined || maxTurn !== undefined) ? { gte: minTurn, lte: maxTurn } : undefined,
       fade: (minFade !== undefined || maxFade !== undefined) ? { gte: minFade, lte: maxFade } : undefined,
     },
     AND: andConditions.length > 0 ? andConditions : undefined,
-  }
-
-  // Bag / Location logic
-  if (inBagParam === 'true') {
-    if (bagPaths.length > 0) {
-      whereClause.OR = bagPaths.flatMap(p => [
-        { location: p },
-        { location: { startsWith: p + '/' } }
-      ])
-    } else {
-      whereClause.id = 'none'
-    }
-  } else if (inBagParam === 'false') {
-    if (bagPaths.length > 0) {
-      whereClause.AND = [
-        ...(whereClause.AND || []),
-        { NOT: { OR: bagPaths.flatMap(p => [
-          { location: p },
-          { location: { startsWith: p + '/' } }
-        ]) } }
-      ]
-    }
-  } else if (inBagParam) {
-    whereClause.OR = [
-      { location: inBagParam },
-      { location: { startsWith: inBagParam + '/' } }
-    ]
-  } else if (locationsFilter.length > 0) {
-    whereClause.location = { in: locationsFilter }
   }
 
   const [
@@ -215,6 +219,7 @@ export default async function AllVaultsDashboard({
 
   return (
     <div className="space-y-8">
+      <FilterPreserver vaultId="all" />
       <div className="px-4">
         <h2 className="text-2xl font-black text-slate-900 tracking-tight">Global Inventory</h2>
         <p className="text-sm text-slate-500 font-medium">Viewing {totalCount} discs across all active filters.</p>

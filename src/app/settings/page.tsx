@@ -3,6 +3,7 @@ import { getGlobalSettings, getLocationTree, getCategoryColors } from '@/app/act
 import { Settings2, Database, MapPin, Palette } from 'lucide-react'
 import { Header } from "@/components/Header"
 import SyncButton from '@/components/SyncButton'
+import NormalizeMoldsButton from '@/components/NormalizeMoldsButton'
 import PrimaryVaultSelector from '@/components/PrimaryVaultSelector'
 import VaultLocationSettings from '@/components/VaultLocationSettings'
 import CategoryColorEditor from '@/components/CategoryColorEditor'
@@ -97,8 +98,9 @@ export default async function SettingsPage() {
           </div>
         </div>
         
-        <div className="flex justify-start">
+        <div className="flex flex-col sm:flex-row gap-4 justify-start">
           <SyncButton />
+          <NormalizeMoldsButton />
         </div>
       </div>
     </div>

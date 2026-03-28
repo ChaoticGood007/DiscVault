@@ -48,3 +48,8 @@ data/
 
 # imports
 *.csv
+
+# dev/scratch scripts
+analyze_inventory.py
+generate_big_inventory.py
+src/scripts/inject_bad_data.ts

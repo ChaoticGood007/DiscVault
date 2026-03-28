@@ -16,7 +16,7 @@
 
 import { getInventoryStats } from "@/lib/analytics"
 import StatsCharts from "@/components/StatsCharts"
-import { BarChart3, ArrowLeft } from "lucide-react"
+import { BarChart3 } from "lucide-react"
 import Link from "next/link"
 
 export default async function ScopedStatsPage({
@@ -71,7 +71,7 @@ export default async function ScopedStatsPage({
           <div>
             <span className="block text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Total Payload</span>
             <span className="text-3xl font-black">{stats.totalWeightKg} <span className="text-sm font-bold opacity-60">kg</span></span>
-            <p className="text-[10px] text-indigo-100/60 font-medium mt-1">That's ~{(parseFloat(stats.totalWeightKg) * 2.204).toFixed(1)} lbs of plastic!</p>
+            <p className="text-[10px] text-indigo-100/60 font-medium mt-1">That&apos;s ~{(parseFloat(stats.totalWeightKg) * 2.204).toFixed(1)} lbs of plastic!</p>
           </div>
           <div>
             <span className="block text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Top Manufacturer</span>
