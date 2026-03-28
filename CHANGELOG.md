@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-28
+
+### Added
+- **Data Normalization Filter**: Added dynamic category mapping rules to sync legacy "Fairway", "Driver", and "Utility" aliases strictly to Discit API schemas when importing custom spreadsheet CSVs.
+- **Legacy DB Normalizer**: Added a "Normalize Legacy Data" button to the `/settings` page. Triggers a smart scan across all existing Molds, resolving legacy aliases and typos against the canonical API synonym map without requiring a migration.
+- **Global Cookie Filter Resilience**: Built a client-side `FilterPreserver` that continuously writes the active vault URL state to a 30-day browser cookie. The `Inventory` tab link and `VaultSwitcher` dropdown now read the live cookie at click-time, so jumping to Analytics, Stats, or another Vault and returning always restores your exact filter combination.
+
+### Fixed
+- **Dashboard Filter Collisions**: Refactored core Prisma query construction in both vault and global dashboard views. Search, Bag, and multi-select filters now correctly compose via a nested `AND` array instead of overwriting each other.
+- **Strict Search Parity**: Resolved a bug where text search implicitly forced an `AND` match across name, brand, and category simultaneously. Search now executes as a broad `OR` across all relevant fields as intended.
+- **View/Edit Return Navigation**: Viewing or editing a disc no longer hard-redirects to the vault root, discarding active filters. Both the Detail View and Edit Form now call `router.back()` after saving/cancelling, returning the user to their exact previous state.
+- **Location ID Crash**: Removed a dependency on the Crypto Web API (`crypto.randomUUID`) inside the Location Tree editor that caused crashes on non-HTTPS self-hosted networks.
+- **Tree Migrator Button Restored**: The "Import from Inventory" button in the Location Tree editor is now correctly wired up again.
+- **React Architectural Performance**: Lifted sub-components out of render bodies in `BulkEditModal` and resolved `useEffect` cascades in `MobileFilterDrawer`, eliminating input focus-loss and unnecessary double-renders.
+- **Code Sanctity**: Replaced 30+ `any` type annotations with explicit Prisma types and removed 50+ unused imports across the codebase.
+
+
 ## [0.2.0] - 2026-03-23
 
 ### Added

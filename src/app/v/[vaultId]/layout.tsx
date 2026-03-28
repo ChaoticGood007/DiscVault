@@ -16,11 +16,13 @@
 
 import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
+import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
 import { LayoutDashboard, BarChart3, Plus, Upload } from "lucide-react"
 import { Header } from "@/components/Header"
 import VaultSwitcher from "@/components/VaultSwitcher"
 import ExportButton from "@/components/ExportButton"
+import ClientInventoryLink from "@/components/ClientInventoryLink"
 
 export const dynamic = 'force-dynamic'
 
@@ -49,8 +51,12 @@ export default async function WorkspaceLayout({
     notFound()
   }
 
+  const cookieStore = await cookies()
+  const savedFilter = cookieStore.get(`vault_filter_${vaultId}`)?.value || ''
+  const inventoryHref = savedFilter ? `/v/${vaultId}?${savedFilter}` : `/v/${vaultId}`
+
   const navItems = [
-    { label: 'Inventory', href: `/v/${vaultId}`, icon: LayoutDashboard },
+    { label: 'Inventory', href: inventoryHref, icon: LayoutDashboard },
     { label: 'Analytics', href: `/v/${vaultId}/stats`, icon: BarChart3 },
     { label: 'Add Disc', href: `/v/${vaultId}/add`, icon: Plus },
     { label: 'Import', href: `/v/${vaultId}/import`, icon: Upload },
@@ -58,14 +64,34 @@ export default async function WorkspaceLayout({
 
   const navLinks = navItems.map((item) => {
     const Icon = item.icon
+    const linkClasses = "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-600 group shrink-0"
+    const content = (
+      <>
+        <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+        {item.label}
+      </>
+    )
+
+    if (item.label === 'Inventory') {
+      return (
+        <ClientInventoryLink 
+          key={item.href} 
+          vaultId={vaultId} 
+          baseHref={item.href} 
+          className={linkClasses}
+        >
+          {content}
+        </ClientInventoryLink>
+      )
+    }
+
     return (
       <Link
         key={item.href}
         href={item.href}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-600 group shrink-0"
+        className={linkClasses}
       >
-        <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-        {item.label}
+        {content}
       </Link>
     )
   })

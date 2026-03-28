@@ -55,7 +55,16 @@ export default function VaultSwitcher({
               key={v.id}
               onClick={() => {
                 setIsOpen(false)
-                router.push(`/v/${v.id}`)
+                const cname = `vault_filter_${v.id}=`
+                const decodedCookie = decodeURIComponent(document.cookie)
+                let cval = ''
+                const ca = decodedCookie.split(';')
+                for(let i = 0; i <ca.length; i++) {
+                  let c = ca[i]
+                  while (c.charAt(0) == ' ') c = c.substring(1)
+                  if (c.indexOf(cname) == 0) cval = c.substring(cname.length, c.length)
+                }
+                router.push(cval ? `/v/${v.id}?${cval}` : `/v/${v.id}`)
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${
                 activeId === v.id 

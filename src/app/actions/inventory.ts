@@ -67,7 +67,6 @@ export async function updateDisc(id: string, formData: FormData) {
   revalidatePath('/')
   revalidatePath('/v/all')
   if (collectionId) revalidatePath(`/v/${collectionId}`)
-  redirect(collectionId ? `/v/${collectionId}` : '/v/all')
 }
 
 export async function deleteDisc(id: string, vaultId: string) {
@@ -78,7 +77,6 @@ export async function deleteDisc(id: string, vaultId: string) {
   revalidatePath('/')
   revalidatePath('/v/all')
   revalidatePath(`/v/${vaultId}`)
-  redirect(`/v/${vaultId}`)
 }
 
 function getStability(turn: number, fade: number): string {
@@ -92,6 +90,7 @@ function getStability(turn: number, fade: number): string {
 const BRAND_SYNONYMS: Record<string, string> = {
   'agl': 'Above Ground Level',
   'dd': 'Dynamic Discs',
+  'dynamic': 'Dynamic Discs',
   'dga': 'Disc Golf Association',
   'mvp': 'MVP',
   'mvp disc sports': 'MVP',
@@ -107,6 +106,18 @@ const BRAND_SYNONYMS: Record<string, string> = {
   'streamline discs': 'Streamline',
   'birdie disc golf supply': 'Birdie',
   'loft': 'Løft Discs',
+  'innova': 'Innova',
+  'innovadiscs': 'Innova',
+  'discraft': 'Discraft',
+  'clash': 'Clash Discs',
+}
+
+const CATEGORY_SYNONYMS: Record<string, string> = {
+  'fairway': 'Control Driver',
+  'fairway driver': 'Control Driver',
+  'driver': 'Distance Driver',
+  'utility': 'Approach Discs',
+  'putt and approach': 'Putter',
 }
 
 export async function importDiscs(records: any[], targetCollectionId?: string) {
@@ -136,6 +147,12 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
       }
 
       if (!mold) {
+        let category = (record.category || 'Unknown').trim()
+        const normalizedCategory = category.toLowerCase()
+        if (CATEGORY_SYNONYMS[normalizedCategory]) {
+          category = CATEGORY_SYNONYMS[normalizedCategory]
+        }
+
         const speed = parseFloat(record.speed) || 0
         const glide = parseFloat(record.glide) || 0
         const turn = parseFloat(record.turn) || 0
@@ -143,7 +160,7 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
         mold = await prisma.mold.create({
           data: {
             name: moldName, brand: moldBrand,
-            category: record.category || 'Unknown',
+            category,
             speed, glide, turn, fade,
             stability: record.stability || getStability(turn, fade),
             isCustom: true
@@ -237,4 +254,40 @@ export async function bulkUpdateInventory(ids: string[], updates: Record<string,
 
   revalidatePath('/')
   revalidatePath('/v/all')
+}
+
+export async function normalizeDatabaseMolds() {
+  const molds = await prisma.mold.findMany()
+  let updatedCount = 0
+
+  for (const mold of molds) {
+    let changed = false
+    let newCategory = mold.category
+    let newBrand = mold.brand
+
+    const normCat = newCategory.toLowerCase().trim()
+    if (CATEGORY_SYNONYMS[normCat]) {
+      newCategory = CATEGORY_SYNONYMS[normCat]
+      changed = true
+    }
+
+    const normBrand = newBrand.toLowerCase().trim()
+    if (BRAND_SYNONYMS[normBrand]) {
+      newBrand = BRAND_SYNONYMS[normBrand]
+      changed = true
+    }
+
+    if (changed) {
+      await prisma.mold.update({
+        where: { id: mold.id },
+        data: { category: newCategory, brand: newBrand }
+      })
+      updatedCount++
+    }
+  }
+
+  revalidatePath('/settings')
+  revalidatePath('/')
+  revalidatePath('/v/all')
+  return { updatedCount }
 }
