@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Multi-Theme System**: Added a 4-theme color system accessible from the header on every page. Themes are: **Light** (original crisp white), **Soft** (warm amber/cream, easy on the eyes), **Dark** (deep slate dark mode), and **Solar** (authentic Solarized Dark palette). Selection persists across sessions via a browser cookie and is applied server-side to prevent flash of wrong theme.
+- **Per-Disc Custom Flight Numbers**: Users can now override factory flight ratings (Glide, Turn, Fade) for individual discs. Features include a "Tuned" badge, custom inputs in the edit form, and a dedicated toggle on the Flight Chart to switch between "Stock" and "Tuned" distribution. Tuned discs are highlighted in amber on the chart.
+- **Interactive Flight Charts**: Added dedicated interactive visual distribution charts (`/v/[vaultId]/chart` and `/v/all/chart`) that plot discs on a classic Speed vs Stability grid. Features custom hover tooltips showing disc metadata and supports toggling between factory stock flights and user-tuned flight numbers.
+
+### Fixed
+- **Header Layout Responsiveness**: Fixed a critical visual regression where the top navigation bar would horizontally collapse and overlap the vault metadata on 1280px+ displays. Expanded maximum app width constraint to `1600px` to comfortably accommodate the UI, and redesigned the mobile view to use a mathematically stable flex-wrapping "pill cloud" instead of a horizontal scrolling menu that was prone to clipping.
 
 ## [0.3.0] - 2026-03-28
 
