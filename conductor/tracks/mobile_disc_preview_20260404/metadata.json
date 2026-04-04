@@ -1,0 +1,8 @@
+{
+  "track_id": "mobile_disc_preview_20260404",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-04-04T12:00:00Z",
+  "updated_at": "2026-04-04T12:00:00Z",
+  "description": "feat: add touch-friendly way to enlarge disc previews on mobile"
+}
