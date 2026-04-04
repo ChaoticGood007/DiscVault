@@ -1,7 +1,7 @@
 # Track: flight_chart_collision_20260404 Implementation Plan
 
 ## Phase 1: Analysis
-- [ ] Task: Review the current collision avoidance implementation in `FlightChart.tsx`.
+- [~] Task: Review the current collision avoidance implementation in `FlightChart.tsx`.
 - [ ] Task: Conductor - User Manual Verification 'Analysis' (Protocol in workflow.md)
 
 ## Phase 2: Implementation
