@@ -1,8 +1,8 @@
 # Track: mobile_disc_preview_20260404 Implementation Plan
 
 ## Phase 1: Prototype
-- [ ] Task: Evaluate whether a lightbox modal or tap-to-expand is more intuitive on mobile.
-- [ ] Task: Conductor - User Manual Verification 'Prototype' (Protocol in workflow.md)
+- [x] Task: Evaluate whether a lightbox modal or tap-to-expand is more intuitive on mobile.
+- [x] Task: Conductor - User Manual Verification 'Prototype' (Protocol in workflow.md)
 
 ## Phase 2: Implementation
 - [ ] Task: Create a reusable `PreviewModal` component for large-scale disc rendering.
