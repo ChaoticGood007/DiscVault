@@ -152,6 +152,13 @@ export default function FlightChart({ discs, vaultId }: FlightChartProps) {
     // Labels are roughly 60px wide and 15px tall in SVG space
     const occupiedSpaces: {x: number, y: number, w: number, h: number}[] = []
 
+    // Map the coordinates of all disc dots to avoid label collisions with them
+    sortedPoints.forEach(p => {
+      const dotX = getX(p.x)
+      const dotY = getY(p.y)
+      occupiedSpaces.push({ x: dotX - 12, y: dotY - 12, w: 24, h: 24 })
+    })
+
     return sortedPoints.map(point => {
       const px = getX(point.x)
       const py = getY(point.y)
