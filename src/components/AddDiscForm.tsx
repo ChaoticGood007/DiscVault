@@ -177,6 +177,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             <option value="Burst">Center Burst</option>
             <option value="Split">Half 'n Half</option>
             <option value="Swirl">Swirly</option>
+            <option value="Speckled">Speckled</option>
           </select>
         </div>
       </div>

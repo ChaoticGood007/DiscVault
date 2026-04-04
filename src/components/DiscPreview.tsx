@@ -16,7 +16,7 @@
 
 'use client'
 
-import { useId } from 'react'
+import { useId, useMemo } from 'react'
 import { parseDiscColor } from '@/lib/colorParser'
 import { motion } from 'framer-motion'
 
@@ -31,6 +31,7 @@ interface DiscPreviewProps {
   isHovered?: boolean
   showTunedOutline?: boolean
   hoverScale?: number
+  seed?: string | number | null
 }
 
 export default function DiscPreview({
@@ -43,7 +44,8 @@ export default function DiscPreview({
   isTuned = false,
   isHovered = false,
   showTunedOutline = false,
-  hoverScale = 1.25
+  hoverScale = 1.25,
+  seed
 }: DiscPreviewProps) {
   const baseColor = parseDiscColor(color)
   const secColor = parseDiscColor(secondaryColor)
@@ -51,10 +53,40 @@ export default function DiscPreview({
   
   // We'll use a coordinate system from -50 to 50 for the internal rendering
   // This makes the math easier regardless of the display size
-  const radius = 40 
+  const radius = 40
   const pattern = secondaryPattern
   const generatedId = useId()
   const clipId = `disc-clip-${generatedId.replace(/:/g, '')}`
+
+  // Stable random dot generator for Speckled pattern
+  const dots = useMemo(() => {
+    if (pattern !== 'Speckled' || !secondaryColor) return []
+    
+    // Simple deterministic random based on seed or baseColor/secColor strings
+    const seedString = String(seed || (baseColor + secColor))
+    let hash = 0
+    for (let i = 0; i < seedString.length; i++) {
+      hash = ((hash << 5) - hash) + seedString.charCodeAt(i)
+      hash |= 0 
+    }
+    
+    const random = () => {
+      hash = (hash * 16807) % 2147483647
+      return (hash - 1) / 2147483646
+    }
+    
+    const dotCount = 80 // A bit more for a nice speckled look
+    return Array.from({ length: dotCount }).map(() => {
+      const r = Math.sqrt(random()) * radius
+      const theta = random() * 2 * Math.PI
+      return {
+        cx: r * Math.cos(theta),
+        cy: r * Math.sin(theta),
+        r: 0.2 + random() * 1.0,
+        opacity: 0.3 + random() * 0.6
+      }
+    })
+  }, [pattern, secondaryColor, seed, baseColor, secColor, radius])
 
   return (
     <motion.svg 
@@ -89,6 +121,20 @@ export default function DiscPreview({
         )}
         {pattern === 'Split' && secondaryColor && (
           <path d={`M 0 -${radius} A ${radius} ${radius} 0 0 1 0 ${radius} Z`} fill={secColor} />
+        )}
+        {pattern === 'Speckled' && secondaryColor && (
+          <g>
+            {dots.map((dot, i) => (
+              <circle 
+                key={i}
+                cx={dot.cx}
+                cy={dot.cy}
+                r={dot.r}
+                fill={secColor}
+                opacity={dot.opacity}
+              />
+            ))}
+          </g>
         )}
         {pattern === 'Swirl' && secondaryColor && (
           <>
