@@ -24,11 +24,11 @@ import { ChevronLeft } from "lucide-react"
 export const dynamic = 'force-dynamic'
 
 interface Props {
-  searchParams: Promise<{ location?: string; vaultId?: string; showAll?: string }>
+  searchParams: Promise<{ location?: string; vaultId?: string; showAll?: string; flightPaths?: string }>
 }
 
 export default async function AllVaultsChartPage({ searchParams }: Props) {
-  const { location, vaultId, showAll } = await searchParams
+  const { location, vaultId, showAll, flightPaths } = await searchParams
 
   // Fetch all vaults to show selection or aggregate bags
   const vaults = await prisma.discCollection.findMany({
@@ -131,7 +131,11 @@ export default async function AllVaultsChartPage({ searchParams }: Props) {
         </div>
       </div>
       
-      <FlightChart discs={filteredDiscs as any} vaultId={vaultId!} />
+      <FlightChart 
+        discs={filteredDiscs as any} 
+        vaultId={vaultId!} 
+        defaultShowFlightPaths={flightPaths === 'true'} 
+      />
     </div>
   )
 }

@@ -180,14 +180,16 @@ export default function InventoryInfiniteList({
                       if (visibleColumns.includes('color') && item.color) {
                         tags.push(
                           <div key="color" className="flex items-center gap-1.5" title={item.color}>
-                            <DiscPreview 
-                              color={item.color} 
+                            <DiscPreview
+                              color={item.color}
                               secondaryColor={item.secondaryColor}
                               secondaryPattern={item.secondaryPattern}
                               stampFoil={item.stampFoil}
-                              size={12} 
+                              size={12}
                               hoverScale={5}
+                              disc={item}
                             />
+
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
                               {item.color}
                             </span>

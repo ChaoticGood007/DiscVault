@@ -16,9 +16,10 @@
 
 'use client'
 
-import { useId, useMemo } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { parseDiscColor } from '@/lib/colorParser'
 import { motion } from 'framer-motion'
+import PreviewModal from './PreviewModal'
 
 interface DiscPreviewProps {
   color?: string | null
@@ -32,6 +33,14 @@ interface DiscPreviewProps {
   showTunedOutline?: boolean
   hoverScale?: number
   seed?: string | number | null
+  disc?: {
+    mold: {
+      name: string
+      brand: string
+    }
+    plastic?: string | null
+    weight?: number | null
+  }
 }
 
 export default function DiscPreview({
@@ -45,8 +54,10 @@ export default function DiscPreview({
   isHovered = false,
   showTunedOutline = false,
   hoverScale = 1.25,
-  seed
+  seed,
+  disc
 }: DiscPreviewProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const baseColor = parseDiscColor(color)
   const secColor = parseDiscColor(secondaryColor)
   const foilColor = parseDiscColor(stampFoil)
@@ -89,97 +100,120 @@ export default function DiscPreview({
   }, [pattern, secondaryColor, seed, baseColor, secColor, radius])
 
   return (
-    <motion.svg 
-      viewBox="-50 -50 100 100" 
-      width={size} 
-      height={size} 
-      className={`overflow-visible ${className}`}
-      whileHover={{ scale: hoverScale, zIndex: 50 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-    >
-      <defs>
-        <clipPath id={clipId}>
-          <circle r={radius} />
-        </clipPath>
-      </defs>
+    <>
+      <motion.svg 
+        viewBox="-50 -50 100 100" 
+        width={size} 
+        height={size} 
+        className={`overflow-visible ${disc ? 'cursor-pointer' : ''} ${className}`}
+        whileHover={{ scale: hoverScale, zIndex: 50 }}
+        onClick={(e) => {
+          if (disc) {
+            e.stopPropagation()
+            e.preventDefault()
+            setIsModalOpen(true)
+          }
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        <defs>
+          <clipPath id={clipId}>
+            <circle r={radius} />
+          </clipPath>
+        </defs>
 
-      {/* Tuned Glow/Stroke Base */}
-      {isHovered && <circle r={radius + 8} fill="none" stroke="white" strokeWidth={6} className="drop-shadow-xl" />}
-      {isTuned && showTunedOutline && !isHovered && <circle r={radius + 4} fill="none" stroke="#f59e0b" strokeWidth={4} opacity={0.6} />}
-      {isTuned && showTunedOutline && isHovered && <circle r={radius + 6} fill="none" stroke="#f59e0b" strokeWidth={6} />}
+        {/* Tuned Glow/Stroke Base */}
+        {isHovered && <circle r={radius + 8} fill="none" stroke="white" strokeWidth={6} className="drop-shadow-xl" />}
+        {isTuned && showTunedOutline && !isHovered && <circle r={radius + 4} fill="none" stroke="#f59e0b" strokeWidth={4} opacity={0.6} />}
+        {isTuned && showTunedOutline && isHovered && <circle r={radius + 6} fill="none" stroke="#f59e0b" strokeWidth={6} />}
 
-      {/* Base Disc */}
-      <circle r={radius} fill={pattern === 'Halo' ? secColor : baseColor} stroke="rgba(0,0,0,0.1)" strokeWidth={1} />
+        {/* Base Disc */}
+        <circle r={radius} fill={pattern === 'Halo' ? secColor : baseColor} stroke="rgba(0,0,0,0.1)" strokeWidth={1} />
 
-      {/* Secondary Patterns - Clipped to disc bounds */}
-      <g clipPath={`url(#${clipId})`}>
-        {pattern === 'Halo' && secondaryColor && (
-          <circle r={radius * 0.75} fill={baseColor} />
-        )}
-        {pattern === 'Burst' && secondaryColor && (
-          <circle r={radius * 0.6} fill={secColor} opacity={0.7} />
-        )}
-        {pattern === 'Split' && secondaryColor && (
-          <path d={`M 0 -${radius} A ${radius} ${radius} 0 0 1 0 ${radius} Z`} fill={secColor} />
-        )}
-        {pattern === 'Speckled' && secondaryColor && (
-          <g>
-            {dots.map((dot, i) => (
-              <circle 
-                key={i}
-                cx={dot.cx}
-                cy={dot.cy}
-                r={dot.r}
-                fill={secColor}
-                opacity={dot.opacity}
+        {/* Secondary Patterns - Clipped to disc bounds */}
+        <g clipPath={`url(#${clipId})`}>
+          {pattern === 'Halo' && secondaryColor && (
+            <circle r={radius * 0.75} fill={baseColor} />
+          )}
+          {pattern === 'Burst' && secondaryColor && (
+            <circle r={radius * 0.6} fill={secColor} opacity={0.7} />
+          )}
+          {pattern === 'Split' && secondaryColor && (
+            <path d={`M 0 -${radius} A ${radius} ${radius} 0 0 1 0 ${radius} Z`} fill={secColor} />
+          )}
+          {pattern === 'Speckled' && secondaryColor && (
+            <g>
+              {dots.map((dot, i) => (
+                <circle 
+                  key={i}
+                  cx={dot.cx}
+                  cy={dot.cy}
+                  r={dot.r}
+                  fill={secColor}
+                  opacity={dot.opacity}
+                />
+              ))}
+            </g>
+          )}
+          {pattern === 'Swirl' && secondaryColor && (
+            <>
+              {/* Layer 1: Thick base blend */}
+              <path 
+                d={`M -${radius} -${radius/2} Q 0 0, ${radius} ${radius/2} T -${radius} ${radius*1.5}`} 
+                fill={secColor} 
+                opacity={0.3} 
               />
-            ))}
+              {/* Layer 2: Main swirl wisps */}
+              <path 
+                d={`M -${radius} 0 C -${radius/2} -${radius}, ${radius/2} ${radius}, ${radius} 0 S ${radius*1.5} -${radius}, 0 0`} 
+                stroke={secColor} 
+                strokeWidth={radius * 0.4} 
+                fill="none" 
+                opacity={0.6} 
+                strokeLinecap="round"
+              />
+              <path 
+                d={`M ${radius} 0 C ${radius/2} ${radius}, -${radius/2} -${radius}, -${radius} 0 S -${radius*1.5} ${radius}, 0 0`} 
+                stroke={baseColor} 
+                strokeWidth={radius * 0.2} 
+                fill="none" 
+                opacity={0.4} 
+                strokeLinecap="round"
+              />
+              {/* Layer 3: Finer detail wisps */}
+              <path 
+                d={`M -${radius} ${radius/3} Q 0 -${radius/2}, ${radius} -${radius/3}`} 
+                stroke={secColor} 
+                strokeWidth={radius * 0.1} 
+                fill="none" 
+                opacity={0.8}
+              />
+            </>
+          )}
+        </g>
+
+        {/* Stamp Foil - Thicker with slight offset for "shine" effect */}
+        {stampFoil && (
+          <g opacity={0.9}>
+            <circle r={radius * 0.4} stroke="rgba(0,0,0,0.1)" strokeWidth={4} fill="none" />
+            <circle r={radius * 0.4} stroke={foilColor} strokeWidth={3.5} fill="none" />
           </g>
         )}
-        {pattern === 'Swirl' && secondaryColor && (
-          <>
-            {/* Layer 1: Thick base blend */}
-            <path 
-              d={`M -${radius} -${radius/2} Q 0 0, ${radius} ${radius/2} T -${radius} ${radius*1.5}`} 
-              fill={secColor} 
-              opacity={0.3} 
-            />
-            {/* Layer 2: Main swirl wisps */}
-            <path 
-              d={`M -${radius} 0 C -${radius/2} -${radius}, ${radius/2} ${radius}, ${radius} 0 S ${radius*1.5} -${radius}, 0 0`} 
-              stroke={secColor} 
-              strokeWidth={radius * 0.4} 
-              fill="none" 
-              opacity={0.6} 
-              strokeLinecap="round"
-            />
-            <path 
-              d={`M ${radius} 0 C ${radius/2} ${radius}, -${radius/2} -${radius}, -${radius} 0 S -${radius*1.5} ${radius}, 0 0`} 
-              stroke={baseColor} 
-              strokeWidth={radius * 0.2} 
-              fill="none" 
-              opacity={0.4} 
-              strokeLinecap="round"
-            />
-            {/* Layer 3: Finer detail wisps */}
-            <path 
-              d={`M -${radius} ${radius/3} Q 0 -${radius/2}, ${radius} -${radius/3}`} 
-              stroke={secColor} 
-              strokeWidth={radius * 0.1} 
-              fill="none" 
-              opacity={0.8}
-            />
-          </>
-        )}
-      </g>
+      </motion.svg>
 
-      {/* Stamp Foil - Thicker with slight offset for "shine" effect */}
-      {stampFoil && (
-        <g opacity={0.9}>
-          <circle r={radius * 0.4} stroke="rgba(0,0,0,0.1)" strokeWidth={4} fill="none" />
-          <circle r={radius * 0.4} stroke={foilColor} strokeWidth={3.5} fill="none" />
-        </g>
+      {disc && (
+        <PreviewModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          disc={{
+            ...disc,
+            color,
+            secondaryColor,
+            secondaryPattern,
+            stampFoil
+          }} 
+        />
       )}
-    </motion.svg>
+    </>
   )
 }
