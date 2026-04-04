@@ -51,24 +51,40 @@ export default async function VaultChartPage({ params, searchParams }: Props) {
 
   // If no location is selected, show the BagSelector
   if (!location) {
-    const bagInfos = flatLocations.map(loc => ({
-      name: loc.path,
-      path: loc.value,
-      count: allDiscs.filter(d => d.location === loc.value).length,
-      isInBag: loc.inBag
-    })).filter(b => b.count > 0) // Only show bags with discs
+    const bagInfos = flatLocations.map(loc => {
+      // Recursive count: discs in this location OR any sub-location
+      const count = allDiscs.filter(d => 
+        d.location === loc.value || d.location?.startsWith(`${loc.value}/`)
+      ).length
+
+      return {
+        name: loc.path,
+        path: loc.value,
+        count,
+        isInBag: loc.inBag,
+        isRootBag: loc.inBag && !flatLocations.find(f => loc.value.startsWith(`${f.value}/`) && f.inBag)
+      }
+    }).filter(b => b.count > 0) // Only show locations with discs
+
+    // If not in showAll mode, we only show the "Root" bags (highest level in-bag nodes)
+    // to avoid showing both "Main Bag" and "Main Bag / Putter Pocket" as separate cards.
+    const displayBags = showAll === 'true' 
+      ? bagInfos 
+      : bagInfos.filter(b => b.isRootBag)
 
     return (
       <BagSelector 
-        bags={bagInfos} 
+        bags={displayBags} 
         baseUrl={`/v/${vaultId}/chart`} 
         showAll={showAll === 'true'} 
       />
     )
   }
 
-  // If location is selected, filter discs and show the chart
-  const filteredDiscs = allDiscs.filter(d => d.location === location)
+  // If location is selected, filter discs recursively
+  const filteredDiscs = allDiscs.filter(d => 
+    d.location === location || d.location?.startsWith(`${location}/`)
+  )
 
   return (
     <div className="flex flex-col gap-6">

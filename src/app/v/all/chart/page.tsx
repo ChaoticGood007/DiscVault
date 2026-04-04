@@ -44,29 +44,34 @@ export default async function AllVaultsChartPage({ searchParams }: Props) {
         name: `${v.name}: ${loc.path}`,
         path: loc.value,
         vaultId: v.id,
-        isInBag: loc.inBag
+        isInBag: loc.inBag,
+        isRootBag: loc.inBag && !flat.find(f => loc.value.startsWith(`${f.value}/`) && f.inBag)
       }))
     })
 
-    // Fetch counts for all these locations
-    const counts = await prisma.inventory.groupBy({
-      by: ['location', 'collectionId'],
-      _count: true
+    // Fetch all discs across all vaults to calculate counts
+    const allDiscs = await prisma.inventory.findMany({
+      select: { location: true, collectionId: true }
     })
 
     const bagInfos = vaultBags.map(vb => {
-      const match = counts.find(c => c.location === vb.path && c.collectionId === vb.vaultId)
+      // Recursive count for this specific vault and location path
+      const count = allDiscs.filter(d => 
+        d.collectionId === vb.vaultId && 
+        (d.location === vb.path || d.location?.startsWith(`${vb.path}/`))
+      ).length
+
       return {
         ...vb,
-        count: match?._count ?? 0,
-        // Update path to include vaultId for uniqueness in the global view
-        fullPath: `v=${vb.vaultId}&l=${encodeURIComponent(vb.path)}`
+        count
       }
-    }).filter(b => b.count > 0) // Only show bags with discs
+    }).filter(b => b.count > 0)
 
-    // We'll slightly adapt BagSelector for the "fullPath" handling
-    // or just build a simpler one here. Let's use BagSelector but fix the link.
-    
+    // Filter to only "Root" bags unless showAll is on
+    const displayBags = showAll === 'true' 
+      ? bagInfos 
+      : bagInfos.filter(b => b.isRootBag)
+
     return (
       <div className="flex flex-col gap-8">
         <div className="text-center max-w-2xl mx-auto">
@@ -74,8 +79,8 @@ export default async function AllVaultsChartPage({ searchParams }: Props) {
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Select a Bag to Analyze</h1>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
-          {bagInfos.filter(b => showAll === 'true' || b.isInBag).map((bag, idx) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto w-full px-4">
+          {displayBags.map((bag, idx) => (
             <Link 
               key={`${bag.vaultId}-${bag.path}`}
               href={`/v/all/chart?vaultId=${bag.vaultId}&location=${encodeURIComponent(bag.path)}`}
@@ -99,14 +104,15 @@ export default async function AllVaultsChartPage({ searchParams }: Props) {
     )
   }
 
-  // If vault and location are selected, show the chart
-  const filteredDiscs = await prisma.inventory.findMany({
-    where: { 
-      collectionId: vaultId,
-      location: location
-    },
+  // If vault and location are selected, show the chart with recursive filtering
+  const allDiscsInVault = await prisma.inventory.findMany({
+    where: { collectionId: vaultId },
     include: { mold: true }
   })
+  
+  const filteredDiscs = allDiscsInVault.filter(d => 
+    d.location === location || d.location?.startsWith(`${location}/`)
+  )
 
   return (
     <div className="flex flex-col gap-6">

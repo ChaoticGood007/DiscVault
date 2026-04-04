@@ -115,22 +115,31 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
             <MapPin className="w-3.5 h-3.5 shrink-0" />
             No location
           </button>
-          {flat.map(loc => (
-            <button
-              key={loc.value}
-              type="button"
-              onClick={() => select(loc)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
-                value === loc.value ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              {loc.inBag
-                ? <Briefcase className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                : <span className="w-3.5 h-3.5 shrink-0" />
-              }
-              <span className="truncate">{loc.path}</span>
-            </button>
-          ))}
+          {flat.map(loc => {
+            const isLeaf = loc.node.children.length === 0
+            return (
+              <button
+                key={loc.value}
+                type="button"
+                disabled={!isLeaf}
+                onClick={() => select(loc)}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
+                  value === loc.value 
+                    ? 'bg-indigo-50 text-indigo-600' 
+                    : isLeaf 
+                      ? 'text-slate-600 hover:bg-slate-50' 
+                      : 'text-slate-300 cursor-not-allowed opacity-60'
+                }`}
+              >
+                {loc.inBag
+                  ? <Briefcase className={`w-3.5 h-3.5 shrink-0 ${isLeaf ? 'text-emerald-500' : 'text-emerald-300'}`} />
+                  : <span className="w-3.5 h-3.5 shrink-0" />
+                }
+                <span className="truncate">{loc.path}</span>
+                {!isLeaf && <span className="text-[9px] uppercase tracking-tighter font-black opacity-40 ml-auto">Folder</span>}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>

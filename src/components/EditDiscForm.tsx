@@ -35,6 +35,8 @@ interface EditDiscFormProps {
     collectionId: string | null
     weight: number | null
     color: string | null
+    secondaryColor: string | null
+    secondaryPattern: string | null
     plastic: string | null
     stamp: string | null
     stampFoil: string | null
@@ -152,6 +154,18 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
             />
           </div>
           <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Location</label>
+            <LocationPicker 
+              tree={currentTree} 
+              value={selectedLocation}
+              onChange={(val) => setSelectedLocation(val)}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Color</label>
             <input
               type="text"
@@ -160,9 +174,32 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
               className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Sec. Color</label>
+            <input
+              type="text"
+              name="secondaryColor"
+              defaultValue={disc.secondaryColor || ''}
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Sec. Pattern</label>
+            <select
+              name="secondaryPattern"
+              defaultValue={disc.secondaryPattern || ''}
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
+            >
+              <option value="">None</option>
+              <option value="Halo">Halo/Overmold</option>
+              <option value="Burst">Center Burst</option>
+              <option value="Split">Half 'n Half</option>
+              <option value="Swirl">Swirly</option>
+            </select>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Stamp</label>
             <input
@@ -179,15 +216,6 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
               name="stampFoil"
               defaultValue={disc.stampFoil || ''}
               className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Location</label>
-            <LocationPicker 
-              tree={currentTree} 
-              value={selectedLocation}
-              onChange={(val) => setSelectedLocation(val)}
-              className="w-full"
             />
           </div>
         </div>

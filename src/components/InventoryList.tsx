@@ -23,12 +23,15 @@ import { moveDiscsToCollection, getPaginatedInventory } from '@/app/actions/inve
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useInView } from 'react-intersection-observer'
 import BulkEditModal from './BulkEditModal'
+import DiscPreview from './DiscPreview'
 
 interface InventoryItem {
   id: string
   collectionId: string | null
   weight: number | null
   color: string | null
+  secondaryColor?: string | null
+  secondaryPattern?: string | null
   plastic: string | null
   stamp: string | null
   stampFoil: string | null
@@ -328,15 +331,21 @@ export default function InventoryList({
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
                         {item.color && (
-                          <div 
-                            className="w-3 h-3 rounded-full border border-slate-200 shrink-0" 
-                            style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
-                          />
+                          <DiscPreview 
+                           color={item.color} 
+                           secondaryColor={item.secondaryColor}
+                           secondaryPattern={item.secondaryPattern}
+                           stampFoil={item.stampFoil}
+                           size={16} 
+                           hoverScale={5}
+                         />
                         )}
+
                         <span className="text-sm font-bold text-slate-700">{item.color || "—"}</span>
                       </div>
                     </td>
                   )}
+
                   {visibleColumns.includes('stamp') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.stampFoil ? `${item.stamp} (${item.stampFoil})` : item.stamp || "—"}</td>}
                   {visibleColumns.includes('condition') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.condition ? `${item.condition}/10` : "—"}</td>}
                   {visibleColumns.includes('ink') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.ink || "—"}</td>}

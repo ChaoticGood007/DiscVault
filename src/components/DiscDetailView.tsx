@@ -3,6 +3,7 @@
 import { Edit3, ArrowLeft, MapPin, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import DiscPreview from './DiscPreview'
 
 interface DiscDetailViewProps {
   disc: {
@@ -10,6 +11,8 @@ interface DiscDetailViewProps {
     collectionId: string | null
     weight: number | null
     color: string | null
+    secondaryColor?: string | null
+    secondaryPattern?: string | null
     plastic: string | null
     stamp: string | null
     stampFoil: string | null
@@ -127,9 +130,13 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</span>
               <div className="flex items-center gap-2 mt-1">
                 {disc.color && (
-                  <div 
-                    className="w-5 h-5 rounded-full border border-slate-200 shrink-0 shadow-sm" 
-                    style={{ backgroundColor: disc.color.toLowerCase().includes('/') ? disc.color.split('/')[0] : disc.color }}
+                  <DiscPreview 
+                    color={disc.color}
+                    secondaryColor={disc.secondaryColor}
+                    secondaryPattern={disc.secondaryPattern}
+                    stampFoil={disc.stampFoil}
+                    size={28}
+                    hoverScale={3}
                   />
                 )}
                 <span className="block text-xl font-black text-slate-900 leading-none">{disc.color || '—'}</span>

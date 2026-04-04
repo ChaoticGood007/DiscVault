@@ -16,10 +16,11 @@
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Info, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import DiscPreview from '@/components/DiscPreview'
 
 interface Disc {
   id: string
@@ -32,6 +33,10 @@ interface Disc {
     turn: number
     fade: number
   }
+  color?: string | null
+  secondaryColor?: string | null
+  secondaryPattern?: string | null
+  stampFoil?: string | null
   plastic?: string | null
   weight?: number | null
   userGlide?: number | null
@@ -47,58 +52,33 @@ interface FlightChartProps {
 export default function FlightChart({ discs, vaultId }: FlightChartProps) {
   const [hoveredDisc, setHoveredDisc] = useState<Disc | null>(null)
   const [useTunedNumbers, setUseTunedNumbers] = useState(true)
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleDotEnter = (disc: Disc) => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    setHoveredDisc(disc)
+  }
+
+  const handleDotLeave = () => {
+    // Small delay to allow moving mouse into the tooltip bridge
+    closeTimeoutRef.current = setTimeout(() => {
+      setHoveredDisc(null)
+    }, 150)
+  }
+
+  const handleTooltipEnter = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+  }
+
+  const handleTooltipLeave = () => {
+    setHoveredDisc(null)
+  }
 
   // Configuration for the grid
   const STABILITY_MIN = 6
   const STABILITY_MAX = -6
   const SPEED_MIN = 0
   const SPEED_MAX = 15
-
-  // Map discs to plot points with jittering for overlap
-  const plotPoints = useMemo(() => {
-    // Group discs by their EFFECTIVE flight numbers (user overrides take priority if toggled)
-    const coordMap: Record<string, Disc[]> = {}
-    
-    discs.forEach(disc => {
-      if (!disc.mold) return
-      const effectiveTurn = (useTunedNumbers && disc.userTurn !== null && disc.userTurn !== undefined) ? disc.userTurn : disc.mold.turn
-      const effectiveFade = (useTunedNumbers && disc.userFade !== null && disc.userFade !== undefined) ? disc.userFade : disc.mold.fade
-      const key = `${disc.mold.speed}-${effectiveTurn + effectiveFade}`
-      if (!coordMap[key]) coordMap[key] = []
-      coordMap[key].push(disc)
-    })
-
-    return Object.entries(coordMap).flatMap(([, groupedDiscs]) => {
-      return groupedDiscs.map((disc, index) => {
-        const effectiveTurn = (useTunedNumbers && disc.userTurn !== null && disc.userTurn !== undefined) ? disc.userTurn : disc.mold.turn
-        const effectiveFade = (useTunedNumbers && disc.userFade !== null && disc.userFade !== undefined) ? disc.userFade : disc.mold.fade
-        const stability = effectiveTurn + effectiveFade
-        const speed = disc.mold.speed
-        const isTuned = disc.userTurn !== null && disc.userTurn !== undefined 
-                     || disc.userFade !== null && disc.userFade !== undefined 
-                     || disc.userGlide !== null && disc.userGlide !== undefined
-
-        // Simple jitter: if more than 1 disc, offset them slightly in a circle
-        let jitterX = 0
-        let jitterY = 0
-        if (groupedDiscs.length > 1) {
-          const angle = (index / groupedDiscs.length) * 2 * Math.PI
-          const radius = 0.15 // small radius in grid units
-          jitterX = Math.cos(angle) * radius
-          jitterY = Math.sin(angle) * radius
-        }
-
-        return {
-          disc,
-          x: stability + jitterX,
-          y: speed + jitterY,
-          stability,
-          speed,
-          isTuned
-        }
-      })
-    })
-  }, [discs, useTunedNumbers])
 
   // Conversion functions for SVG space
   const getX = (val: number) => {
@@ -116,6 +96,107 @@ export default function FlightChart({ discs, vaultId }: FlightChartProps) {
     const ratio = (val - SPEED_MIN) / (SPEED_MAX - SPEED_MIN)
     return 1000 - (padding + (ratio * height))
   }
+
+  // Map discs to plot points with jittering for overlap
+  const plotPoints = useMemo(() => {
+    // Group discs by their EFFECTIVE flight numbers (user overrides take priority if toggled)
+    const coordMap: Record<string, Disc[]> = {}
+    
+    discs.forEach(disc => {
+      if (!disc.mold) return
+      const effectiveTurn = (useTunedNumbers && disc.userTurn !== null && disc.userTurn !== undefined) ? disc.userTurn : disc.mold.turn
+      const effectiveFade = (useTunedNumbers && disc.userFade !== null && disc.userFade !== undefined) ? disc.userFade : disc.mold.fade
+      const key = `${disc.mold.speed}-${effectiveTurn + effectiveFade}`
+      if (!coordMap[key]) coordMap[key] = []
+      coordMap[key].push(disc)
+    })
+
+    const points = Object.entries(coordMap).flatMap(([, groupedDiscs]) => {
+      return groupedDiscs.map((disc, index) => {
+        const effectiveTurn = (useTunedNumbers && disc.userTurn !== null && disc.userTurn !== undefined) ? disc.userTurn : disc.mold.turn
+        const effectiveFade = (useTunedNumbers && disc.userFade !== null && disc.userFade !== undefined) ? disc.userFade : disc.mold.fade
+        const stability = effectiveTurn + effectiveFade
+        const speed = disc.mold.speed
+        const isTuned = disc.userTurn !== null && disc.userTurn !== undefined 
+                     || disc.userFade !== null && disc.userFade !== undefined 
+                     || disc.userGlide !== null && disc.userGlide !== undefined
+
+        // Improved jitter: if more than 1 disc, offset them slightly
+        let jitterX = 0
+        let jitterY = 0
+        if (groupedDiscs.length > 1) {
+          const angle = (index / groupedDiscs.length) * 2 * Math.PI
+          const radius = 0.2 // slightly larger radius
+          jitterX = Math.cos(angle) * radius
+          jitterY = Math.sin(angle) * radius
+        }
+
+        return {
+          disc,
+          x: stability + jitterX,
+          y: speed + jitterY,
+          stability,
+          speed,
+          isTuned,
+          labelYOffset: 22, // Default offset below the dot
+          labelXOffset: 0
+        }
+      })
+    })
+
+    // Simple collision avoidance for labels
+    // Sort points by y then x to process them in order
+    const sortedPoints = [...points].sort((a, b) => (a.y === b.y ? a.x - b.x : a.y - b.y))
+    
+    // We'll track occupied spaces for labels (very basic approximation)
+    // Labels are roughly 60px wide and 15px tall in SVG space
+    const occupiedSpaces: {x: number, y: number, w: number, h: number}[] = []
+
+    return sortedPoints.map(point => {
+      const px = getX(point.x)
+      const py = getY(point.y)
+      
+      let finalYOffset = 22
+      let finalXOffset = 0
+      
+      // Try to find a spot for the label
+      const labelW = 60
+      const labelH = 15
+      
+      const checkOverlap = (lx: number, ly: number) => {
+        return occupiedSpaces.some(s => 
+          lx < s.x + s.w && 
+          lx + labelW > s.x && 
+          ly < s.y + s.h && 
+          ly + labelH > s.y
+        )
+      }
+
+      // Try below, then above, then slightly offset
+      const positions = [
+        { x: px - labelW/2, y: py + 12 }, // Below
+        { x: px - labelW/2, y: py - 25 }, // Above
+        { x: px - labelW/2 + 30, y: py + 12 }, // Below Right
+        { x: px - labelW/2 - 30, y: py + 12 }, // Below Left
+      ]
+
+      let foundPos = positions[0]
+      for (const pos of positions) {
+        if (!checkOverlap(pos.x, pos.y)) {
+          foundPos = pos
+          break
+        }
+      }
+
+      occupiedSpaces.push({ ...foundPos, w: labelW, h: labelH })
+      
+      return {
+        ...point,
+        labelXOffset: foundPos.x - (px - labelW/2),
+        labelYOffset: foundPos.y - py + (labelH/2) + 2
+      }
+    })
+  }, [discs, useTunedNumbers])
 
   return (
     <div className="bg-white p-4 sm:p-8 rounded-[40px] shadow-sm border border-slate-100 relative overflow-hidden flex flex-col items-center">
@@ -135,11 +216,11 @@ export default function FlightChart({ discs, vaultId }: FlightChartProps) {
           
           <div className="hidden sm:flex items-center gap-4 border-l border-slate-200 pl-4">
              <div className="flex items-center gap-1.5 pt-1">
-                <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                <span>Stock</span>
+                <div className="w-2 h-2 rounded-full bg-slate-400" />
+                <span>Disc Color</span>
              </div>
              <div className="flex items-center gap-1.5 pt-1">
-                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <div className="w-3 h-3 rounded-full border-2 border-amber-500" />
                 <span>Tuned</span>
              </div>
           </div>
@@ -189,25 +270,29 @@ export default function FlightChart({ discs, vaultId }: FlightChartProps) {
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: i * 0.005, type: 'spring' }}
-                onMouseEnter={() => setHoveredDisc(point.disc)}
-                onMouseLeave={() => {
-                  // We'll let the tooltip's own hover keep it alive if needed
-                }}
+                onMouseEnter={() => handleDotEnter(point.disc)}
+                onMouseLeave={handleDotLeave}
                 className="cursor-pointer group"
               >
-                <circle 
-                  cx={cx} 
-                  cy={cy} 
-                  r={isHovered ? 10 : 6} 
-                  className={`transition-all duration-300 ${isHovered ? 'stroke-4 stroke-white shadow-xl' : ''} ${point.isTuned && useTunedNumbers ? (isHovered ? 'fill-amber-400' : 'fill-amber-500') : (isHovered ? 'fill-indigo-500' : 'fill-indigo-600')}`} 
-                />
+                <g transform={`translate(${cx - (isHovered ? 15 : 10)}, ${cy - (isHovered ? 15 : 10)})`}>
+                  <DiscPreview 
+                    color={point.disc.color}
+                    secondaryColor={point.disc.secondaryColor}
+                    secondaryPattern={point.disc.secondaryPattern}
+                    stampFoil={point.disc.stampFoil}
+                    size={isHovered ? 30 : 20}
+                    isTuned={point.isTuned && useTunedNumbers}
+                    isHovered={isHovered}
+                    showTunedOutline={true}
+                  />
+                </g>
                 
                 {showLabel && (
                   <text 
-                    x={cx} 
-                    y={cy + 22} 
+                    x={cx + point.labelXOffset} 
+                    y={cy + point.labelYOffset} 
                     textAnchor="middle" 
-                    className={`text-[11px] font-black fill-current pointer-events-none transition-colors duration-200 ${isHovered ? (point.isTuned && useTunedNumbers ? 'fill-amber-500' : 'fill-indigo-600') : ''}`}
+                    className={`text-[11px] font-black fill-current pointer-events-none transition-all duration-200 ${isHovered ? (point.isTuned && useTunedNumbers ? 'fill-amber-500' : 'fill-indigo-600') : ''}`}
                   >
                     {point.disc.mold.name}
                   </text>
@@ -232,8 +317,8 @@ export default function FlightChart({ discs, vaultId }: FlightChartProps) {
                 top: `${(getY(plotPoints.find(p => p.disc.id === hoveredDisc.id)!.y) / 1000) * 100}%`,
                 transform: 'translate(-50%, -105%)', // Position above the dot
               }}
-              onMouseEnter={() => setHoveredDisc(hoveredDisc)} // Keep alive
-              onMouseLeave={() => setHoveredDisc(null)}
+              onMouseEnter={handleTooltipEnter}
+              onMouseLeave={handleTooltipLeave}
             >
               <div className="w-64 bg-slate-900 border border-slate-700 text-white p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
