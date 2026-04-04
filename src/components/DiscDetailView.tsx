@@ -1,8 +1,9 @@
 'use client'
 
-import { Edit3, ArrowLeft, MapPin } from 'lucide-react'
+import { Edit3, ArrowLeft, MapPin, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import DiscPreview from './DiscPreview'
 
 interface DiscDetailViewProps {
   disc: {
@@ -10,6 +11,8 @@ interface DiscDetailViewProps {
     collectionId: string | null
     weight: number | null
     color: string | null
+    secondaryColor?: string | null
+    secondaryPattern?: string | null
     plastic: string | null
     stamp: string | null
     stampFoil: string | null
@@ -17,6 +20,9 @@ interface DiscDetailViewProps {
     condition: number | null
     ink: string | null
     notes: string | null
+    userGlide: number | null
+    userTurn: number | null
+    userFade: number | null
     createdAt: Date
     mold: {
       name: string
@@ -36,6 +42,11 @@ interface DiscDetailViewProps {
 export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths = [] }: DiscDetailViewProps) {
   const router = useRouter()
   const categoryColor = categoryColors[disc.mold.category] || '#cbd5e1'
+  const hasTuning = disc.userGlide !== null || disc.userTurn !== null || disc.userFade !== null
+
+  const effectiveGlide = disc.userGlide ?? disc.mold.glide
+  const effectiveTurn = disc.userTurn ?? disc.mold.turn
+  const effectiveFade = disc.userFade ?? disc.mold.fade
 
   const isInBag = (loc: string | null) => {
     if (!loc) return false
@@ -57,9 +68,16 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
               <span className="inline-flex items-center px-4 h-[32px] rounded-full text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 border border-indigo-100 mb-5 shadow-sm">
                 {disc.mold.brand}
               </span>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none mb-4">
-                {disc.mold.name}
-              </h2>
+              <div className="flex items-center gap-3 flex-wrap mb-4">
+                <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none">
+                  {disc.mold.name}
+                </h2>
+                {hasTuning && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full text-[10px] font-black text-amber-600 uppercase tracking-widest">
+                    <Zap className="w-3 h-3" /> Tuned
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em]">{disc.mold.category}</span>
                 {isInBag(disc.location) && (
@@ -72,20 +90,30 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
             </div>
 
             {/* Flight Numbers */}
-            <div className="flex space-x-3 bg-slate-50 p-5 rounded-3xl border border-slate-100 shrink-0">
+            <div className={`flex space-x-3 p-5 rounded-3xl border shrink-0 ${hasTuning ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-100'}`}>
               {[
-                { key: 'speed', val: disc.mold.speed },
-                { key: 'glide', val: disc.mold.glide },
-                { key: 'turn', val: disc.mold.turn },
-                { key: 'fade', val: disc.mold.fade }
-              ].map((stat, idx) => (
-                <div key={idx} className="flex flex-col items-center">
-                  <span className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white text-slate-900 font-black text-xl border border-slate-200 shadow-sm">
-                    {stat.val}
-                  </span>
-                  <span className="text-[10px] font-black text-slate-400 mt-2.5 uppercase tracking-widest">{stat.key}</span>
-                </div>
-              ))}
+                { key: 'speed', moldVal: disc.mold.speed, effectiveVal: disc.mold.speed, isLocked: true },
+                { key: 'glide', moldVal: disc.mold.glide, effectiveVal: effectiveGlide, isLocked: false },
+                { key: 'turn',  moldVal: disc.mold.turn,  effectiveVal: effectiveTurn,  isLocked: false },
+                { key: 'fade',  moldVal: disc.mold.fade,  effectiveVal: effectiveFade,  isLocked: false },
+              ].map((stat, idx) => {
+                const overridden = !stat.isLocked && stat.effectiveVal !== stat.moldVal
+                return (
+                  <div key={idx} className="flex flex-col items-center">
+                    <span className={`w-14 h-14 flex items-center justify-center rounded-2xl font-black text-xl border shadow-sm transition-colors ${
+                      overridden
+                        ? 'bg-amber-500 text-white border-amber-400'
+                        : 'bg-white text-slate-900 border-slate-200'
+                    }`}>
+                      {stat.effectiveVal}
+                    </span>
+                    {overridden && (
+                      <span className="text-[8px] font-bold text-slate-400 mt-1 line-through">{stat.moldVal}</span>
+                    )}
+                    <span className="text-[10px] font-black text-slate-400 mt-1.5 uppercase tracking-widest">{stat.key}</span>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
@@ -102,9 +130,13 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</span>
               <div className="flex items-center gap-2 mt-1">
                 {disc.color && (
-                  <div 
-                    className="w-5 h-5 rounded-full border border-slate-200 shrink-0 shadow-sm" 
-                    style={{ backgroundColor: disc.color.toLowerCase().includes('/') ? disc.color.split('/')[0] : disc.color }}
+                  <DiscPreview 
+                    color={disc.color}
+                    secondaryColor={disc.secondaryColor}
+                    secondaryPattern={disc.secondaryPattern}
+                    stampFoil={disc.stampFoil}
+                    size={28}
+                    hoverScale={3}
                   />
                 )}
                 <span className="block text-xl font-black text-slate-900 leading-none">{disc.color || '—'}</span>

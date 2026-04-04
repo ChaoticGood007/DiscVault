@@ -17,7 +17,7 @@
 import { db as prisma } from "@/lib/prisma"
 import { cookies } from "next/headers"
 import Link from "next/link"
-import { LayoutDashboard, BarChart3, Plus, Upload } from "lucide-react"
+import { LayoutDashboard, BarChart3, Plus, Upload, Wind } from "lucide-react"
 import { Header } from "@/components/Header"
 import VaultSwitcher from "@/components/VaultSwitcher"
 import ExportButton from "@/components/ExportButton"
@@ -40,16 +40,17 @@ export default async function AllVaultsLayout({
   const navItems = [
     { label: 'Total Inventory', href: inventoryHref, icon: LayoutDashboard },
     { label: 'Total Stats', href: `/v/all/stats`, icon: BarChart3 },
+    { label: 'Total Chart', href: `/v/all/chart`, icon: Wind },
     { label: 'Add Disc', href: `/v/all/add`, icon: Plus },
     { label: 'Import', href: `/v/all/import`, icon: Upload },
   ]
 
   const navLinks = navItems.map((item) => {
     const Icon = item.icon
-    const linkClasses = "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-600 group shrink-0"
+    const linkClasses = "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all text-slate-600 hover:text-indigo-600 dark:hover:text-amber-500 group shrink-0"
     const content = (
       <>
-        <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+        <Icon className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-amber-500 transition-colors" />
         {item.label}
       </>
     )
@@ -86,7 +87,7 @@ export default async function AllVaultsLayout({
         <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-slate-100 rounded-md text-[8px] sm:text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] hidden sm:inline-block shrink-0">{totalCount} Discs</span>
       </Header>
 
-      <main className="max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col min-h-[calc(100vh-120px)]">
+      <main className="max-w-[1600px] w-full mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col min-h-[calc(100vh-120px)]">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col flex-1">
           {children}
         </div>

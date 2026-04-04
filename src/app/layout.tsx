@@ -16,6 +16,7 @@
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { getGlobalSettings } from '@/app/actions/settings';
 import { generateTailwindPalette } from '@/lib/colors';
@@ -52,9 +53,11 @@ export default async function RootLayout({
 
   const settings = await getGlobalSettings();
   const customPalette = generateTailwindPalette(settings.accentColor);
+  const cookieStore = await cookies();
+  const theme = (cookieStore.get('dv_theme')?.value ?? 'light') as string;
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme={theme}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900 min-h-screen`}
         style={customPalette as React.CSSProperties}

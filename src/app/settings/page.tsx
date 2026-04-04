@@ -22,7 +22,7 @@ export default async function SettingsPage() {
   return (
     <>
       <Header />
-      <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
+      <main className="max-w-[1600px] mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
         <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-4">

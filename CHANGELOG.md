@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-04
+
+### Added
+- **Multi-Theme System**: Added a 4-theme color system accessible from the header on every page. Themes are: **Light** (original crisp white), **Soft** (warm amber/cream, easy on the eyes), **Dark** (deep slate dark mode), and **Solar** (authentic Solarized Dark palette). Selection persists across sessions via a browser cookie and is applied server-side to prevent flash of wrong theme.
+- **Per-Disc Custom Flight Numbers**: Users can now override factory flight ratings (Glide, Turn, Fade) for individual discs. Features include a "Tuned" badge, custom inputs in the edit form, and a dedicated toggle on the Flight Chart to switch between "Stock" and "Tuned" distribution. Tuned discs are highlighted in amber on the chart.
+- **Interactive Flight Charts**: Added dedicated interactive visual distribution charts (`/v/[vaultId]/chart` and `/v/all/chart`) that plot discs on a classic Speed vs Stability grid. Features include collision-aware label positioning to prevent overlaps, recursive bag aggregation (analyzing a parent folder automatically includes all nested pockets), and support for toggling between factory stock and user-tuned flight numbers.
+- **Dynamic Disc Visualizations**: Replaced generic dots with detailed SVG approximations of actual discs. New "Secondary Color", "Secondary Pattern" (Halo, Burst, Split, Swirl), and "Stamp Foil" attributes are now rendered consistently across the Flight Chart, Inventory Lists, and Disc Detail views.
+- **Smart Color Parsing**: Integrated a robust color parsing system that translates descriptive names (e.g., "Neon Pink", "Clear Green", "Moonshine Glow") into precise visual representations.
+
+### Changed
+- **Leaf-Node Location Enforcement**: Refined the location system to only allow assigning discs to the bottommost "leaf" nodes of the location tree. Folders now act purely as organizational containers.
+- **Location UI Visuals**: Updated the `LocationPicker` and `LocationTreeEditor` with distinct icons to differentiate between organizational folders (📁) and actual storage spots (📍).
+
+### Fixed
+- **Header Layout Responsiveness**: Fixed a critical visual regression where the top navigation bar would horizontally collapse and overlap the vault metadata on 1280px+ displays. Expanded maximum app width constraint to `1600px` to comfortably accommodate the UI, and redesigned the mobile view to use a mathematically stable flex-wrapping "pill cloud" instead of a horizontal scrolling menu that was prone to clipping.
+
 ## [0.3.0] - 2026-03-28
 
 ### Added

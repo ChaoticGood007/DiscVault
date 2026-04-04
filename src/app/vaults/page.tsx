@@ -36,7 +36,7 @@ export default async function LandingPage() {
   return (
     <>
       <Header />
-      <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
+      <main className="max-w-[1600px] mx-auto px-2 sm:px-6 lg:px-8 py-4 md:py-12">
         <div className="max-w-6xl mx-auto space-y-12 py-10">
           <div className="text-center space-y-4">
         <h1 className="text-6xl font-black text-slate-900 tracking-tighter">

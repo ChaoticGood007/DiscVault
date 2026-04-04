@@ -35,6 +35,8 @@ interface EditDiscFormProps {
     collectionId: string | null
     weight: number | null
     color: string | null
+    secondaryColor: string | null
+    secondaryPattern: string | null
     plastic: string | null
     stamp: string | null
     stampFoil: string | null
@@ -42,10 +44,17 @@ interface EditDiscFormProps {
     condition: number | null
     ink: string | null
     notes: string | null
+    userGlide: number | null
+    userTurn: number | null
+    userFade: number | null
     mold: {
       name: string
       brand: string
       category: string
+      speed: number
+      glide: number
+      turn: number
+      fade: number
     }
   }
   collections: Collection[]
@@ -56,6 +65,10 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
   const router = useRouter()
   const [selectedVaultId, setSelectedVaultId] = useState<string>(disc.collectionId || '')
   const [selectedLocation, setSelectedLocation] = useState<string | null>(disc.location)
+  const [userGlide, setUserGlide] = useState<string>(disc.userGlide !== null && disc.userGlide !== undefined ? String(disc.userGlide) : '')
+  const [userTurn, setUserTurn] = useState<string>(disc.userTurn !== null && disc.userTurn !== undefined ? String(disc.userTurn) : '')
+  const [userFade, setUserFade] = useState<string>(disc.userFade !== null && disc.userFade !== undefined ? String(disc.userFade) : '')
+  const hasTuning = userGlide !== '' || userTurn !== '' || userFade !== ''
   
   const currentTree = (() => {
     if (!selectedVaultId) return []
@@ -141,6 +154,18 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
             />
           </div>
           <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Location</label>
+            <LocationPicker 
+              tree={currentTree} 
+              value={selectedLocation}
+              onChange={(val) => setSelectedLocation(val)}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Color</label>
             <input
               type="text"
@@ -149,9 +174,32 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
               className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             />
           </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Sec. Color</label>
+            <input
+              type="text"
+              name="secondaryColor"
+              defaultValue={disc.secondaryColor || ''}
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Sec. Pattern</label>
+            <select
+              name="secondaryPattern"
+              defaultValue={disc.secondaryPattern || ''}
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
+            >
+              <option value="">None</option>
+              <option value="Halo">Halo/Overmold</option>
+              <option value="Burst">Center Burst</option>
+              <option value="Split">Half 'n Half</option>
+              <option value="Swirl">Swirly</option>
+            </select>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Stamp</label>
             <input
@@ -168,15 +216,6 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
               name="stampFoil"
               defaultValue={disc.stampFoil || ''}
               className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Location</label>
-            <LocationPicker 
-              tree={currentTree} 
-              value={selectedLocation}
-              onChange={(val) => setSelectedLocation(val)}
-              className="w-full"
             />
           </div>
         </div>
@@ -216,6 +255,98 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
             defaultValue={disc.notes || ''}
             className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none resize-none shadow-sm"
           ></textarea>
+        </div>
+
+        {/* ── User Flight Numbers ── */}
+        <div className="space-y-4 pt-6 border-t border-slate-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="block text-xs font-black text-slate-900 uppercase tracking-widest">User Flight Numbers</span>
+              <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">
+                Override the disc's actual behaviour based on how <em>this copy</em> flies. Speed is locked to the mold.
+              </span>
+            </div>
+            {hasTuning && (
+              <button
+                type="button"
+                onClick={() => { setUserGlide(''); setUserTurn(''); setUserFade('') }}
+                className="text-[10px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest transition-colors"
+              >
+                Clear Overrides
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-4 gap-3">
+            {/* Speed — locked */}
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Speed</label>
+              <div className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-400 text-center text-sm select-none">
+                {disc.mold.speed}
+              </div>
+              <span className="block text-[8px] text-center text-slate-300 font-bold uppercase tracking-widest">Locked</span>
+            </div>
+
+            {/* Glide */}
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Glide <span className="normal-case font-medium text-slate-300">(rated {disc.mold.glide})</span>
+              </label>
+              <input
+                type="number"
+                name="userGlide"
+                step="0.5"
+                min="1"
+                max="7"
+                placeholder={String(disc.mold.glide)}
+                value={userGlide}
+                onChange={e => setUserGlide(e.target.value)}
+                className="w-full px-4 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-amber-100 focus:border-amber-400 transition-all outline-none shadow-sm text-center"
+              />
+            </div>
+
+            {/* Turn */}
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Turn <span className="normal-case font-medium text-slate-300">(rated {disc.mold.turn})</span>
+              </label>
+              <input
+                type="number"
+                name="userTurn"
+                step="0.5"
+                min="-5"
+                max="1"
+                placeholder={String(disc.mold.turn)}
+                value={userTurn}
+                onChange={e => setUserTurn(e.target.value)}
+                className="w-full px-4 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-amber-100 focus:border-amber-400 transition-all outline-none shadow-sm text-center"
+              />
+            </div>
+
+            {/* Fade */}
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Fade <span className="normal-case font-medium text-slate-300">(rated {disc.mold.fade})</span>
+              </label>
+              <input
+                type="number"
+                name="userFade"
+                step="0.5"
+                min="0"
+                max="5"
+                placeholder={String(disc.mold.fade)}
+                value={userFade}
+                onChange={e => setUserFade(e.target.value)}
+                className="w-full px-4 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-amber-100 focus:border-amber-400 transition-all outline-none shadow-sm text-center"
+              />
+            </div>
+          </div>
+
+          {hasTuning && (
+            <p className="text-[10px] text-amber-600 font-bold bg-amber-50 px-4 py-2.5 rounded-xl border border-amber-100">
+              ⚡ Custom flight numbers are active. This disc will be plotted using your values on the Flight Chart.
+            </p>
+          )}
         </div>
 
         <div className="pt-6 flex gap-4">

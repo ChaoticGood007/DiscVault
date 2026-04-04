@@ -1,66 +1,153 @@
 @import "tailwindcss";
 
-@theme {
-  --color-background: #f8fafc; /* Slate 50 */
-  --color-foreground: #0f172a; /* Slate 900 */
+/* ============================================================
+   DISCVAULT THEME SYSTEM
+   4 themes driven by [data-theme] on <html>
+   Tokens map to existing Tailwind utility classes via overrides
+   ============================================================ */
+
+/* ── LIGHT (default) ─────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --dv-bg:           #f8fafc; /* slate-50  */
+  --dv-surface:      #ffffff; /* white     */
+  --dv-surface-2:    #f8fafc; /* slate-50  */
+  --dv-surface-3:    #f1f5f9; /* slate-100 */
+  --dv-border:       #e2e8f0; /* slate-200 */
+  --dv-border-2:     #cbd5e1; /* slate-300 */
+  --dv-text:         #0f172a; /* slate-900 */
+  --dv-text-muted:   #475569; /* slate-600 */
+  --dv-text-faint:   #94a3b8; /* slate-400 */
+  --dv-input-bg:     #ffffff;
 }
 
+/* ── SOFT LIGHT (warm amber/stone) ───────────────────────── */
+[data-theme="soft"] {
+  --dv-bg:           #fdf4e3;
+  --dv-surface:      #fffbf0;
+  --dv-surface-2:    #fdf4e3;
+  --dv-surface-3:    #f5e9cc;
+  --dv-border:       #e8d5aa;
+  --dv-border-2:     #d4b882;
+  --dv-text:         #2d1f0e;
+  --dv-text-muted:   #6b4e2a;
+  --dv-text-faint:   #b08050;
+  --dv-input-bg:     #fffbf0;
+}
+
+/* ── DARK ────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --dv-bg:           #0f172a; /* slate-900  */
+  --dv-surface:      #1e293b; /* slate-800  */
+  --dv-surface-2:    #0f172a; /* slate-900  */
+  --dv-surface-3:    #334155; /* slate-700  */
+  --dv-border:       #334155; /* slate-700  */
+  --dv-border-2:     #475569; /* slate-600  */
+  --dv-text:         #f1f5f9; /* slate-100  */
+  --dv-text-muted:   #94a3b8; /* slate-400  */
+  --dv-text-faint:   #64748b; /* slate-500  */
+  --dv-input-bg:     #1e293b;
+}
+
+/* ── SOLARIZED DARK ──────────────────────────────────────── */
+[data-theme="solarized"] {
+  --dv-bg:           #002b36; /* base03     */
+  --dv-surface:      #073642; /* base02     */
+  --dv-surface-2:    #002b36; /* base03     */
+  --dv-surface-3:    #083f4d;
+  --dv-border:       #0d4a5a;
+  --dv-border-2:     #1a5f70;
+  --dv-text:         #839496; /* base0      */
+  --dv-text-muted:   #657b83; /* base00     */
+  --dv-text-faint:   #586e75; /* base01     */
+  --dv-input-bg:     #073642;
+}
+
+/* ============================================================
+   BASE STYLES — driven by tokens
+   ============================================================ */
 :root {
-  background-color: #f8fafc;
-  color: #0f172a;
-}
-
-/* Explicitly disable dark mode inheritance for a "Fixed" light theme */
-@media (prefers-color-scheme: dark) {
-  :root {
-    background-color: #f8fafc !important;
-    color: #0f172a !important;
-  }
+  background-color: var(--dv-bg);
+  color: var(--dv-text);
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+  background-color: var(--dv-bg) !important;
+  color: var(--dv-text) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure dynamic accent colors don't wash out child text components */
-.bg-indigo-600.text-white, 
-.bg-indigo-600 .text-white,
-.bg-indigo-700.text-white, 
-.bg-indigo-700 .text-white,
-.hover\:bg-indigo-700:hover.text-white,
-.hover\:bg-indigo-700:hover .text-white,
-.hover\:bg-indigo-600:hover.text-white,
-.hover\:bg-indigo-600:hover .text-white {
-  color: var(--color-indigo-contrast, #ffffff) !important;
-}
+/* ============================================================
+   TAILWIND CLASS → TOKEN REMAPPING
+   Maps hard-coded utility classes to semantic theme tokens.
+   This makes every component theme-aware without code changes.
+   ============================================================ */
 
-/* Ensure form elements have high contrast */
+/* Backgrounds */
+.bg-white                { background-color: var(--dv-surface) !important; }
+.bg-slate-50             { background-color: var(--dv-surface-2) !important; }
+.bg-slate-100            { background-color: var(--dv-surface-3) !important; }
+.hover\:bg-slate-50:hover { background-color: var(--dv-surface-2) !important; }
+.hover\:bg-slate-100:hover { background-color: var(--dv-surface-3) !important; }
+
+/* Text */
+.text-slate-900          { color: var(--dv-text) !important; }
+.text-slate-800          { color: var(--dv-text) !important; }
+.text-slate-700          { color: var(--dv-text-muted) !important; }
+.text-slate-600          { color: var(--dv-text-muted) !important; }
+.text-slate-500          { color: var(--dv-text-muted) !important; }
+.text-slate-400          { color: var(--dv-text-faint) !important; }
+.hover\:text-slate-900:hover { color: var(--dv-text) !important; }
+
+/* Borders */
+.border-slate-100        { border-color: var(--dv-border) !important; }
+.border-slate-200        { border-color: var(--dv-border) !important; }
+.border-slate-300        { border-color: var(--dv-border-2) !important; }
+
+/* Dividers */
+.divide-slate-100 > * + * { border-color: var(--dv-border) !important; }
+.divide-slate-200 > * + * { border-color: var(--dv-border) !important; }
+
+/* Form elements */
 input, select, textarea {
-  @apply bg-white text-slate-900 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500;
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: var(--dv-input-bg) !important;
+  color: var(--dv-text) !important;
+  border-color: var(--dv-border) !important;
 }
 
-/* Table specific overrides for visibility */
-table {
-  @apply border-slate-200;
+input::placeholder,
+textarea::placeholder {
+  color: var(--dv-text-faint) !important;
 }
 
-th {
-  @apply bg-slate-100 text-slate-600 border-slate-200;
+/* Table */
+table { border-color: var(--dv-border); }
+th    { background-color: var(--dv-surface-3) !important; color: var(--dv-text-muted) !important; border-color: var(--dv-border) !important; }
+td    { border-color: var(--dv-border) !important; }
+
+/* Shadows — soften in dark themes */
+[data-theme="dark"] .shadow-sm,
+[data-theme="dark"] .shadow-xl,
+[data-theme="dark"] .shadow-2xl,
+[data-theme="solarized"] .shadow-sm,
+[data-theme="solarized"] .shadow-xl,
+[data-theme="solarized"] .shadow-2xl {
+  --tw-shadow-color: rgba(0,0,0,0.4);
 }
 
-td {
-  @apply border-slate-100;
-}
+/* Accent colors (indigo) — no override applied; Tailwind keeps them as-is */
 
+/* ============================================================
+   UTILITIES
+   ============================================================ */
 @utility no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-  &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
-  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
+@theme {
+  --color-background: var(--dv-bg);
+  --color-foreground: var(--dv-text);
+}

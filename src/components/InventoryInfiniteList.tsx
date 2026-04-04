@@ -22,12 +22,15 @@ import { Prisma } from '@prisma/client'
 import { getPaginatedInventory } from '@/app/actions/inventory'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
+import DiscPreview from './DiscPreview'
 
 export interface InventoryItem {
   id: string
   collectionId: string | null
   weight: number | null
   color: string | null
+  secondaryColor?: string | null
+  secondaryPattern?: string | null
   plastic: string | null
   stamp: string | null
   stampFoil: string | null
@@ -177,9 +180,13 @@ export default function InventoryInfiniteList({
                       if (visibleColumns.includes('color') && item.color) {
                         tags.push(
                           <div key="color" className="flex items-center gap-1.5" title={item.color}>
-                            <div 
-                              className="w-2.5 h-2.5 rounded-full border border-slate-200 shrink-0 shadow-sm" 
-                              style={{ backgroundColor: item.color.toLowerCase().includes('/') ? item.color.split('/')[0] : item.color }}
+                            <DiscPreview 
+                              color={item.color} 
+                              secondaryColor={item.secondaryColor}
+                              secondaryPattern={item.secondaryPattern}
+                              stampFoil={item.stampFoil}
+                              size={12} 
+                              hoverScale={5}
                             />
                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
                               {item.color}
@@ -187,7 +194,6 @@ export default function InventoryInfiniteList({
                           </div>
                         )
                       }
-
                       if (visibleColumns.includes('stamp') && item.stampFoil) {
                         tags.push(
                           <span key="foil" className="text-[10px] font-black text-amber-600 uppercase tracking-widest">

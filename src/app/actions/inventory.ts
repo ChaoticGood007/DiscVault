@@ -22,11 +22,19 @@ import { redirect } from "next/navigation"
 import { resolveInBag } from "@/lib/locationTree"
 import { getLocationTree } from "@/app/actions/settings"
 
+function parseUserFlight(val: FormDataEntryValue | null): number | null {
+  if (val === null || val === '') return null
+  const n = parseFloat(val as string)
+  return isNaN(n) ? null : n
+}
+
 export async function addDisc(formData: FormData) {
   const moldId = formData.get('moldId') as string
   const collectionId = formData.get('collectionId') as string || null
   const weight = parseFloat(formData.get('weight') as string) || null
   const color = formData.get('color') as string
+  const secondaryColor = formData.get('secondaryColor') as string || null
+  const secondaryPattern = formData.get('secondaryPattern') as string || null
   const plastic = formData.get('plastic') as string
   const stamp = formData.get('stamp') as string
   const stampFoil = formData.get('stampFoil') as string
@@ -34,12 +42,37 @@ export async function addDisc(formData: FormData) {
   const condition = parseInt(formData.get('condition') as string) || null
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
+  const userGlide = parseUserFlight(formData.get('userGlide'))
+  const userTurn = parseUserFlight(formData.get('userTurn'))
+  const userFade = parseUserFlight(formData.get('userFade'))
 
   if (!moldId) throw new Error('Mold ID is required')
 
-  await prisma.inventory.create({
-    data: { moldId, collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes },
-  })
+  try {
+    await prisma.inventory.create({
+      data: { 
+        mold: { connect: { id: moldId } },
+        collection: collectionId ? { connect: { id: collectionId } } : undefined,
+        weight, 
+        color, 
+        secondaryColor, 
+        secondaryPattern, 
+        plastic, 
+        stamp, 
+        stampFoil, 
+        location, 
+        condition, 
+        ink, 
+        notes, 
+        userGlide, 
+        userTurn, 
+        userFade 
+      },
+    })
+  } catch (error) {
+    console.error('SERVER ACTION ERROR (addDisc):', error)
+    throw error
+  }
 
   revalidatePath('/')
   revalidatePath('/v/all')
@@ -51,6 +84,8 @@ export async function updateDisc(id: string, formData: FormData) {
   const collectionId = formData.get('collectionId') as string || null
   const weight = parseFloat(formData.get('weight') as string) || null
   const color = formData.get('color') as string
+  const secondaryColor = formData.get('secondaryColor') as string || null
+  const secondaryPattern = formData.get('secondaryPattern') as string || null
   const plastic = formData.get('plastic') as string
   const stamp = formData.get('stamp') as string
   const stampFoil = formData.get('stampFoil') as string
@@ -58,11 +93,35 @@ export async function updateDisc(id: string, formData: FormData) {
   const condition = parseInt(formData.get('condition') as string) || null
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
+  const userGlide = parseUserFlight(formData.get('userGlide'))
+  const userTurn = parseUserFlight(formData.get('userTurn'))
+  const userFade = parseUserFlight(formData.get('userFade'))
 
-  await prisma.inventory.update({
-    where: { id },
-    data: { collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes },
-  })
+  try {
+    await prisma.inventory.update({
+      where: { id },
+      data: { 
+        collection: collectionId ? { connect: { id: collectionId } } : { disconnect: true },
+        weight, 
+        color, 
+        secondaryColor, 
+        secondaryPattern, 
+        plastic, 
+        stamp, 
+        stampFoil, 
+        location, 
+        condition, 
+        ink, 
+        notes, 
+        userGlide, 
+        userTurn, 
+        userFade 
+      },
+    })
+  } catch (error) {
+    console.error('SERVER ACTION ERROR (updateDisc):', error)
+    throw error
+  }
 
   revalidatePath('/')
   revalidatePath('/v/all')
@@ -172,11 +231,13 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
 
       await prisma.inventory.create({
         data: {
-          moldId: mold.id,
-          collectionId: targetCollectionId || null,
+          mold: { connect: { id: mold.id } },
+          collection: targetCollectionId ? { connect: { id: targetCollectionId } } : undefined,
           plastic: record.plastic || null,
           weight: parseFloat(record.weight) || null,
           color: record.color || null,
+          secondaryColor: record.secondaryColor || null,
+          secondaryPattern: record.secondaryPattern || null,
           stamp: record.stamp || null,
           stampFoil: record.stampFoil || null,
           location,

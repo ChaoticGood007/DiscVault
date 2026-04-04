@@ -17,7 +17,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Plus, Trash2, ChevronRight, Briefcase, GripVertical, FolderOpen, Check, Download } from 'lucide-react'
+import { Plus, Trash2, ChevronRight, Briefcase, GripVertical, FolderOpen, Check, Download, MapPin } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { saveLocationTree, migrateLocationsFromInventory } from '@/app/actions/settings'
 import { reorderInTree, indentNode, dedentNode, getNodeInfo, generateId, type LocationNode } from '@/lib/locationTree'
@@ -227,6 +227,8 @@ function DragNodeRow({
 
   const commitLabel = () => { onUpdate(node.id, { label }); setEditing(false) }
 
+  const isLeaf = node.children.length === 0
+
   return (
     <div
       draggable
@@ -240,7 +242,12 @@ function DragNodeRow({
       style={{ paddingLeft: `${12 + depth * 24}px` }}
     >
       <GripVertical className="w-3 h-3 text-slate-300 shrink-0 cursor-grab active:cursor-grabbing" />
-      <span className="w-3.5 h-3.5 shrink-0" />
+      
+      {isLeaf ? (
+        <MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+      ) : (
+        <FolderOpen className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+      )}
 
       {editing ? (
         <input
