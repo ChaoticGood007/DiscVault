@@ -1,6 +1,6 @@
 # Track: mobile_disc_preview_20260404 Implementation Plan
 
-## Phase 1: Prototype
+## Phase 1: Prototype [checkpoint: 02dcf60]
 - [x] Task: Evaluate whether a lightbox modal or tap-to-expand is more intuitive on mobile.
 - [x] Task: Conductor - User Manual Verification 'Prototype' (Protocol in workflow.md)
 
