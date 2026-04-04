@@ -22,6 +22,12 @@ import { redirect } from "next/navigation"
 import { resolveInBag } from "@/lib/locationTree"
 import { getLocationTree } from "@/app/actions/settings"
 
+function parseUserFlight(val: FormDataEntryValue | null): number | null {
+  if (val === null || val === '') return null
+  const n = parseFloat(val as string)
+  return isNaN(n) ? null : n
+}
+
 export async function addDisc(formData: FormData) {
   const moldId = formData.get('moldId') as string
   const collectionId = formData.get('collectionId') as string || null
@@ -34,12 +40,20 @@ export async function addDisc(formData: FormData) {
   const condition = parseInt(formData.get('condition') as string) || null
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
+  const userGlide = parseUserFlight(formData.get('userGlide'))
+  const userTurn = parseUserFlight(formData.get('userTurn'))
+  const userFade = parseUserFlight(formData.get('userFade'))
 
   if (!moldId) throw new Error('Mold ID is required')
 
-  await prisma.inventory.create({
-    data: { moldId, collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes },
-  })
+  try {
+    await prisma.inventory.create({
+      data: { moldId, collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes, userGlide, userTurn, userFade },
+    })
+  } catch (error) {
+    console.error('SERVER ACTION ERROR (addDisc):', error)
+    throw error
+  }
 
   revalidatePath('/')
   revalidatePath('/v/all')
@@ -58,11 +72,19 @@ export async function updateDisc(id: string, formData: FormData) {
   const condition = parseInt(formData.get('condition') as string) || null
   const ink = formData.get('ink') as string
   const notes = formData.get('notes') as string
+  const userGlide = parseUserFlight(formData.get('userGlide'))
+  const userTurn = parseUserFlight(formData.get('userTurn'))
+  const userFade = parseUserFlight(formData.get('userFade'))
 
-  await prisma.inventory.update({
-    where: { id },
-    data: { collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes },
-  })
+  try {
+    await prisma.inventory.update({
+      where: { id },
+      data: { collectionId, weight, color, plastic, stamp, stampFoil, location, condition, ink, notes, userGlide, userTurn, userFade },
+    })
+  } catch (error) {
+    console.error('SERVER ACTION ERROR (updateDisc):', error)
+    throw error
+  }
 
   revalidatePath('/')
   revalidatePath('/v/all')

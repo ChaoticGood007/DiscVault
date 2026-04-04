@@ -86,13 +86,15 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
         </span>
         <div className="flex items-center gap-1 shrink-0">
           {selected && (
-            <button
-              type="button"
+            <span
+              role="button"
+              tabIndex={0}
               onClick={e => { e.stopPropagation(); select(null) }}
-              className="p-0.5 rounded text-slate-300 hover:text-red-400 transition-colors"
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); select(null) } }}
+              className="p-0.5 rounded text-slate-300 hover:text-red-400 transition-colors cursor-pointer"
             >
               <X className="w-3 h-3" />
-            </button>
+            </span>
           )}
           <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
         </div>

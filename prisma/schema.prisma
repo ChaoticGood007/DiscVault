@@ -57,6 +57,9 @@ model Inventory {
   condition    Int?
   ink          String?
   notes        String?
+  userGlide    Float?
+  userTurn     Float?
+  userFade     Float?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 }
