@@ -2,7 +2,7 @@
 
 ## Phase 1: Exploration and Discovery
 - [x] Task: Review existing `secondaryPattern` types and usage in forms and preview component.
-- [ ] Task: Conductor - User Manual Verification 'Exploration and Discovery' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Exploration and Discovery' (Protocol in workflow.md)
 
 ## Phase 2: Form Integration
 - [ ] Task: Update `AddDiscForm.tsx` to include 'Speckled' in the secondary pattern dropdown.
