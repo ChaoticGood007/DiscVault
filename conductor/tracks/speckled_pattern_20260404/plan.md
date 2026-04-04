@@ -5,8 +5,8 @@
 - [x] Task: Conductor - User Manual Verification 'Exploration and Discovery' (Protocol in workflow.md)
 
 ## Phase 2: Form Integration
-- [ ] Task: Update `AddDiscForm.tsx` to include 'Speckled' in the secondary pattern dropdown.
-- [ ] Task: Update `EditDiscForm.tsx` to include 'Speckled' in the secondary pattern dropdown.
+- [~] Task: Update `AddDiscForm.tsx` to include 'Speckled' in the secondary pattern dropdown.
+- [~] Task: Update `EditDiscForm.tsx` to include 'Speckled' in the secondary pattern dropdown.
 - [ ] Task: Conductor - User Manual Verification 'Form Integration' (Protocol in workflow.md)
 
 ## Phase 3: Visual Implementation
