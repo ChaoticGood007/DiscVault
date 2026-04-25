@@ -244,6 +244,9 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           condition: parseInt(record.condition) || null,
           ink: record.ink || null,
           notes: record.notes || null,
+          userGlide: parseFloat(record.userGlide) || null,
+          userTurn: parseFloat(record.userTurn) || null,
+          userFade: parseFloat(record.userFade) || null,
         }
       })
       successCount++
@@ -261,7 +264,8 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
 export async function exportInventory() {
   return await prisma.inventory.findMany({
     include: {
-      mold: true
+      mold: true,
+      collection: true,
     },
     orderBy: {
       createdAt: 'desc'

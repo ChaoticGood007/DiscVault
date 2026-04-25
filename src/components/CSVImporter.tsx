@@ -33,12 +33,17 @@ const SCHEMA_FIELDS = [
   { id: 'fade', label: 'Fade' },
   { id: 'category', label: 'Category' },
   { id: 'color', label: 'Color' },
+  { id: 'secondaryColor', label: 'Secondary Color' },
+  { id: 'secondaryPattern', label: 'Secondary Pattern' },
   { id: 'stamp', label: 'Stamp' },
   { id: 'stampFoil', label: 'Stamp Foil' },
   { id: 'location', label: 'Location' },
   { id: 'condition', label: 'Condition (1-10)' },
   { id: 'ink', label: 'Ink Status' },
   { id: 'notes', label: 'Notes' },
+  { id: 'userGlide', label: 'Custom Glide' },
+  { id: 'userTurn', label: 'Custom Turn' },
+  { id: 'userFade', label: 'Custom Fade' },
 ]
 
 interface Vault {
