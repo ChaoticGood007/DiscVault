@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-04-25
+
+### Added
+- **Bag Check Feature:** A new tool to help you make sure you haven't left any discs behind after practice or a round. Accessed from the vault header, it lets you select one of your configured bags and gives you an interactive checklist of all discs in that bag. Discs are grouped by their sub-location (e.g., 'Putter Pocket', 'Main Compartment') and sorted by speed (highest first) then net stability (most overstable first).
+
+### Fixed
+- Fixed an issue with CSV imports where columns without spaces (e.g., `SecondaryColor`) were not being automatically mapped correctly.
+- Fixed a bug where legitimate `0` flight numbers (e.g., `0` turn, `0` fade) were being ignored and overwritten during CSV imports.
+
 ## [0.4.3] - 2026-04-25
 
 ### Fixed
