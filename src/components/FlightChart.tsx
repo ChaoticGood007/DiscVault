@@ -100,6 +100,8 @@ export default function FlightChart({ discs, vaultId, defaultShowFlightPaths = f
     return 1000 - (padding + (ratio * height))
   }
 
+  const origin = getFlightPathOrigin()
+
   // Map discs to plot points with jittering for overlap
   const plotPoints = useMemo(() => {
     // Group discs by their EFFECTIVE flight numbers (user overrides take priority if toggled)
