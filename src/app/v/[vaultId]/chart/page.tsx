@@ -25,12 +25,12 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ vaultId: string }>
-  searchParams: Promise<{ location?: string; showAll?: string }>
+  searchParams: Promise<{ location?: string; showAll?: string; flightPaths?: string }>
 }
 
 export default async function VaultChartPage({ params, searchParams }: Props) {
   const { vaultId } = await params
-  const { location, showAll } = await searchParams
+  const { location, showAll, flightPaths } = await searchParams
 
   // Fetch vault and its location tree
   const vault = await prisma.discCollection.findUnique({
@@ -101,7 +101,11 @@ export default async function VaultChartPage({ params, searchParams }: Props) {
         </div>
       </div>
       
-      <FlightChart discs={filteredDiscs as any} vaultId={vaultId} />
+      <FlightChart 
+        discs={filteredDiscs as any} 
+        vaultId={vaultId} 
+        defaultShowFlightPaths={flightPaths === 'true'} 
+      />
     </div>
   )
 }

@@ -195,6 +195,7 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
               <option value="Burst">Center Burst</option>
               <option value="Split">Half 'n Half</option>
               <option value="Swirl">Swirly</option>
+              <option value="Speckled">Speckled</option>
             </select>
           </div>
         </div>

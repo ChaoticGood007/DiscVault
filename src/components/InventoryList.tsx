@@ -331,14 +331,16 @@ export default function InventoryList({
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
                         {item.color && (
-                          <DiscPreview 
-                           color={item.color} 
-                           secondaryColor={item.secondaryColor}
-                           secondaryPattern={item.secondaryPattern}
-                           stampFoil={item.stampFoil}
-                           size={16} 
-                           hoverScale={5}
-                         />
+                          <DiscPreview
+                            color={item.color}
+                            secondaryColor={item.secondaryColor}
+                            secondaryPattern={item.secondaryPattern}
+                            stampFoil={item.stampFoil}
+                            size={16}
+                            hoverScale={5}
+                            disc={item}
+                          />
+
                         )}
 
                         <span className="text-sm font-bold text-slate-700">{item.color || "—"}</span>

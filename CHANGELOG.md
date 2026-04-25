@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-04-24
+
+### Fixed
+- Fixed flight path visualization drawing incorrectly on the flight charts by ensuring the curves anchor to the correct bottom-center origin point.
+- Added `tinycolor2` dependency that was missing and crashing the dev server.
+
 ## [0.4.0] - 2026-04-04
 
 ### Added

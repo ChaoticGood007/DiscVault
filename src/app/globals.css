@@ -18,6 +18,7 @@
   --dv-text:         #0f172a; /* slate-900 */
   --dv-text-muted:   #475569; /* slate-600 */
   --dv-text-faint:   #94a3b8; /* slate-400 */
+  --dv-accent:       #4f46e5; /* indigo-600 */
   --dv-input-bg:     #ffffff;
 }
 
@@ -32,6 +33,7 @@
   --dv-text:         #2d1f0e;
   --dv-text-muted:   #6b4e2a;
   --dv-text-faint:   #b08050;
+  --dv-accent:       #d97706; /* amber-600 */
   --dv-input-bg:     #fffbf0;
 }
 
@@ -46,6 +48,7 @@
   --dv-text:         #f1f5f9; /* slate-100  */
   --dv-text-muted:   #94a3b8; /* slate-400  */
   --dv-text-faint:   #64748b; /* slate-500  */
+  --dv-accent:       #818cf8; /* indigo-400 */
   --dv-input-bg:     #1e293b;
 }
 
