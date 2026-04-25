@@ -127,7 +127,7 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
               <span className="block text-xl font-black text-slate-900">{disc.plastic || '—'}</span>
             </div>
             <div className="space-y-2">
-              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</span>
+              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Primary Color</span>
               <div className="flex items-center gap-2 mt-1">
                 {disc.color && (
                   <DiscPreview 
@@ -143,23 +143,31 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
               </div>
             </div>
             <div className="space-y-2">
+              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Secondary Color</span>
+              <span className="block text-xl font-black text-slate-900">{disc.secondaryColor || '—'}</span>
+            </div>
+            <div className="space-y-2">
+              <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Secondary Pattern</span>
+              <span className="block text-xl font-black text-slate-900">{disc.secondaryPattern || '—'}</span>
+            </div>
+            <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Condition</span>
               <span className="block text-xl font-black text-slate-900">{disc.condition ? `${disc.condition}/10` : '—'}</span>
             </div>
             
-            <div className="space-y-2 border-t border-slate-50 pt-8 md:border-t-0 md:pt-0">
+            <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Stamp</span>
               <span className="block text-xl font-black text-slate-900">{disc.stamp || 'Stock'}</span>
             </div>
-            <div className="space-y-2 border-t border-slate-50 pt-8 md:border-t-0 md:pt-0">
+            <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Foil</span>
               <span className="block text-xl font-black text-slate-900">{disc.stampFoil || '—'}</span>
             </div>
-            <div className="space-y-2 border-t border-slate-50 pt-8 md:border-t-0 md:pt-0">
+            <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Ink</span>
               <span className="block text-xl font-black text-slate-900">{disc.ink || 'None'}</span>
             </div>
-            <div className="space-y-2 border-t border-slate-50 pt-8 md:border-t-0 md:pt-0">
+            <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3" /> Location</span>
               <span className="block text-xl font-black text-slate-900">{disc.location || '—'}</span>
             </div>
