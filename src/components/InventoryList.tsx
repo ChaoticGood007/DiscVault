@@ -325,9 +325,9 @@ export default function InventoryList({
                   {visibleColumns.includes('flight_numbers') && (
                     <>
                       <td className="px-6 py-5 text-sm font-black text-center text-slate-900">{item.mold.speed}</td>
-                      <td className={`px-6 py-5 text-sm font-black text-center ${useUserFlightNumbers && item.userGlide !== null ? 'text-indigo-600' : 'text-slate-900'}`}>{useUserFlightNumbers && item.userGlide !== null ? `${item.userGlide}*` : item.mold.glide}</td>
-                      <td className={`px-6 py-5 text-sm font-black text-center ${useUserFlightNumbers && item.userTurn !== null ? 'text-indigo-600' : 'text-slate-900'}`}>{useUserFlightNumbers && item.userTurn !== null ? `${item.userTurn}*` : item.mold.turn}</td>
-                      <td className={`px-6 py-5 text-sm font-black text-center ${useUserFlightNumbers && item.userFade !== null ? 'text-indigo-600' : 'text-slate-900'}`}>{useUserFlightNumbers && item.userFade !== null ? `${item.userFade}*` : item.mold.fade}</td>
+                      <td className={`px-6 py-5 text-sm font-black text-center ${useUserFlightNumbers && item.userGlide !== null ? 'text-amber-600' : 'text-slate-900'}`}>{useUserFlightNumbers && item.userGlide !== null ? `${item.userGlide}*` : item.mold.glide}</td>
+                      <td className={`px-6 py-5 text-sm font-black text-center ${useUserFlightNumbers && item.userTurn !== null ? 'text-amber-600' : 'text-slate-900'}`}>{useUserFlightNumbers && item.userTurn !== null ? `${item.userTurn}*` : item.mold.turn}</td>
+                      <td className={`px-6 py-5 text-sm font-black text-center ${useUserFlightNumbers && item.userFade !== null ? 'text-amber-600' : 'text-slate-900'}`}>{useUserFlightNumbers && item.userFade !== null ? `${item.userFade}*` : item.mold.fade}</td>
                     </>
                   )}
                   {visibleColumns.includes('plastic') && <td className="px-6 py-5 text-sm font-bold text-slate-700">{item.plastic || "—"}</td>}

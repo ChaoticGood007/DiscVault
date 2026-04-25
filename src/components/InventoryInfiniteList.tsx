@@ -241,7 +241,7 @@ export default function InventoryInfiniteList({
                       { key: 'fade', label: 'F', val: useUserFlightNumbers && item.userFade !== null ? item.userFade : item.mold.fade, isCustom: useUserFlightNumbers && item.userFade !== null }
                     ].map((stat, idx) => (
                       <div key={idx} className="flex flex-col items-center">
-                        <span className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl bg-white ${stat.isCustom ? 'text-indigo-600 border-indigo-200 shadow-indigo-100' : 'text-slate-900 border-slate-200'} font-black text-xs md:text-sm border shadow-sm transition-transform group-hover:scale-110`}>
+                        <span className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl bg-white ${stat.isCustom ? 'text-amber-600 border-amber-200 shadow-amber-100' : 'text-slate-900 border-slate-200'} font-black text-xs md:text-sm border shadow-sm transition-transform group-hover:scale-110`}>
                           {stat.val}{stat.isCustom && '*'}
                         </span>
                         <span className="text-[8px] font-black text-slate-400 mt-1 uppercase">{stat.key}</span>
