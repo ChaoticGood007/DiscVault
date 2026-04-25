@@ -37,20 +37,25 @@ export function generateFlightPath(
   
   // Calculate horizontal intensity of turn and fade
   // Turn is typically negative (right for RHBH), Fade is positive (left for RHBH).
-  // On our chart, more positive is left (overstable), more negative is right (understable).
+  // On our chart, more positive stability is left (overstable), more negative is right (understable).
   
   // Adjust turn/fade intensity by speed (higher speed discs have more pronounced curves)
   const speedFactor = Math.max(1, speed / 7);
-  const turnIntensity = turn * 15 * speedFactor;
-  const fadeIntensity = fade * 10 * speedFactor;
+  const turnIntensity = turn * 10 * speedFactor;
+  const fadeIntensity = fade * 12 * speedFactor;
   
-  // Release point is usually vertical, so C1 is shifted by turn
-  const cp1x = startX - turnIntensity;
-  const cp1y = startY - (startY - endY) * 0.4;
+  // CP1 handles the high-speed turn phase.
+  // Placed at 70% of the flight distance so the disc flies mostly straight
+  // before any turn displacement kicks in — mimicking real flight where
+  // the disc holds its line for the majority of the throw.
+  const cp1x = startX - (turnIntensity * 0.5);
+  const cp1y = startY - (startY - endY) * 0.7;
   
-  // C2 is shifted by fade relative to the end position
-  const cp2x = endX - (fadeIntensity * 0.5);
-  const cp2y = endY + (startY - endY) * 0.2;
+  // CP2 handles the low-speed fade phase.
+  // Pushed PAST the endpoint in the fade direction so the curve
+  // arrives at the endpoint already hooking left, rather than straightening out.
+  const cp2x = endX + (fadeIntensity * 0.6);
+  const cp2y = endY + (startY - endY) * 0.1;
   
   return `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}`;
 }
