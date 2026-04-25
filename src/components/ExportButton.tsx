@@ -30,6 +30,7 @@ export default function ExportButton({ variant = 'default' }: { variant?: 'defau
       const data = await exportInventory()
       
       const flatData = data.map(item => ({
+        Vault: item.collection?.name || '',
         Manufacturer: item.mold.brand,
         Mold: item.mold.name,
         Category: item.mold.category,
@@ -40,12 +41,17 @@ export default function ExportButton({ variant = 'default' }: { variant?: 'defau
         Plastic: item.plastic || '',
         Weight: item.weight || '',
         Color: item.color || '',
+        SecondaryColor: item.secondaryColor || '',
+        SecondaryPattern: item.secondaryPattern || '',
         Stamp: item.stamp || '',
         StampFoil: item.stampFoil || '',
         Location: item.location || '',
         Condition: item.condition || '',
         Ink: item.ink || '',
         Notes: item.notes || '',
+        UserGlide: item.userGlide ?? '',
+        UserTurn: item.userTurn ?? '',
+        UserFade: item.userFade ?? '',
         AddedDate: new Date(item.createdAt).toLocaleDateString()
       }))
 
