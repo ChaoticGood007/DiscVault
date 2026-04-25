@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-04-25
+
+### Fixed
+- Overstable disc flight paths now show a realistic left-hooking finish instead of appearing to straighten out at the end. All flight paths also fly straighter for longer before curving.
+- CSV import and export now include all newer disc attributes: Secondary Color, Secondary Pattern, and Custom Flight Numbers (Glide, Turn, Fade). Previously these fields were silently dropped during import/export.
+- CSV export now includes the Vault name for each disc.
+
 ## [0.4.2] - 2026-04-25
 
 ### Added
