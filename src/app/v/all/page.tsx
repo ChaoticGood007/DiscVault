@@ -41,10 +41,12 @@ export default async function AllVaultsDashboard({
   const category = typeof searchP.category === 'string' ? searchP.category : undefined
   const brand = typeof searchP.brand === 'string' ? searchP.brand : undefined
   const view = typeof searchP.view === 'string' ? searchP.view : 'cards'
-  const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : 'createdAt') as SortField
-  const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : 'desc') as SortOrder
-
   const cookieStore = await cookies()
+  const defaultSortBy = cookieStore.get('discVaultSortBy')?.value || 'createdAt'
+  const defaultSortOrder = cookieStore.get('discVaultSortOrder')?.value || 'desc'
+  const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : defaultSortBy) as SortField
+  const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : defaultSortOrder) as SortOrder
+
   const savedColsCookie = cookieStore.get('discVaultVisibleCols')
   const cookieCols = savedColsCookie ? savedColsCookie.value.split(',') : DEFAULT_COLUMNS
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : cookieCols

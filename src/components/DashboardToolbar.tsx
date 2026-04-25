@@ -438,9 +438,18 @@ export default function DashboardToolbar({
                     key={opt.id}
                     onClick={() => {
                       if (isActive) {
-                        updateParams({ sortOrder: sortOrder === 'asc' ? 'desc' : 'asc' })
+                        const newOrder = sortOrder === 'asc' ? 'desc' : 'asc'
+                        if (typeof document !== 'undefined') {
+                          document.cookie = `discVaultSortOrder=${newOrder}; path=/; max-age=31536000`
+                        }
+                        updateParams({ sortOrder: newOrder })
                       } else {
-                        updateParams({ sortBy: opt.id, sortOrder: opt.id === 'createdAt' || opt.id === 'speed' || opt.id === 'condition' || opt.id === 'weight' ? 'desc' : 'asc' })
+                        const newOrder = opt.id === 'createdAt' || opt.id === 'speed' || opt.id === 'condition' || opt.id === 'weight' ? 'desc' : 'asc'
+                        if (typeof document !== 'undefined') {
+                          document.cookie = `discVaultSortBy=${opt.id}; path=/; max-age=31536000`
+                          document.cookie = `discVaultSortOrder=${newOrder}; path=/; max-age=31536000`
+                        }
+                        updateParams({ sortBy: opt.id, sortOrder: newOrder })
                       }
                       setShowSortSelector(false)
                     }}
