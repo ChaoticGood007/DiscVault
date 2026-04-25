@@ -60,6 +60,11 @@ export default async function VaultDashboard({
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
   const inBagParam = typeof searchP.inBag === 'string' ? searchP.inBag : undefined
 
+  const userFlightCookie = cookieStore.get('discVaultUserFlightNum')?.value === 'true'
+  const useUserFlightNumbers = typeof searchP.useUserFlightNumbers === 'string' 
+    ? searchP.useUserFlightNumbers === 'true' 
+    : userFlightCookie
+
   const minSpeed = searchP.minSpeed ? parseFloat(searchP.minSpeed as string) : undefined
   const maxSpeed = searchP.maxSpeed ? parseFloat(searchP.maxSpeed as string) : undefined
   const minGlide = searchP.minGlide ? parseFloat(searchP.minGlide as string) : undefined
@@ -254,6 +259,7 @@ export default async function VaultDashboard({
         sortBy={sortBy}
         sortOrder={sortOrder}
         visibleColumns={visibleCols}
+        useUserFlightNumbers={useUserFlightNumbers}
       />
       </div>
 
@@ -300,6 +306,7 @@ export default async function VaultDashboard({
             visibleColumns={visibleCols}
             categoryColors={categoryColors}
             bagPaths={bagPaths}
+            useUserFlightNumbers={useUserFlightNumbers}
           />
         </div>
       ) : (
@@ -314,6 +321,7 @@ export default async function VaultDashboard({
             pageSize={pageSize}
             totalCount={totalCount}
             bagPaths={bagPaths}
+            useUserFlightNumbers={useUserFlightNumbers}
           />
         </div>
       )}

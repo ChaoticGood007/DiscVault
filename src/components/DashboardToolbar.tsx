@@ -62,6 +62,7 @@ interface DashboardToolbarProps {
   sortBy: string
   sortOrder: string
   visibleColumns: string[]
+  useUserFlightNumbers: boolean
 }
 
 const ALL_COLUMNS = [
@@ -101,6 +102,7 @@ export default function DashboardToolbar({
   sortBy,
   sortOrder,
   visibleColumns,
+  useUserFlightNumbers,
 }: DashboardToolbarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -160,6 +162,15 @@ export default function DashboardToolbar({
     
     if (!updates.page) {
       params.set('page', '1')
+    }
+    
+    // Explicitly handle boolean toggle to persist to URL
+    if (updates.useUserFlightNumbers !== undefined) {
+      if (updates.useUserFlightNumbers === null) {
+        params.delete('useUserFlightNumbers')
+      } else {
+        params.set('useUserFlightNumbers', updates.useUserFlightNumbers)
+      }
     }
     
     router.push(`${pathname}?${params.toString()}`)
@@ -504,6 +515,22 @@ export default function DashboardToolbar({
                     </button>
                   )
                 })}
+                <div className="mt-2 pt-2 border-t border-slate-50">
+                  <button
+                    onClick={() => {
+                      const newVal = !useUserFlightNumbers;
+                      if (typeof document !== 'undefined') {
+                        document.cookie = `discVaultUserFlightNum=${newVal}; path=/; max-age=31536000`;
+                      }
+                      updateParams({ useUserFlightNumbers: newVal ? 'true' : 'false' });
+                      setShowColSelector(false);
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between group ${useUserFlightNumbers ? 'bg-indigo-50 text-indigo-600' : 'hover:bg-slate-50 text-slate-600'}`}
+                  >
+                    <span className="font-bold text-sm">Use Custom Flight #s</span>
+                    {useUserFlightNumbers && <Check className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
           </div>
 

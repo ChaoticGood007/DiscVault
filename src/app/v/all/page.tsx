@@ -55,6 +55,11 @@ export default async function AllVaultsDashboard({
   const inBagParam = typeof searchP.inBag === 'string' ? searchP.inBag : undefined
   const selectedCollectionIds = typeof searchP.collections === 'string' ? searchP.collections.split(',') : []
 
+  const userFlightCookie = cookieStore.get('discVaultUserFlightNum')?.value === 'true'
+  const useUserFlightNumbers = typeof searchP.useUserFlightNumbers === 'string' 
+    ? searchP.useUserFlightNumbers === 'true' 
+    : userFlightCookie
+
   const minSpeed = searchP.minSpeed ? parseFloat(searchP.minSpeed as string) : undefined
   const maxSpeed = searchP.maxSpeed ? parseFloat(searchP.maxSpeed as string) : undefined
   const minGlide = searchP.minGlide ? parseFloat(searchP.minGlide as string) : undefined
@@ -259,6 +264,7 @@ export default async function AllVaultsDashboard({
         sortBy={sortBy}
         sortOrder={sortOrder}
         visibleColumns={visibleCols}
+        useUserFlightNumbers={useUserFlightNumbers}
       />
 
       {totalCount === 0 ? (
@@ -293,6 +299,7 @@ export default async function AllVaultsDashboard({
           totalCount={totalCount}
           visibleColumns={visibleCols}
           bagPaths={bagPaths}
+          useUserFlightNumbers={useUserFlightNumbers}
         />
       ) : (
         <InventoryList 
@@ -305,6 +312,7 @@ export default async function AllVaultsDashboard({
           pageSize={pageSize}
           totalCount={totalCount}
           bagPaths={bagPaths}
+          useUserFlightNumbers={useUserFlightNumbers}
         />
       )}
     </div>
