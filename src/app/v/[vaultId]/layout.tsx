@@ -18,7 +18,7 @@ import { db as prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { cookies } from "next/headers"
 import { notFound } from "next/navigation"
-import { LayoutDashboard, BarChart3, Plus, Upload, Wind } from "lucide-react"
+import { LayoutDashboard, BarChart3, Plus, Upload, Wind, ClipboardCheck } from "lucide-react"
 import { Header } from "@/components/Header"
 import VaultSwitcher from "@/components/VaultSwitcher"
 import ExportButton from "@/components/ExportButton"
@@ -59,6 +59,7 @@ export default async function WorkspaceLayout({
     { label: 'Inventory', href: inventoryHref, icon: LayoutDashboard },
     { label: 'Analytics', href: `/v/${vaultId}/stats`, icon: BarChart3 },
     { label: 'Flight Chart', href: `/v/${vaultId}/chart`, icon: Wind },
+    { label: 'Bag Check', href: `/v/${vaultId}/bagcheck`, icon: ClipboardCheck },
     { label: 'Add Disc', href: `/v/${vaultId}/add`, icon: Plus },
     { label: 'Import', href: `/v/${vaultId}/import`, icon: Upload },
   ]

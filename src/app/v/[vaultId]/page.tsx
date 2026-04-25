@@ -47,16 +47,23 @@ export default async function VaultDashboard({
   const category = typeof searchP.category === 'string' ? searchP.category : undefined
   const brand = typeof searchP.brand === 'string' ? searchP.brand : undefined
   const view = typeof searchP.view === 'string' ? searchP.view : 'cards'
-  const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : 'createdAt') as SortField
-  const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : 'desc') as SortOrder
-
   const cookieStore = await cookies()
+  const defaultSortBy = cookieStore.get('discVaultSortBy')?.value || 'createdAt'
+  const defaultSortOrder = cookieStore.get('discVaultSortOrder')?.value || 'desc'
+  const sortBy = (typeof searchP.sortBy === 'string' ? searchP.sortBy : defaultSortBy) as SortField
+  const sortOrder = (typeof searchP.sortOrder === 'string' ? searchP.sortOrder : defaultSortOrder) as SortOrder
+
   const savedColsCookie = cookieStore.get('discVaultVisibleCols')
   const cookieCols = savedColsCookie ? savedColsCookie.value.split(',') : DEFAULT_COLUMNS
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : cookieCols
   const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
   const inBagParam = typeof searchP.inBag === 'string' ? searchP.inBag : undefined
+
+  const userFlightCookie = cookieStore.get('discVaultUserFlightNum')?.value === 'true'
+  const useUserFlightNumbers = typeof searchP.useUserFlightNumbers === 'string' 
+    ? searchP.useUserFlightNumbers === 'true' 
+    : userFlightCookie
 
   const minSpeed = searchP.minSpeed ? parseFloat(searchP.minSpeed as string) : undefined
   const maxSpeed = searchP.maxSpeed ? parseFloat(searchP.maxSpeed as string) : undefined
@@ -252,6 +259,7 @@ export default async function VaultDashboard({
         sortBy={sortBy}
         sortOrder={sortOrder}
         visibleColumns={visibleCols}
+        useUserFlightNumbers={useUserFlightNumbers}
       />
       </div>
 
@@ -298,6 +306,7 @@ export default async function VaultDashboard({
             visibleColumns={visibleCols}
             categoryColors={categoryColors}
             bagPaths={bagPaths}
+            useUserFlightNumbers={useUserFlightNumbers}
           />
         </div>
       ) : (
@@ -312,6 +321,7 @@ export default async function VaultDashboard({
             pageSize={pageSize}
             totalCount={totalCount}
             bagPaths={bagPaths}
+            useUserFlightNumbers={useUserFlightNumbers}
           />
         </div>
       )}

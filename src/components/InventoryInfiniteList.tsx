@@ -38,6 +38,9 @@ export interface InventoryItem {
   condition: number | null
   ink: string | null
   notes: string | null
+  userGlide: number | null
+  userTurn: number | null
+  userFade: number | null
   createdAt: Date
   mold: {
     name: string
@@ -59,6 +62,7 @@ interface InventoryInfiniteListProps {
   bagPaths?: string[]
   visibleColumns?: string[]
   categoryColors?: Record<string, string>
+  useUserFlightNumbers?: boolean
 }
 
 export default function InventoryInfiniteList({ 
@@ -69,7 +73,8 @@ export default function InventoryInfiniteList({
   totalCount, 
   visibleColumns = ['brand', 'category', 'flight_numbers', 'plastic', 'weight', 'color', 'stamp', 'inBag', 'createdAt'], 
   categoryColors,
-  bagPaths = []
+  bagPaths = [],
+  useUserFlightNumbers = false
 }: InventoryInfiniteListProps) {
   const isInBag = (loc: string | null) => {
     if (!loc) return false
@@ -230,14 +235,14 @@ export default function InventoryInfiniteList({
                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Flight Numbers</div>
                   <div className="flex space-x-2">
                     {[
-                      { key: 'speed', label: 'S', val: item.mold.speed },
-                      { key: 'glide', label: 'G', val: item.mold.glide },
-                      { key: 'turn', label: 'T', val: item.mold.turn },
-                      { key: 'fade', label: 'F', val: item.mold.fade }
+                      { key: 'speed', label: 'S', val: item.mold.speed, isCustom: false },
+                      { key: 'glide', label: 'G', val: useUserFlightNumbers && item.userGlide !== null ? item.userGlide : item.mold.glide, isCustom: useUserFlightNumbers && item.userGlide !== null },
+                      { key: 'turn', label: 'T', val: useUserFlightNumbers && item.userTurn !== null ? item.userTurn : item.mold.turn, isCustom: useUserFlightNumbers && item.userTurn !== null },
+                      { key: 'fade', label: 'F', val: useUserFlightNumbers && item.userFade !== null ? item.userFade : item.mold.fade, isCustom: useUserFlightNumbers && item.userFade !== null }
                     ].map((stat, idx) => (
                       <div key={idx} className="flex flex-col items-center">
-                        <span className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl bg-white text-slate-900 font-black text-xs md:text-sm border border-slate-200 shadow-sm transition-transform group-hover:scale-110">
-                          {stat.val}
+                        <span className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl bg-white ${stat.isCustom ? 'text-amber-600 border-amber-200 shadow-amber-100' : 'text-slate-900 border-slate-200'} font-black text-xs md:text-sm border shadow-sm transition-transform group-hover:scale-110`}>
+                          {stat.val}{stat.isCustom && '*'}
                         </span>
                         <span className="text-[8px] font-black text-slate-400 mt-1 uppercase">{stat.key}</span>
                       </div>

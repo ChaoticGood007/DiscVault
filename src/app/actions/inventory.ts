@@ -28,6 +28,13 @@ function parseUserFlight(val: FormDataEntryValue | null): number | null {
   return isNaN(n) ? null : n
 }
 
+/** Parse a float from a CSV value, returning a fallback if empty/invalid. */
+function parseSafeFloat(val: any, fallback: number = 0): number {
+  if (val === null || val === undefined || val === '') return fallback
+  const n = parseFloat(val)
+  return isNaN(n) ? fallback : n
+}
+
 export async function addDisc(formData: FormData) {
   const moldId = formData.get('moldId') as string
   const collectionId = formData.get('collectionId') as string || null
@@ -212,10 +219,10 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           category = CATEGORY_SYNONYMS[normalizedCategory]
         }
 
-        const speed = parseFloat(record.speed) || 0
-        const glide = parseFloat(record.glide) || 0
-        const turn = parseFloat(record.turn) || 0
-        const fade = parseFloat(record.fade) || 0
+        const speed = parseSafeFloat(record.speed)
+        const glide = parseSafeFloat(record.glide)
+        const turn = parseSafeFloat(record.turn)
+        const fade = parseSafeFloat(record.fade)
         mold = await prisma.mold.create({
           data: {
             name: moldName, brand: moldBrand,
@@ -234,7 +241,7 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           mold: { connect: { id: mold.id } },
           collection: targetCollectionId ? { connect: { id: targetCollectionId } } : undefined,
           plastic: record.plastic || null,
-          weight: parseFloat(record.weight) || null,
+          weight: parseSafeFloat(record.weight, NaN) || null,
           color: record.color || null,
           secondaryColor: record.secondaryColor || null,
           secondaryPattern: record.secondaryPattern || null,
@@ -244,9 +251,9 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           condition: parseInt(record.condition) || null,
           ink: record.ink || null,
           notes: record.notes || null,
-          userGlide: parseFloat(record.userGlide) || null,
-          userTurn: parseFloat(record.userTurn) || null,
-          userFade: parseFloat(record.userFade) || null,
+          userGlide: parseUserFlight(record.userGlide ?? null),
+          userTurn: parseUserFlight(record.userTurn ?? null),
+          userFade: parseUserFlight(record.userFade ?? null),
         }
       })
       successCount++
@@ -331,13 +338,13 @@ export async function normalizeDatabaseMolds() {
     let newBrand = mold.brand
 
     const normCat = newCategory.toLowerCase().trim()
-    if (CATEGORY_SYNONYMS[normCat]) {
+    if (CATEGORY_SYNONYMS[normCat] && CATEGORY_SYNONYMS[normCat] !== mold.category) {
       newCategory = CATEGORY_SYNONYMS[normCat]
       changed = true
     }
 
     const normBrand = newBrand.toLowerCase().trim()
-    if (BRAND_SYNONYMS[normBrand]) {
+    if (BRAND_SYNONYMS[normBrand] && BRAND_SYNONYMS[normBrand] !== mold.brand) {
       newBrand = BRAND_SYNONYMS[normBrand]
       changed = true
     }
@@ -348,6 +355,37 @@ export async function normalizeDatabaseMolds() {
         data: { category: newCategory, brand: newBrand }
       })
       updatedCount++
+    }
+  }
+
+  // 2. Merge duplicate molds
+  const allMolds = await prisma.mold.findMany()
+  const grouped = new Map<string, typeof allMolds>()
+  
+  for (const mold of allMolds) {
+    const key = `${mold.brand.toLowerCase().trim()}:::${mold.name.toLowerCase().trim()}`
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key)!.push(mold)
+  }
+
+  for (const group of grouped.values()) {
+    if (group.length > 1) {
+      // Pick canonical mold (prefer isCustom = false, otherwise first one)
+      const canonical = group.find(m => !m.isCustom) || group[0]
+      const duplicates = group.filter(m => m.id !== canonical.id)
+      
+      for (const dup of duplicates) {
+        // Move inventory
+        await prisma.inventory.updateMany({
+          where: { moldId: dup.id },
+          data: { moldId: canonical.id }
+        })
+        // Delete duplicate mold
+        await prisma.mold.delete({
+          where: { id: dup.id }
+        })
+        updatedCount++
+      }
     }
   }
 

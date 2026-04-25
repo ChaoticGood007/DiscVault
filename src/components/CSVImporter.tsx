@@ -83,10 +83,14 @@ export default function CSVImporter({ targetVault, collections }: CSVImporterPro
         const normalizedHeaders = (results.meta.fields || []).map(h => h.toLowerCase().trim())
         
         SCHEMA_FIELDS.forEach(field => {
-          const matchIndex = normalizedHeaders.findIndex(h => 
-            h === field.id.toLowerCase() || 
-            h.includes(field.label.toLowerCase().split('/')[0].trim())
-          )
+          const normalizedId = field.id.toLowerCase()
+          const normalizedLabel = field.label.toLowerCase().split('/')[0].trim().replace(/\s+/g, '')
+          const matchIndex = normalizedHeaders.findIndex(h => {
+            const stripped = h.replace(/\s+/g, '')
+            return stripped === normalizedId ||
+              stripped.includes(normalizedLabel) ||
+              h.includes(field.label.toLowerCase().split('/')[0].trim())
+          })
           if (matchIndex !== -1) {
             initialMap[field.id] = (results.meta.fields || [])[matchIndex]
           }
