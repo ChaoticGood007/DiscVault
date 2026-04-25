@@ -1,6 +1,7 @@
 import ThemeCustomizer from './ThemeCustomizer'
 import { getGlobalSettings, getLocationTree, getCategoryColors } from '@/app/actions/settings'
 import { Settings2, Database, MapPin, Palette } from 'lucide-react'
+import pkg from '../../../package.json'
 import { Header } from "@/components/Header"
 import SyncButton from '@/components/SyncButton'
 import NormalizeMoldsButton from '@/components/NormalizeMoldsButton'
@@ -33,6 +34,10 @@ export default async function SettingsPage() {
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none mb-1 block">Configuration</span>
             <h1 className="text-3xl font-black text-slate-900 leading-tight">Global Settings</h1>
           </div>
+        </div>
+        <div className="text-right">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none mb-1.5 block">App Version</span>
+          <span className="inline-block bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-black tracking-widest border border-slate-200">v{pkg.version}</span>
         </div>
       </div>
 
