@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Bag Check Feature:** A new tool to help you make sure you haven't left any discs behind after practice or a round. Accessed from the vault header, it lets you select one of your configured bags and gives you an interactive checklist of all discs in that bag. Discs are grouped by their sub-location (e.g., 'Putter Pocket', 'Main Compartment') and sorted by speed (highest first) then net stability (most overstable first).
 - **Custom Flight Numbers Toggle:** You can now toggle "Use Custom Flight #s" from the Columns dropdown on the inventory dashboards. When enabled, this will replace the stock mold flight numbers with your custom flight numbers (if defined) for that specific disc.
+- **Secondary Physical Properties:** Added `Secondary Color` and `Secondary Pattern` text displays to the physical properties grid in the Disc Detail view, bringing it to full feature parity with recent schema additions.
 
 ### Fixed
 - Fixed an issue with CSV imports where columns without spaces (e.g., `SecondaryColor`) were not being automatically mapped correctly.
