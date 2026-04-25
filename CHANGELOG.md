@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed an issue where the user's sort preference was only saved temporarily in the URL; sort order now correctly persists across sessions and vaults globally via cookies.
 - Fixed a bug where entering negative numbers or decimals in the Advanced Search inputs would instantly clear to `NaN`.
 - Fixed the "Normalize Legacy Data" button incorrectly reporting that it updated discs even when they were already fully normalized.
+- Enhanced the "Normalize Legacy Data" function to detect and merge duplicate molds (e.g. from case-sensitivity mismatches during CSV imports) so they no longer appear multiple times in the Add Disc dropdown.
 
 ## [0.4.3] - 2026-04-25
 

@@ -358,6 +358,37 @@ export async function normalizeDatabaseMolds() {
     }
   }
 
+  // 2. Merge duplicate molds
+  const allMolds = await prisma.mold.findMany()
+  const grouped = new Map<string, typeof allMolds>()
+  
+  for (const mold of allMolds) {
+    const key = `${mold.brand.toLowerCase().trim()}:::${mold.name.toLowerCase().trim()}`
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key)!.push(mold)
+  }
+
+  for (const group of grouped.values()) {
+    if (group.length > 1) {
+      // Pick canonical mold (prefer isCustom = false, otherwise first one)
+      const canonical = group.find(m => !m.isCustom) || group[0]
+      const duplicates = group.filter(m => m.id !== canonical.id)
+      
+      for (const dup of duplicates) {
+        // Move inventory
+        await prisma.inventory.updateMany({
+          where: { moldId: dup.id },
+          data: { moldId: canonical.id }
+        })
+        // Delete duplicate mold
+        await prisma.mold.delete({
+          where: { id: dup.id }
+        })
+        updatedCount++
+      }
+    }
+  }
+
   revalidatePath('/settings')
   revalidatePath('/')
   revalidatePath('/v/all')
