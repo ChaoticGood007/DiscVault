@@ -338,13 +338,13 @@ export async function normalizeDatabaseMolds() {
     let newBrand = mold.brand
 
     const normCat = newCategory.toLowerCase().trim()
-    if (CATEGORY_SYNONYMS[normCat]) {
+    if (CATEGORY_SYNONYMS[normCat] && CATEGORY_SYNONYMS[normCat] !== mold.category) {
       newCategory = CATEGORY_SYNONYMS[normCat]
       changed = true
     }
 
     const normBrand = newBrand.toLowerCase().trim()
-    if (BRAND_SYNONYMS[normBrand]) {
+    if (BRAND_SYNONYMS[normBrand] && BRAND_SYNONYMS[normBrand] !== mold.brand) {
       newBrand = BRAND_SYNONYMS[normBrand]
       changed = true
     }
