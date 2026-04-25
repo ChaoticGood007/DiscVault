@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed an issue with CSV imports where columns without spaces (e.g., `SecondaryColor`) were not being automatically mapped correctly.
 - Fixed a bug where legitimate `0` flight numbers (e.g., `0` turn, `0` fade) were being ignored and overwritten during CSV imports.
 - Fixed an issue where the user's sort preference was only saved temporarily in the URL; sort order now correctly persists across sessions and vaults globally via cookies.
+- Fixed a bug where entering negative numbers or decimals in the Advanced Search inputs would instantly clear to `NaN`.
 
 ## [0.4.3] - 2026-04-25
 

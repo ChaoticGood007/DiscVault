@@ -24,18 +24,18 @@ import MultiSelectDropdown from './MultiSelectDropdown'
 const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
 export interface AdvancedFilters {
-  minSpeed?: number
-  maxSpeed?: number
-  minGlide?: number
-  maxGlide?: number
-  minTurn?: number
-  maxTurn?: number
-  minFade?: number
-  maxFade?: number
-  minWeight?: number
-  maxWeight?: number
-  minCond?: number
-  maxCond?: number
+  minSpeed?: number | string
+  maxSpeed?: number | string
+  minGlide?: number | string
+  maxGlide?: number | string
+  minTurn?: number | string
+  maxTurn?: number | string
+  minFade?: number | string
+  maxFade?: number | string
+  minWeight?: number | string
+  maxWeight?: number | string
+  minCond?: number | string
+  maxCond?: number | string
   ink?: string
   plastic?: string
   color?: string
@@ -137,12 +137,12 @@ export default function AdvancedSearch({
                 <div className="flex items-center gap-2">
                   <input type="text" inputMode="decimal" placeholder="Min"
                     value={localFilters[minKey] ?? ''} onKeyDown={allowNumeric}
-                    onChange={(e) => handleUpdate(minKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+                    onChange={(e) => handleUpdate(minKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                   <span className="text-slate-200 font-bold shrink-0">—</span>
                   <input type="text" inputMode="decimal" placeholder="Max"
                     value={localFilters[maxKey] ?? ''} onKeyDown={allowNumeric}
-                    onChange={(e) => handleUpdate(maxKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+                    onChange={(e) => handleUpdate(maxKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                 </div>
               </div>
@@ -163,12 +163,12 @@ export default function AdvancedSearch({
                 <div className="flex items-center gap-2">
                   <input type="text" inputMode="decimal" placeholder="Min"
                     value={localFilters[minKey] ?? ''} onKeyDown={allowNumeric}
-                    onChange={(e) => handleUpdate(minKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+                    onChange={(e) => handleUpdate(minKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                   <span className="text-slate-200 font-bold shrink-0">—</span>
                   <input type="text" inputMode="decimal" placeholder="Max"
                     value={localFilters[maxKey] ?? ''} onKeyDown={allowNumeric}
-                    onChange={(e) => handleUpdate(maxKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+                    onChange={(e) => handleUpdate(maxKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                 </div>
               </div>
