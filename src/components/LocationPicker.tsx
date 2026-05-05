@@ -101,14 +101,14 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
       </button>
 
       {/* Dropdown */}
-      <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden transition-all duration-200 ease-out origin-top ${
+      <div className={`absolute top-full left-0 min-w-full w-max max-w-[90vw] sm:max-w-md mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden transition-all duration-200 ease-out origin-top ${
         open ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
       }`}>
         <div className="max-h-56 overflow-y-auto p-2 space-y-0.5">
           <button
             type="button"
             onClick={() => select(null)}
-            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
+            className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap ${
               !value ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'
             }`}
           >
@@ -123,7 +123,7 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
                 type="button"
                 disabled={!isLeaf}
                 onClick={() => select(loc)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap ${
                   value === loc.value 
                     ? 'bg-indigo-50 text-indigo-600' 
                     : isLeaf 
@@ -136,7 +136,7 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
                   : <span className="w-3.5 h-3.5 shrink-0" />
                 }
                 <span className="truncate">{loc.path}</span>
-                {!isLeaf && <span className="text-[9px] uppercase tracking-tighter font-black opacity-40 ml-auto">Folder</span>}
+                {!isLeaf && <span className="text-[9px] uppercase tracking-tighter font-black opacity-40 ml-auto pl-4">Folder</span>}
               </button>
             )
           })}
