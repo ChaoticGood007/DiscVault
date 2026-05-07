@@ -36,13 +36,16 @@ export async function syncMolds() {
     // unless they happen to match exactly by brand/name
     const existing = await prisma.mold.findFirst({
       where: {
-        id: disc.id
+        OR: [
+          { id: disc.id },
+          { name: disc.name, brand: disc.brand }
+        ]
       }
     })
 
     if (existing) {
       await prisma.mold.update({
-        where: { id: disc.id },
+        where: { id: existing.id },
         data: {
           name: disc.name,
           brand: disc.brand,
