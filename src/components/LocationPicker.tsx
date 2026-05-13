@@ -74,14 +74,14 @@ export default function LocationPicker({ tree, value, onChange, className = '' }
             : 'border-slate-200 bg-slate-50 hover:border-indigo-200'
         }`}
       >
-        <span className="flex items-center gap-2 truncate">
+        <span className="flex items-start gap-2 text-left">
           {selected ? (
             <>
-              {selected.inBag && <Briefcase className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
-              <span className="text-slate-900 truncate">{selected.path}</span>
+              {selected.inBag && <Briefcase className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-[3px]" />}
+              <span className="text-slate-900 break-words leading-snug">{selected.path}</span>
             </>
           ) : (
-            <span className="text-slate-400 font-medium">No location set</span>
+            <span className="text-slate-400 font-medium mt-[1px]">No location set</span>
           )}
         </span>
         <div className="flex items-center gap-1 shrink-0">

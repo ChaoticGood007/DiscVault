@@ -33,7 +33,9 @@ interface BagCheckDisc {
   plastic: string | null
   weight: number | null
   color: string | null
+  colorHex: string | null
   secondaryColor: string | null
+  secondaryColorHex: string | null
   secondaryPattern: string | null
   stampFoil: string | null
   location: string | null
@@ -292,7 +294,9 @@ export default function BagCheckList({ vaultName, bags, discs }: BagCheckListPro
                     <div className="shrink-0">
                       <DiscPreview
                         color={disc.color}
+                        colorHex={disc.colorHex}
                         secondaryColor={disc.secondaryColor}
+                        secondaryColorHex={disc.secondaryColorHex}
                         secondaryPattern={disc.secondaryPattern}
                         stampFoil={disc.stampFoil}
                         size={36}

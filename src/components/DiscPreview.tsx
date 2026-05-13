@@ -23,7 +23,9 @@ import PreviewModal from './PreviewModal'
 
 interface DiscPreviewProps {
   color?: string | null
+  colorHex?: string | null
   secondaryColor?: string | null
+  secondaryColorHex?: string | null
   secondaryPattern?: string | null
   stampFoil?: string | null
   size?: number
@@ -45,7 +47,9 @@ interface DiscPreviewProps {
 
 export default function DiscPreview({
   color,
+  colorHex,
   secondaryColor,
+  secondaryColorHex,
   secondaryPattern,
   stampFoil,
   size = 24,
@@ -58,8 +62,8 @@ export default function DiscPreview({
   disc
 }: DiscPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const baseColor = parseDiscColor(color)
-  const secColor = parseDiscColor(secondaryColor)
+  const baseColor = parseDiscColor(color, colorHex)
+  const secColor = parseDiscColor(secondaryColor, secondaryColorHex)
   const foilColor = parseDiscColor(stampFoil)
   
   // We'll use a coordinate system from -50 to 50 for the internal rendering
@@ -128,12 +132,26 @@ export default function DiscPreview({
         {isTuned && showTunedOutline && isHovered && <circle r={radius + 6} fill="none" stroke="#f59e0b" strokeWidth={6} />}
 
         {/* Base Disc */}
-        <circle r={radius} fill={pattern === 'Halo' ? secColor : baseColor} stroke="rgba(0,0,0,0.1)" strokeWidth={1} />
+        {pattern === 'Split' && secondaryColor ? (
+          <>
+            <path d={`M 0 -${radius} A ${radius} ${radius} 0 0 0 0 ${radius} Z`} fill={baseColor} />
+            <circle r={radius} fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth={1} />
+          </>
+        ) : (
+          <circle r={radius} fill={baseColor} stroke="rgba(0,0,0,0.1)" strokeWidth={1} />
+        )}
 
         {/* Secondary Patterns - Clipped to disc bounds */}
         <g clipPath={`url(#${clipId})`}>
           {pattern === 'Halo' && secondaryColor && (
-            <circle r={radius * 0.75} fill={baseColor} />
+            <path 
+              d={`
+                M 0 -${radius} A ${radius} ${radius} 0 1 1 0 ${radius} A ${radius} ${radius} 0 1 1 0 -${radius} 
+                M 0 -${radius * 0.75} A ${radius * 0.75} ${radius * 0.75} 0 1 0 0 ${radius * 0.75} A ${radius * 0.75} ${radius * 0.75} 0 1 0 0 -${radius * 0.75}
+              `} 
+              fill={secColor} 
+              fillRule="evenodd" 
+            />
           )}
           {pattern === 'Burst' && secondaryColor && (
             <circle r={radius * 0.6} fill={secColor} opacity={0.7} />

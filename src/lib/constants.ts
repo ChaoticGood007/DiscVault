@@ -5,3 +5,11 @@ export const DEFAULT_CATEGORY_COLORS: Record<string, string> = {
   'Putter': '#10b981',          // emerald
   'Utility': '#8b5cf6',         // violet
 }
+
+export const SECONDARY_PATTERN_LABELS: Record<string, string> = {
+  'Halo': 'Halo/Rim',
+  'Burst': 'Center Burst',
+  'Split': 'Half \'n Half',
+  'Swirl': 'Swirly',
+  'Speckled': 'Speckled'
+}

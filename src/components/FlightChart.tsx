@@ -35,7 +35,9 @@ interface Disc {
     fade: number
   }
   color?: string | null
+  colorHex?: string | null
   secondaryColor?: string | null
+  secondaryColorHex?: string | null
   secondaryPattern?: string | null
   stampFoil?: string | null
   plastic?: string | null
@@ -336,7 +338,9 @@ export default function FlightChart({ discs, vaultId, defaultShowFlightPaths = f
                 <g transform={`translate(${cx - (isHovered ? 15 : 10)}, ${cy - (isHovered ? 15 : 10)})`}>
                   <DiscPreview 
                     color={point.disc.color}
+                    colorHex={point.disc.colorHex}
                     secondaryColor={point.disc.secondaryColor}
+                    secondaryColorHex={point.disc.secondaryColorHex}
                     secondaryPattern={point.disc.secondaryPattern}
                     stampFoil={point.disc.stampFoil}
                     size={isHovered ? 30 : 20}
