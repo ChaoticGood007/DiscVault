@@ -96,3 +96,44 @@ export async function syncMolds() {
   revalidatePath('/')
   return { updatedCount, createdCount }
 }
+
+function getStability(turn: number, fade: number): string {
+  const score = turn + fade
+  if (score <= -2) return 'Understable'
+  if (score <= 0) return 'Stable'
+  if (score <= 2) return 'Overstable'
+  return 'Very Overstable'
+}
+
+export async function createCustomMold(formData: FormData) {
+  const name = formData.get('name') as string
+  const brand = formData.get('brand') as string
+  const category = formData.get('category') as string
+  const speed = parseFloat(formData.get('speed') as string)
+  const glide = parseFloat(formData.get('glide') as string)
+  const turn = parseFloat(formData.get('turn') as string)
+  const fade = parseFloat(formData.get('fade') as string)
+
+  if (!name || !brand || !category || isNaN(speed) || isNaN(glide) || isNaN(turn) || isNaN(fade)) {
+    throw new Error('All fields are required to create a custom mold.')
+  }
+
+  const stability = getStability(turn, fade)
+
+  const newMold = await prisma.mold.create({
+    data: {
+      name,
+      brand,
+      category,
+      speed,
+      glide,
+      turn,
+      fade,
+      stability,
+      isCustom: true
+    }
+  })
+
+  revalidatePath('/settings')
+  return newMold
+}
