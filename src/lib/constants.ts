@@ -7,7 +7,7 @@ export const DEFAULT_CATEGORY_COLORS: Record<string, string> = {
 }
 
 export const SECONDARY_PATTERN_LABELS: Record<string, string> = {
-  'Halo': 'Halo/Overmold',
+  'Halo': 'Halo/Rim',
   'Burst': 'Center Burst',
   'Split': 'Half \'n Half',
   'Swirl': 'Swirly',

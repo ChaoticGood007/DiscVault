@@ -52,6 +52,8 @@ export async function addDisc(formData: FormData) {
   const userGlide = parseUserFlight(formData.get('userGlide'))
   const userTurn = parseUserFlight(formData.get('userTurn'))
   const userFade = parseUserFlight(formData.get('userFade'))
+  const colorHex = (formData.get('colorHex') as string) || null
+  const secondaryColorHex = (formData.get('secondaryColorHex') as string) || null
 
   if (!moldId) throw new Error('Mold ID is required')
 
@@ -63,6 +65,8 @@ export async function addDisc(formData: FormData) {
         weight, 
         color, 
         secondaryColor, 
+        colorHex,
+        secondaryColorHex,
         secondaryPattern, 
         plastic, 
         stamp, 
@@ -103,6 +107,8 @@ export async function updateDisc(id: string, formData: FormData) {
   const userGlide = parseUserFlight(formData.get('userGlide'))
   const userTurn = parseUserFlight(formData.get('userTurn'))
   const userFade = parseUserFlight(formData.get('userFade'))
+  const colorHex = (formData.get('colorHex') as string) || null
+  const secondaryColorHex = (formData.get('secondaryColorHex') as string) || null
 
   try {
     await prisma.inventory.update({
@@ -112,6 +118,8 @@ export async function updateDisc(id: string, formData: FormData) {
         weight, 
         color, 
         secondaryColor, 
+        colorHex,
+        secondaryColorHex,
         secondaryPattern, 
         plastic, 
         stamp, 
@@ -243,7 +251,9 @@ export async function importDiscs(records: any[], targetCollectionId?: string) {
           plastic: record.plastic || null,
           weight: parseSafeFloat(record.weight, NaN) || null,
           color: record.color || null,
+          colorHex: record.colorHex || null,
           secondaryColor: record.secondaryColor || null,
+          secondaryColorHex: record.secondaryColorHex || null,
           secondaryPattern: record.secondaryPattern || null,
           stamp: record.stamp || null,
           stampFoil: record.stampFoil || null,

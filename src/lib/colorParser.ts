@@ -1,12 +1,31 @@
 import tinycolor from 'tinycolor2';
 
-export function parseDiscColor(input: string | null | undefined): string {
-  if (!input) return '#94a3b8'; // Default slate-400
+export function parseDiscColor(input: string | null | undefined, hexOverride?: string | null): string {
+  if (!input && !hexOverride) return '#94a3b8'; // Default slate-400
 
-  let colorStr = input.toLowerCase().trim();
-  const isClear = colorStr.includes('clear');
+  let colorStr = (input || '').toLowerCase().trim();
+  const isClear = colorStr.includes('clear') || colorStr === 'ice';
   if (isClear) {
     colorStr = colorStr.replace('clear', '').trim();
+  }
+
+  const applyClear = (hex: string) => {
+    if (!isClear) return hex;
+    const c = tinycolor(hex).toRgb();
+    return `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`;
+  }
+
+  if (hexOverride) {
+    // If we have an 8-char hex, the alpha is embedded in the hex.
+    // If it's a 6-char hex and isClear, we apply 0.5 opacity.
+    const parsedHex = tinycolor(hexOverride);
+    if (parsedHex.isValid()) {
+      // If it already has an alpha < 1, just return its hex8 or rgba
+      if (parsedHex.getAlpha() < 1) {
+        return parsedHex.toRgbString();
+      }
+      return applyClear(parsedHex.toHexString());
+    }
   }
 
   // 1. Handle specific Disc Golf exact matches / overrides
@@ -39,12 +58,6 @@ export function parseDiscColor(input: string | null | undefined): string {
   if (hasLight) colorStr = colorStr.replace('light', '').trim();
   if (hasDark) colorStr = colorStr.replace('dark', '').trim();
   if (hasDeep) colorStr = colorStr.replace('deep', '').trim();
-
-  const applyClear = (hex: string) => {
-    if (!isClear) return hex;
-    const c = tinycolor(hex).toRgb();
-    return `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`;
-  }
 
   const applyModifiers = (color: tinycolor.Instance) => {
     if (hasNeon) color = color.saturate(100).lighten(10);

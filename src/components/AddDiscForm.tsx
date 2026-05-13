@@ -23,6 +23,8 @@ import { Search, Loader2, Plus } from 'lucide-react'
 import LocationPicker from '@/components/LocationPicker'
 import { type LocationNode } from '@/lib/locationTree'
 import { SECONDARY_PATTERN_LABELS } from '@/lib/constants'
+import ColorInput from './ColorInput'
+import DiscPreview from './DiscPreview'
 
 interface Mold {
   id: string
@@ -45,6 +47,18 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [isCustomMode, setIsCustomMode] = useState(false)
   const [isCreatingCustom, setIsCreatingCustom] = useState(false)
+
+  // Preview State
+  const [previewState, setPreviewState] = useState({
+    color: '',
+    colorHex: null as string | null,
+    secondaryColor: '',
+    secondaryColorHex: null as string | null,
+    secondaryPattern: '',
+    stampFoil: '',
+    weight: '',
+    plastic: ''
+  })
 
   const handleCreateCustomMold = async () => {
     const brandInput = document.querySelector('input[name="customBrand"]') as HTMLInputElement
@@ -244,6 +258,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             step="0.1"
             name="weight"
             placeholder="175"
+            onChange={e => setPreviewState(s => ({ ...s, weight: e.target.value }))}
             className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
@@ -253,6 +268,7 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             type="text"
             name="plastic"
             placeholder="Star, Champion..."
+            onChange={e => setPreviewState(s => ({ ...s, plastic: e.target.value }))}
             className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
           />
         </div>
@@ -266,59 +282,83 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Color</label>
-          <input
-            type="text"
-            name="color"
-            placeholder="Blue, Pink..."
-            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
-          />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="md:col-span-3 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <ColorInput 
+              name="color" 
+              label="Color" 
+              onChange={(text, hex) => setPreviewState(s => ({ ...s, color: text, colorHex: hex }))} 
+            />
+            <ColorInput 
+              name="secondaryColor" 
+              label="Sec. Color" 
+              onChange={(text, hex) => setPreviewState(s => ({ ...s, secondaryColor: text, secondaryColorHex: hex }))} 
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Sec. Pattern</label>
+              <select
+                name="secondaryPattern"
+                onChange={e => setPreviewState(s => ({ ...s, secondaryPattern: e.target.value }))}
+                className="w-full px-3 py-4 bg-white border border-slate-200 rounded-2xl font-black text-sm text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
+              >
+                <option value="">None</option>
+                {Object.entries(SECONDARY_PATTERN_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Stamp</label>
+              <input
+                type="text"
+                name="stamp"
+                placeholder="Stock, Tournament..."
+                className="w-full px-3 py-4 bg-white border border-slate-200 rounded-2xl font-black text-sm text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Stamp Foil</label>
+              <input
+                type="text"
+                name="stampFoil"
+                placeholder="Gold, Silver, Holo..."
+                onChange={e => setPreviewState(s => ({ ...s, stampFoil: e.target.value }))}
+                className="w-full px-3 py-4 bg-white border border-slate-200 rounded-2xl font-black text-sm text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
+              />
+            </div>
+          </div>
         </div>
-        <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Sec. Color</label>
-          <input
-            type="text"
-            name="secondaryColor"
-            placeholder="Red, Yellow..."
-            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Sec. Pattern</label>
-          <select
-            name="secondaryPattern"
-            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
-          >
-            <option value="">None</option>
-            {Object.entries(SECONDARY_PATTERN_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+        
+        {/* Live Preview */}
+        <div className="flex justify-center items-center bg-slate-50 rounded-3xl border border-slate-200 p-6 md:p-4 md:col-span-1 min-h-[200px]">
+          {selectedMold || isCustomMode ? (
+            <DiscPreview
+              color={previewState.color}
+              colorHex={previewState.colorHex}
+              secondaryColor={previewState.secondaryColor}
+              secondaryColorHex={previewState.secondaryColorHex}
+              secondaryPattern={previewState.secondaryPattern}
+              stampFoil={previewState.stampFoil}
+              size={120}
+              hoverScale={1}
+              className="w-full max-w-[160px] h-auto drop-shadow-xl"
+            />
+          ) : (
+            <div className="text-center space-y-2">
+              <div className="w-24 h-24 rounded-full border-4 border-dashed border-slate-300 mx-auto opacity-50 flex items-center justify-center">
+                <span className="text-slate-400 font-bold text-xs">Preview</span>
+              </div>
+              <p className="text-xs text-slate-400 font-bold px-4">Select a mold to see preview</p>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Stamp</label>
-          <input
-            type="text"
-            name="stamp"
-            placeholder="Stock, Tournament..."
-            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="block text-xs font-black text-slate-400 uppercase tracking-widest px-1">Stamp Foil</label>
-          <input
-            type="text"
-            name="stampFoil"
-            placeholder="Gold, Silver, Holo..."
-            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
-          />
-        </div>
-      </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
         <div className="space-y-2">

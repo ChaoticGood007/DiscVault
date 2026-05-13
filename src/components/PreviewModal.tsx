@@ -31,7 +31,9 @@ interface PreviewModalProps {
       brand: string
     }
     color?: string | null
+    colorHex?: string | null
     secondaryColor?: string | null
+    secondaryColorHex?: string | null
     secondaryPattern?: string | null
     stampFoil?: string | null
     plastic?: string | null
@@ -83,7 +85,9 @@ export default function PreviewModal({ isOpen, onClose, disc }: PreviewModalProp
                 <div className="relative">
                   <DiscPreview
                     color={disc.color}
+                    colorHex={disc.colorHex}
                     secondaryColor={disc.secondaryColor}
+                    secondaryColorHex={disc.secondaryColorHex}
                     secondaryPattern={disc.secondaryPattern}
                     stampFoil={disc.stampFoil}
                     size={280}

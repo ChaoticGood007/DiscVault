@@ -12,7 +12,9 @@ interface DiscDetailViewProps {
     collectionId: string | null
     weight: number | null
     color: string | null
+    colorHex: string | null
     secondaryColor?: string | null
+    secondaryColorHex?: string | null
     secondaryPattern?: string | null
     plastic: string | null
     stamp: string | null
@@ -133,7 +135,9 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
                 {disc.color && (
                   <DiscPreview 
                     color={disc.color}
+                    colorHex={disc.colorHex}
                     secondaryColor={disc.secondaryColor}
+                    secondaryColorHex={disc.secondaryColorHex}
                     secondaryPattern={disc.secondaryPattern}
                     stampFoil={disc.stampFoil}
                     size={28}

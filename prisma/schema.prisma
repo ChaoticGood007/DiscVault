@@ -58,6 +58,8 @@ model Inventory {
   userGlide        Float?
   userTurn         Float?
   secondaryColor   String?
+  colorHex         String?
+  secondaryColorHex String?
   secondaryPattern String?
   collection       DiscCollection? @relation(fields: [collectionId], references: [id])
   mold             Mold            @relation(fields: [moldId], references: [id])

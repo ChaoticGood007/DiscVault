@@ -23,7 +23,9 @@ import PreviewModal from './PreviewModal'
 
 interface DiscPreviewProps {
   color?: string | null
+  colorHex?: string | null
   secondaryColor?: string | null
+  secondaryColorHex?: string | null
   secondaryPattern?: string | null
   stampFoil?: string | null
   size?: number
@@ -45,7 +47,9 @@ interface DiscPreviewProps {
 
 export default function DiscPreview({
   color,
+  colorHex,
   secondaryColor,
+  secondaryColorHex,
   secondaryPattern,
   stampFoil,
   size = 24,
@@ -58,8 +62,8 @@ export default function DiscPreview({
   disc
 }: DiscPreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const baseColor = parseDiscColor(color)
-  const secColor = parseDiscColor(secondaryColor)
+  const baseColor = parseDiscColor(color, colorHex)
+  const secColor = parseDiscColor(secondaryColor, secondaryColorHex)
   const foilColor = parseDiscColor(stampFoil)
   
   // We'll use a coordinate system from -50 to 50 for the internal rendering

@@ -30,7 +30,9 @@ interface InventoryItem {
   collectionId: string | null
   weight: number | null
   color: string | null
+  colorHex: string | null
   secondaryColor?: string | null
+  secondaryColorHex?: string | null
   secondaryPattern?: string | null
   plastic: string | null
   stamp: string | null
@@ -338,7 +340,9 @@ export default function InventoryList({
                         {item.color && (
                           <DiscPreview
                             color={item.color}
+                            colorHex={item.colorHex}
                             secondaryColor={item.secondaryColor}
+                            secondaryColorHex={item.secondaryColorHex}
                             secondaryPattern={item.secondaryPattern}
                             stampFoil={item.stampFoil}
                             size={16}

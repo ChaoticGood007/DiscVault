@@ -8,10 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0] - 2026-05-12
 
 ### Added
+- **Precise Color Picker & Live Preview:** Replaced the generic color text inputs in Add and Edit forms with an interactive Color Input component. This new component combines text search with a native hex color picker and opacity slider, providing accurate visual representation while maintaining searchability. The form now features a live-updating `DiscPreview` that reflects changes in real-time. Hex color overrides seamlessly propagate to inventory lists, bag checklists, and flight charts.
 - **Custom Molds:** Added the ability to create Custom Molds directly inline from the "Add Disc" form. If a disc does not exist in the Discit API, users can now define the disc's name, brand, category, and flight numbers to add it to their vault.
 
 ### Fixed
-- **Secondary Patterns:** Standardized Secondary Pattern names (e.g. "Halo/Overmold") to consistently display friendly labels across both the editor forms and the detail views instead of the raw database values.
+- **Secondary Patterns:** Standardized Secondary Pattern names (e.g. "Halo/Rim") to consistently display friendly labels across both the editor forms and the detail views instead of the raw database values. Fixed an issue where long pattern names would truncate in form inputs on smaller screens.
 - **Disc Visuals:** Fixed an SVG rendering bug where translucent or "Clear" secondary colors in Half 'n Half and Halo patterns incorrectly showed the base disc color underneath them.
 - **Location Picker:** Fixed an issue where heavily nested location paths would be truncated after selection. The dropdown button now expands vertically to wrap long text.
 
