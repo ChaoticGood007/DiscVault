@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Secondary Patterns:** Standardized Secondary Pattern names (e.g. "Halo/Overmold") to consistently display friendly labels across both the editor forms and the detail views instead of the raw database values.
+- **Disc Visuals:** Fixed an SVG rendering bug where translucent or "Clear" secondary colors in Half 'n Half and Halo patterns incorrectly showed the base disc color underneath them.
 
 ## [0.5.2] - 2026-05-07
 
