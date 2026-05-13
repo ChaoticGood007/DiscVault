@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Custom Molds:** Added the ability to create Custom Molds directly inline from the "Add Disc" form. If a disc does not exist in the Discit API, users can now define the disc's name, brand, category, and flight numbers to add it to their vault.
 
+### Fixed
+- **Secondary Patterns:** Standardized Secondary Pattern names (e.g. "Halo/Overmold") to consistently display friendly labels across both the editor forms and the detail views instead of the raw database values.
+
 ## [0.5.2] - 2026-05-07
 
 ### Fixed

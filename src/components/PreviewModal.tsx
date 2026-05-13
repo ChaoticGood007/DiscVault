@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import DiscPreview from './DiscPreview'
 import { useEffect } from 'react'
+import { SECONDARY_PATTERN_LABELS } from '@/lib/constants'
 
 interface PreviewModalProps {
   isOpen: boolean
@@ -105,7 +106,7 @@ export default function PreviewModal({ isOpen, onClose, disc }: PreviewModalProp
                   </div>
                   {disc.secondaryPattern && (
                     <div className="px-3 py-1 bg-indigo-50 rounded-full text-[10px] font-black text-indigo-600 uppercase tracking-widest">
-                      {disc.secondaryPattern} Pattern
+                      {SECONDARY_PATTERN_LABELS[disc.secondaryPattern] || disc.secondaryPattern} Pattern
                     </div>
                   )}
                 </div>

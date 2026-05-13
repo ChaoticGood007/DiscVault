@@ -22,6 +22,7 @@ import { Trash2, ArrowLeft, Inbox } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import LocationPicker from '@/components/LocationPicker'
 import { type LocationNode } from '@/lib/locationTree'
+import { SECONDARY_PATTERN_LABELS } from '@/lib/constants'
 
 interface Collection {
   id: string
@@ -191,11 +192,9 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
               className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none shadow-sm"
             >
               <option value="">None</option>
-              <option value="Halo">Halo/Overmold</option>
-              <option value="Burst">Center Burst</option>
-              <option value="Split">Half 'n Half</option>
-              <option value="Swirl">Swirly</option>
-              <option value="Speckled">Speckled</option>
+              {Object.entries(SECONDARY_PATTERN_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
             </select>
           </div>
         </div>

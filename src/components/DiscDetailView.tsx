@@ -4,6 +4,7 @@ import { Edit3, ArrowLeft, MapPin, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import DiscPreview from './DiscPreview'
+import { SECONDARY_PATTERN_LABELS } from '@/lib/constants'
 
 interface DiscDetailViewProps {
   disc: {
@@ -148,7 +149,7 @@ export default function DiscDetailView({ disc, categoryColors, vaultId, bagPaths
             </div>
             <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Secondary Pattern</span>
-              <span className="block text-xl font-black text-slate-900">{disc.secondaryPattern || '—'}</span>
+              <span className="block text-xl font-black text-slate-900">{disc.secondaryPattern ? (SECONDARY_PATTERN_LABELS[disc.secondaryPattern] || disc.secondaryPattern) : '—'}</span>
             </div>
             <div className="space-y-2">
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Condition</span>

@@ -22,6 +22,7 @@ import { createCustomMold } from '@/app/actions/molds'
 import { Search, Loader2, Plus } from 'lucide-react'
 import LocationPicker from '@/components/LocationPicker'
 import { type LocationNode } from '@/lib/locationTree'
+import { SECONDARY_PATTERN_LABELS } from '@/lib/constants'
 
 interface Mold {
   id: string
@@ -291,11 +292,9 @@ export default function AddDiscForm({ vaultId, tree }: AddDiscFormProps) {
             className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl font-black text-slate-900 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
           >
             <option value="">None</option>
-            <option value="Halo">Halo/Overmold</option>
-            <option value="Burst">Center Burst</option>
-            <option value="Split">Half 'n Half</option>
-            <option value="Swirl">Swirly</option>
-            <option value="Speckled">Speckled</option>
+            {Object.entries(SECONDARY_PATTERN_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
           </select>
         </div>
       </div>
