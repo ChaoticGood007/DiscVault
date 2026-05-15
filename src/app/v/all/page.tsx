@@ -25,6 +25,7 @@ import InventoryInfiniteList from "@/components/InventoryInfiniteList"
 import FilterPreserver from "@/components/FilterPreserver"
 import { getLocationTree } from "@/app/actions/settings"
 import { flattenTree, type LocationNode } from "@/lib/locationTree"
+import { parseSearchQuery } from "@/lib/searchParser"
 
 type SortField = 'name' | 'brand' | 'category' | 'speed' | 'glide' | 'turn' | 'fade' | 'createdAt' | 'plastic' | 'weight' | 'color' | 'stamp' | 'stampFoil' | 'location' | 'condition' | 'ink';
 type SortOrder = 'asc' | 'desc';
@@ -38,8 +39,6 @@ export default async function AllVaultsDashboard({
 }) {
   const searchP = await searchParams
   
-  const category = typeof searchP.category === 'string' ? searchP.category : undefined
-  const brand = typeof searchP.brand === 'string' ? searchP.brand : undefined
   const view = typeof searchP.view === 'string' ? searchP.view : 'cards'
   const cookieStore = await cookies()
   const defaultSortBy = cookieStore.get('discVaultSortBy')?.value || 'createdAt'
@@ -52,32 +51,12 @@ export default async function AllVaultsDashboard({
   const colsParam = typeof searchP.cols === 'string' ? searchP.cols.split(',') : cookieCols
   const visibleCols = colsParam.includes('name') ? colsParam : ['name', ...colsParam]
   const searchQuery = typeof searchP.search === 'string' ? searchP.search : undefined
-  const inBagParam = typeof searchP.inBag === 'string' ? searchP.inBag : undefined
   const selectedCollectionIds = typeof searchP.collections === 'string' ? searchP.collections.split(',') : []
 
   const userFlightCookie = cookieStore.get('discVaultUserFlightNum')?.value === 'true'
   const useUserFlightNumbers = typeof searchP.useUserFlightNumbers === 'string' 
     ? searchP.useUserFlightNumbers === 'true' 
     : userFlightCookie
-
-  const minSpeed = searchP.minSpeed ? parseFloat(searchP.minSpeed as string) : undefined
-  const maxSpeed = searchP.maxSpeed ? parseFloat(searchP.maxSpeed as string) : undefined
-  const minGlide = searchP.minGlide ? parseFloat(searchP.minGlide as string) : undefined
-  const maxGlide = searchP.maxGlide ? parseFloat(searchP.maxGlide as string) : undefined
-  const minTurn = searchP.minTurn ? parseFloat(searchP.minTurn as string) : undefined
-  const maxTurn = searchP.maxTurn ? parseFloat(searchP.maxTurn as string) : undefined
-  const minFade = searchP.minFade ? parseFloat(searchP.minFade as string) : undefined
-  const maxFade = searchP.maxFade ? parseFloat(searchP.maxFade as string) : undefined
-  const minWeight = searchP.minWeight ? parseFloat(searchP.minWeight as string) : undefined
-  const maxWeight = searchP.maxWeight ? parseFloat(searchP.maxWeight as string) : undefined
-  const minCond = searchP.minCond ? parseInt(searchP.minCond as string) : undefined
-  const maxCond = searchP.maxCond ? parseInt(searchP.maxCond as string) : undefined
-  const inkFilter = searchP.ink as string | undefined
-  const plasticFilter = typeof searchP.plastic === 'string' ? searchP.plastic : undefined
-  const colorFilter = typeof searchP.color === 'string' ? searchP.color : undefined
-  const stampFilter = typeof searchP.stamp === 'string' ? searchP.stamp : undefined
-  const stampFoilFilter = typeof searchP.stampFoil === 'string' ? searchP.stampFoil : undefined
-  const locationsFilter = typeof searchP.locations === 'string' ? searchP.locations.split(',').filter(Boolean) : []
 
   const pageSize = 24
   const page = typeof searchP.page === 'string' ? Math.max(1, parseInt(searchP.page)) : 1
@@ -89,45 +68,7 @@ export default async function AllVaultsDashboard({
     return { mold: { [field]: order } }
   }
 
-  const andConditions: any[] = []
 
-  if (searchQuery) {
-    andConditions.push({
-      OR: [
-        { mold: { name: { contains: searchQuery } } },
-        { mold: { brand: { contains: searchQuery } } },
-        { mold: { category: { contains: searchQuery } } },
-        { plastic: { contains: searchQuery } },
-        { color: { contains: searchQuery } },
-        { stamp: { contains: searchQuery } },
-        { stampFoil: { contains: searchQuery } },
-        { location: { contains: searchQuery } },
-        { notes: { contains: searchQuery } },
-      ]
-    })
-  }
-
-  const addNullableMultiSelect = (field: string, filterStr?: string) => {
-    if (!filterStr) return;
-    const values = filterStr.split(',').filter(Boolean);
-    if (values.length === 0) return;
-    const hasNotDefined = values.includes('Not Defined');
-    const valid = values.filter(v => v !== 'Not Defined');
-    if (hasNotDefined) {
-      const orConditions: any[] = [{ [field]: null }, { [field]: '' }];
-      if (valid.length > 0) {
-        orConditions.push({ [field]: { in: valid } });
-      }
-      andConditions.push({ OR: orConditions });
-    } else {
-      andConditions.push({ [field]: { in: values } });
-    }
-  }
-
-  addNullableMultiSelect('plastic', plasticFilter);
-  addNullableMultiSelect('color', colorFilter);
-  addNullableMultiSelect('stamp', stampFilter);
-  addNullableMultiSelect('stampFoil', stampFoilFilter);
 
   const baseColWhere = selectedCollectionIds.length > 0 ? { collectionId: { in: selectedCollectionIds } } : {}
 
@@ -144,52 +85,9 @@ export default async function AllVaultsDashboard({
   const bagOptions = Array.from(new Map(allBags.map(b => [b.value, b])).values())
   const bagPaths = bagOptions.map(b => b.value)
 
-  // Bag / Location logic
-  if (inBagParam === 'true') {
-    if (bagPaths.length > 0) {
-      andConditions.push({
-        OR: bagPaths.flatMap(p => [
-          { location: p },
-          { location: { startsWith: p + '/' } }
-        ])
-      })
-    } else {
-      andConditions.push({ id: 'none' })
-    }
-  } else if (inBagParam === 'false') {
-    if (bagPaths.length > 0) {
-      andConditions.push({
-        NOT: { OR: bagPaths.flatMap(p => [
-          { location: p },
-          { location: { startsWith: p + '/' } }
-        ])}
-      })
-    }
-  } else if (inBagParam) {
-    andConditions.push({
-      OR: [
-        { location: inBagParam },
-        { location: { startsWith: inBagParam + '/' } }
-      ]
-    })
-  } else if (locationsFilter.length > 0) {
-    andConditions.push({ location: { in: locationsFilter } })
-  }
-
-  const whereClause: any = {
-    collectionId: selectedCollectionIds.length > 0 ? { in: selectedCollectionIds } : undefined,
-    weight: (minWeight !== undefined || maxWeight !== undefined) ? { gte: minWeight, lte: maxWeight } : undefined,
-    condition: (minCond !== undefined || maxCond !== undefined) ? { gte: minCond, lte: maxCond } : undefined,
-    ink: inkFilter === 'none' ? { equals: 'None' } : inkFilter === 'exists' ? { not: 'None' } : undefined,
-    mold: {
-      brand: brand ? { in: brand.split(',') } : undefined,
-      category: category ? { in: category.split(',') } : undefined,
-      speed: (minSpeed !== undefined || maxSpeed !== undefined) ? { gte: minSpeed, lte: maxSpeed } : undefined,
-      glide: (minGlide !== undefined || maxGlide !== undefined) ? { gte: minGlide, lte: maxGlide } : undefined,
-      turn: (minTurn !== undefined || maxTurn !== undefined) ? { gte: minTurn, lte: maxTurn } : undefined,
-      fade: (minFade !== undefined || maxFade !== undefined) ? { gte: minFade, lte: maxFade } : undefined,
-    },
-    AND: andConditions.length > 0 ? andConditions : undefined,
+  const whereClause: any = parseSearchQuery(searchQuery || '', 'all', bagPaths);
+  if (selectedCollectionIds.length > 0) {
+    whereClause.collectionId = { in: selectedCollectionIds };
   }
 
   const [
@@ -222,7 +120,7 @@ export default async function AllVaultsDashboard({
   const stampFoilsList = ['Not Defined', ...Array.from(new Set(inventoryStampFoils.map((i: any) => i.stampFoil))).filter(Boolean).sort() as string[]]
   const locationsList = Array.from(new Set(bagOptions.map(b => b.value))).sort() // Fallback or aggregate list
 
-  const activeFiltersCount = (category ? category.split(',').length : 0) + (brand ? brand.split(',').length : 0) + (searchQuery ? 1 : 0) + (inBagParam ? 1 : 0) + selectedCollectionIds.length + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0) - (searchP.collections ? 1 : 0)
+  const activeFiltersCount = (searchQuery ? 1 : 0) + selectedCollectionIds.length + Object.values(searchP).filter(v => v !== undefined && v !== '').length - (searchP.view ? 1 : 0) - (searchP.sortBy ? 1 : 0) - (searchP.sortOrder ? 1 : 0) - (searchP.cols ? 1 : 0) - (searchP.page ? 1 : 0) - (searchP.collections ? 1 : 0)
 
   return (
     <div className="space-y-8">
@@ -242,25 +140,9 @@ export default async function AllVaultsDashboard({
         collections={collections as any}
         availableLocations={locationsList}
         currentCollectionIds={selectedCollectionIds}
-        currentCategory={category}
-        currentBrand={brand}
         currentView={view}
         searchQuery={searchQuery}
-        currentBag={inBagParam}
         bagOptions={bagOptions}
-        advancedFilters={{
-          minSpeed, maxSpeed,
-          minGlide, maxGlide,
-          minTurn, maxTurn,
-          minFade, maxFade,
-          minWeight, maxWeight,
-          minCond, maxCond,
-          ink: inkFilter,
-          plastic: plasticFilter,
-          color: colorFilter,
-          stamp: stampFilter,
-          locations: locationsFilter.length ? locationsFilter.join(',') : undefined,
-        }}
         sortBy={sortBy}
         sortOrder={sortOrder}
         visibleColumns={visibleCols}

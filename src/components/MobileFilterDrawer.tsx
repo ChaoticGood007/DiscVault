@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { X, Check, RotateCcw, SlidersHorizontal, Package, Tag, Layers, Filter } from 'lucide-react'
-import { type AdvancedFilters, ADVANCED_KEYS } from './AdvancedSearch'
+import { X, RotateCcw, SlidersHorizontal, Package, Tag, Layers, Filter } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { extractSearchTokens } from '@/lib/searchParser'
 import MultiSelectDropdown from './MultiSelectDropdown'
 const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
@@ -18,11 +17,8 @@ interface MobileFilterDrawerProps {
   stamps: string[]
   stampFoils: string[]
   availableLocations: string[]
-  currentCategory?: string
-  currentBrand?: string
-  currentBag?: string
-  bagOptions: { label: string, value: string }[]
-  advancedFilters: AdvancedFilters
+  initialQuery?: string
+  onAppendSearch: (str: string) => void
 }
 
 const allowNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -43,29 +39,16 @@ export default function MobileFilterDrawer({
   stamps,
   stampFoils,
   availableLocations,
-  currentCategory,
-  currentBrand,
-  currentBag,
-  bagOptions,
-  advancedFilters,
+  initialQuery,
+  onAppendSearch
 }: MobileFilterDrawerProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-
-  const [localCategory, setLocalCategory] = useState<string | undefined>(currentCategory)
-  const [localBrand, setLocalBrand] = useState<string | undefined>(currentBrand)
-  const [localBag, setLocalBag] = useState<string | undefined>(currentBag)
-  const [localAdvanced, setLocalAdvanced] = useState<AdvancedFilters>(advancedFilters)
+  const [localState, setLocalState] = useState<Record<string, any>>({})
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
 
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen)
     if (isOpen) {
-      setLocalCategory(currentCategory)
-      setLocalBrand(currentBrand)
-      setLocalBag(currentBag)
-      setLocalAdvanced(advancedFilters)
+      setLocalState(extractSearchTokens(initialQuery || ''))
     }
   }
 
@@ -80,57 +63,64 @@ export default function MobileFilterDrawer({
 
   if (!isOpen) return null
 
-  const handleUpdateAdvanced = (key: keyof AdvancedFilters, value: string | number | undefined) => {
-    setLocalAdvanced(prev => ({ ...prev, [key]: value }))
-  }
-
-  const selectedLocations = localAdvanced.locations ? localAdvanced.locations.split(',').filter(Boolean) : []
-
-  const toggleLocation = (loc: string) => {
-    const next = selectedLocations.includes(loc)
-      ? selectedLocations.filter(l => l !== loc)
-      : [...selectedLocations, loc]
-    setLocalAdvanced(prev => ({ ...prev, locations: next.length ? next.join(',') : undefined }))
+  const handleUpdate = (key: string, value: any) => {
+    setLocalState(prev => ({ ...prev, [key]: value }))
   }
 
   const applyFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    
-    if (localCategory) params.set('category', localCategory)
-    else params.delete('category')
-      
-    if (localBrand) params.set('brand', localBrand)
-    else params.delete('brand')
+    const tokens: string[] = []
 
-    if (localBag) params.set('inBag', localBag)
-    else params.delete('inBag')
+    const addRange = (minKey: string, maxKey: string, field: string) => {
+      const min = localState[minKey];
+      const max = localState[maxKey];
+      if (min && max) tokens.push(`${field}:${min}-${max}`)
+      else if (min) tokens.push(`${field}:>=${min}`)
+      else if (max) tokens.push(`${field}:<=${max}`)
+    }
 
-    ADVANCED_KEYS.forEach(key => {
-      const val = localAdvanced[key]
-      if (val !== undefined && val !== '') {
-        params.set(key, val.toString())
-      } else {
-        params.delete(key)
+    addRange('minSpeed', 'maxSpeed', 'speed')
+    addRange('minGlide', 'maxGlide', 'glide')
+    addRange('minTurn', 'maxTurn', 'turn')
+    addRange('minFade', 'maxFade', 'fade')
+    addRange('minWeight', 'maxWeight', 'weight')
+    addRange('minCond', 'maxCond', 'condition')
+
+    const addMulti = (key: string, field: string) => {
+      if (localState[key]) {
+        localState[key].split(',').filter(Boolean).forEach((val: string) => {
+          tokens.push(`${field}:"${val}"`)
+        })
       }
-    })
+    }
 
-    params.set('page', '1')
-    router.push(`${pathname}?${params.toString()}`)
+    addMulti('category', 'category')
+    addMulti('brand', 'brand')
+    addMulti('plastic', 'plastic')
+    addMulti('color', 'color')
+    addMulti('stamp', 'stamp')
+    addMulti('stampFoil', 'foil')
+
+    if (localState.locations) {
+      localState.locations.split(',').filter(Boolean).forEach((val: string) => {
+        tokens.push(`location:"${val}"`)
+      })
+    }
+
+    if (localState.ink && localState.ink !== 'any') {
+      tokens.push(`ink:${localState.ink}`)
+    }
+
+    if (tokens.length > 0) {
+      onAppendSearch(tokens.join(' '))
+    }
     onClose()
   }
 
   const resetFilters = () => {
-    setLocalCategory(undefined)
-    setLocalBrand(undefined)
-    setLocalBag(undefined)
-    setLocalAdvanced({})
+    setLocalState({})
   }
 
-  const activeCount = 
-    (localCategory ? 1 : 0) + 
-    (localBrand ? 1 : 0) + 
-    (localBag ? 1 : 0) + 
-    Object.values(localAdvanced).filter(v => v !== undefined && v !== '').length
+  const activeCount = Object.keys(localState).length
 
   return (
     <div className="fixed inset-0 z-[200] flex flex-col bg-slate-50 sm:hidden animate-in slide-in-from-bottom-full duration-300">
@@ -138,7 +128,7 @@ export default function MobileFilterDrawer({
       <div className="flex items-center justify-between px-4 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="flex items-center gap-2 text-indigo-600">
           <Filter className="w-5 h-5" />
-          <h2 className="text-lg font-black text-slate-900">Filters</h2>
+          <h2 className="text-lg font-black text-slate-900">Query Builder</h2>
           {activeCount > 0 && (
             <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full text-[10px] font-black">
               {activeCount} Active
@@ -152,40 +142,6 @@ export default function MobileFilterDrawer({
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-8 pb-32">
-        {/* Quick Filters */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-slate-800 mb-4 border-b border-slate-200 pb-2">
-            <Package className="w-4 h-4 text-indigo-500" />
-            <span className="text-xs font-black uppercase tracking-widest text-slate-400">Bag Select</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setLocalBag(localBag === 'true' ? undefined : 'true')}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${localBag === 'true' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-100 text-slate-600'}`}
-            >
-              <span className="text-xs font-bold">All Bags</span>
-              {localBag === 'true' && <Check className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => setLocalBag(localBag === 'false' ? undefined : 'false')}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${localBag === 'false' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-100 text-slate-600'}`}
-            >
-              <span className="text-xs font-bold">No Bag</span>
-              {localBag === 'false' && <Check className="w-4 h-4" />}
-            </button>
-            {bagOptions.map(bag => (
-              <button
-                key={bag.value}
-                onClick={() => setLocalBag(localBag === bag.value ? undefined : bag.value)}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${localBag === bag.value ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-slate-100 text-slate-600'}`}
-              >
-                <span className="text-xs font-bold truncate pr-2">{bag.label.split(' / ').pop()}</span>
-                {localBag === bag.value && <Check className="w-4 h-4 flex-shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Categories */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-slate-800 mb-4 border-b border-slate-200 pb-2">
@@ -195,8 +151,8 @@ export default function MobileFilterDrawer({
           <MultiSelectDropdown
             label="Category"
             options={categories}
-            selectedValues={localCategory ? localCategory.split(',').filter(Boolean) : []}
-            onChange={(vals) => setLocalCategory(vals.length ? vals.join(',') : undefined)}
+            selectedValues={(localState.category || '').split(',').filter(Boolean)}
+            onChange={(vals) => handleUpdate('category', vals.length ? vals.join(',') : undefined)}
             placeholder="All Categories"
           />
         </div>
@@ -210,8 +166,8 @@ export default function MobileFilterDrawer({
           <MultiSelectDropdown
             label="Brand"
             options={brands}
-            selectedValues={localBrand ? localBrand.split(',').filter(Boolean) : []}
-            onChange={(vals) => setLocalBrand(vals.length ? vals.join(',') : undefined)}
+            selectedValues={(localState.brand || '').split(',').filter(Boolean)}
+            onChange={(vals) => handleUpdate('brand', vals.length ? vals.join(',') : undefined)}
             placeholder="All Brands"
           />
         </div>
@@ -220,22 +176,22 @@ export default function MobileFilterDrawer({
         {availableLocations.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-slate-800 mb-2 border-b border-slate-200 pb-2">
-              <Layers className="w-4 h-4 text-indigo-500" />
+              <Package className="w-4 h-4 text-indigo-500" />
               <span className="text-xs font-black uppercase tracking-widest text-slate-400">Location</span>
-              {selectedLocations.length > 0 && (
+              {(localState.locations ? localState.locations.split(',').filter(Boolean) : []).length > 0 && (
                 <span className="ml-auto text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                  {selectedLocations.length} selected
+                  {(localState.locations ? localState.locations.split(',').filter(Boolean) : []).length} selected
                 </span>
               )}
             </div>
-            {selectedLocations.length > 0 && (
+            {(localState.locations ? localState.locations.split(',').filter(Boolean) : []).length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {selectedLocations.map(loc => (
+                {(localState.locations ? localState.locations.split(',').filter(Boolean) : []).map((loc: string) => (
                   <span key={loc} className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-1 rounded-lg">
                     {loc.split('/').pop()}
                     <button type="button" onClick={() => {
-                      const next = selectedLocations.filter(l => l !== loc)
-                      setLocalAdvanced(prev => ({ ...prev, locations: next.length ? next.join(',') : undefined }))
+                      const next = (localState.locations ? localState.locations.split(',').filter(Boolean) : []).filter((l: string) => l !== loc)
+                      handleUpdate('locations', next.length ? next.join(',') : undefined)
                     }} className="hover:text-indigo-900">×</button>
                   </span>
                 ))}
@@ -243,8 +199,8 @@ export default function MobileFilterDrawer({
             )}
             <LocationTreePicker
               availableLocations={availableLocations}
-              selectedLocations={selectedLocations}
-              onChange={(locs) => setLocalAdvanced(prev => ({ ...prev, locations: locs.length ? locs.join(',') : undefined }))}
+              selectedLocations={(localState.locations ? localState.locations.split(',').filter(Boolean) : [])}
+              onChange={(locs) => handleUpdate('locations', locs.length ? locs.join(',') : undefined)}
               className="shadow-sm"
             />
           </div>
@@ -264,18 +220,18 @@ export default function MobileFilterDrawer({
               ['Fade', 'minFade', 'maxFade'],
               ['Weight (g)', 'minWeight', 'maxWeight'],
               ['Condition', 'minCond', 'maxCond'],
-            ] as [string, keyof AdvancedFilters, keyof AdvancedFilters][]).map(([label, minKey, maxKey]) => (
+            ] as [string, string, string][]).map(([label, minKey, maxKey]) => (
               <div key={label} className="space-y-2">
                 <label className={labelCls}>{label}</label>
                 <div className="flex items-center gap-2">
                   <input type="text" inputMode="decimal" placeholder="Min"
-                    value={localAdvanced[minKey] ?? ''} onKeyDown={allowNumeric}
-                    onChange={(e) => handleUpdateAdvanced(minKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+                    value={localState[minKey] ?? ''} onKeyDown={allowNumeric}
+                    onChange={(e) => handleUpdate(minKey, e.target.value ? parseFloat(e.target.value) : undefined)}
                     className={inputCls} />
                   <span className="text-slate-300 font-bold shrink-0">—</span>
                   <input type="text" inputMode="decimal" placeholder="Max"
-                    value={localAdvanced[maxKey] ?? ''} onKeyDown={allowNumeric}
-                    onChange={(e) => handleUpdateAdvanced(maxKey, e.target.value ? parseFloat(e.target.value) : undefined)}
+                    value={localState[maxKey] ?? ''} onKeyDown={allowNumeric}
+                    onChange={(e) => handleUpdate(maxKey, e.target.value ? parseFloat(e.target.value) : undefined)}
                     className={inputCls} />
                 </div>
               </div>
@@ -287,8 +243,8 @@ export default function MobileFilterDrawer({
               <MultiSelectDropdown
                 label="Plastic"
                 options={plastics}
-                selectedValues={(localAdvanced.plastic as string || '').split(',').filter(Boolean)}
-                onChange={(vals) => handleUpdateAdvanced('plastic', vals.length ? vals.join(',') : undefined)}
+                selectedValues={(localState.plastic as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('plastic', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Plastics"
               />
             </div>
@@ -298,8 +254,8 @@ export default function MobileFilterDrawer({
               <MultiSelectDropdown
                 label="Color"
                 options={colors}
-                selectedValues={(localAdvanced.color as string || '').split(',').filter(Boolean)}
-                onChange={(vals) => handleUpdateAdvanced('color', vals.length ? vals.join(',') : undefined)}
+                selectedValues={(localState.color as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('color', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Colors"
               />
             </div>
@@ -309,8 +265,8 @@ export default function MobileFilterDrawer({
               <MultiSelectDropdown
                 label="Stamp"
                 options={stamps}
-                selectedValues={(localAdvanced.stamp as string || '').split(',').filter(Boolean)}
-                onChange={(vals) => handleUpdateAdvanced('stamp', vals.length ? vals.join(',') : undefined)}
+                selectedValues={(localState.stamp as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('stamp', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Stamps"
               />
             </div>
@@ -320,8 +276,8 @@ export default function MobileFilterDrawer({
               <MultiSelectDropdown
                 label="Foil"
                 options={stampFoils}
-                selectedValues={(localAdvanced.stampFoil as string || '').split(',').filter(Boolean)}
-                onChange={(vals) => handleUpdateAdvanced('stampFoil', vals.length ? vals.join(',') : undefined)}
+                selectedValues={(localState.stampFoil as string || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('stampFoil', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Foils"
               />
             </div>
@@ -332,9 +288,9 @@ export default function MobileFilterDrawer({
               <div className="flex gap-2">
                 {['any', 'none', 'exists'].map((option) => (
                   <button key={option}
-                    onClick={() => handleUpdateAdvanced('ink', option === 'any' ? undefined : option)}
+                    onClick={() => handleUpdate('ink', option === 'any' ? undefined : option)}
                     className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                      (localAdvanced.ink || 'any') === option 
+                      (localState.ink || 'any') === option 
                         ? 'bg-slate-900 border-slate-900 text-white shadow-lg' 
                         : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                     }`}
@@ -357,7 +313,7 @@ export default function MobileFilterDrawer({
         </button>
         <button onClick={applyFilters}
           className="flex-[2] py-4 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 shadow-xl shadow-indigo-200">
-          Show Results
+          Add to Search
         </button>
       </div>
     </div>
