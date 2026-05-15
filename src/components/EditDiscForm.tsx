@@ -98,7 +98,8 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
 
   const handleUpdate = async (formData: FormData) => {
     await updateDisc(disc.id, formData)
-    router.back()
+    const targetVault = formData.get('collectionId') as string || 'all'
+    router.push(`/v/${targetVault}/inventory/${disc.id}`)
   }
 
   const handleDelete = async () => {
