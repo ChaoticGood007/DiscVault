@@ -150,7 +150,7 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
           </select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-50">
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Weight (g)</label>
             <input

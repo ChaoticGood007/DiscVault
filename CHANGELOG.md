@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-05-14
+
+### Fixed
+- **Disc Visuals:** Fixed a bug where the 'Speckled' secondary pattern would fail to render due to a hash calculation error.
+- **Location Picker:** Fixed a z-index issue where the Location Picker dropdown menu in the Add/Edit forms would render behind the live Disc Preview.
+
 ## [0.6.0] - 2026-05-12
 
 ### Added

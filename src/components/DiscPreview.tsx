@@ -84,6 +84,7 @@ export default function DiscPreview({
       hash = ((hash << 5) - hash) + seedString.charCodeAt(i)
       hash |= 0 
     }
+    hash = Math.abs(hash) || 1
     
     const random = () => {
       hash = (hash * 16807) % 2147483647
