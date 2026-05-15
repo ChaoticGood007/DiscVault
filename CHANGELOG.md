@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-05-14
+
+### Added
+- **Intelligent Autocomplete Search:** Replaced the standard search bar with a powerful, context-aware autocomplete engine. The search bar now provides instant, keyboard-accessible suggestions for syntax keys (e.g., `brand:`, `speed:`) and scans your database to suggest available values as you type. 
+- **Powerful Search Syntax:** Replaced the legacy dropdown filter system with a unified, GitHub-style text search parser. The main search bar is now the single source of truth for inventory discovery, supporting complex tokens (e.g., `brand:Innova`, `speed:>9`, `plastic:"Star"`). The Advanced Filter and Mobile Filter UI have been repurposed into a "Query Builder" that seamlessly constructs and appends these tokens to your search string.
+- **Smart Stacking for Bags:** The "Bags" dropdown toggle now features intelligent "Smart Stacking." When toggling a bag or pocket on, the system automatically clears out redundant parent or child location tokens to keep your query clean and focused while still supporting multi-bag searches.
+
+### Fixed
+- **Disc Visuals:** Fixed a bug where the 'Speckled' secondary pattern would fail to render due to a hash calculation error.
+- **Location Picker:** Fixed a z-index issue where the Location Picker dropdown menu in the Add/Edit forms would render behind the live Disc Preview.
 ## [0.6.0] - 2026-05-12
 
 ### Added

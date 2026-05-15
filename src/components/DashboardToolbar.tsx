@@ -20,9 +20,11 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Filter, LayoutGrid, List, Columns, Check, Search, Inbox, ChevronDown, Settings, SlidersHorizontal, ArrowUpDown, ArrowDown, ArrowUp, Briefcase } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useCallback } from 'react'
-import AdvancedSearch, { type AdvancedFilters } from './AdvancedSearch'
+import AdvancedSearch from './AdvancedSearch'
 import MobileFilterDrawer from './MobileFilterDrawer'
+import AutocompleteSearch from './AutocompleteSearch'
 import MultiSelectDropdown from './MultiSelectDropdown'
+import { extractSearchTokens } from '@/lib/searchParser'
 
 const SORT_OPTIONS = [
   { id: 'createdAt', label: 'Date Added' },
@@ -52,13 +54,9 @@ interface DashboardToolbarProps {
   collections: Collection[]
   availableLocations: string[]
   currentCollectionIds: string[]
-  currentCategory?: string
-  currentBrand?: string
   currentView: string
   searchQuery?: string
-  currentBag?: string
   bagOptions?: { label: string, value: string }[]
-  advancedFilters: AdvancedFilters
   sortBy: string
   sortOrder: string
   visibleColumns: string[]
@@ -92,13 +90,9 @@ export default function DashboardToolbar({
   collections,
   availableLocations,
   currentCollectionIds,
-  currentCategory,
-  currentBrand,
   currentView,
   searchQuery,
-  currentBag,
   bagOptions = [],
-  advancedFilters,
   sortBy,
   sortOrder,
   visibleColumns,
@@ -209,12 +203,53 @@ export default function DashboardToolbar({
     updateParams({ collections: newIds.length > 0 ? newIds.join(',') : null })
   }
 
-  const activeAdvancedCount = Object.values(advancedFilters).filter(v => v !== undefined && v !== '').length
-  
-  const currentCategoryArray = currentCategory ? currentCategory.split(',').filter(Boolean) : []
-  const currentBrandArray = currentBrand ? currentBrand.split(',').filter(Boolean) : []
-  
-  const activeFilterCount = currentCategoryArray.length + currentBrandArray.length + (currentBag ? 1 : 0) + activeAdvancedCount
+  const parsedSearch = extractSearchTokens(localSearch)
+  const isBagYes = parsedSearch.bag === 'yes' || parsedSearch.bag === 'true' || parsedSearch.bag === '1'
+  const isBagNo = parsedSearch.bag === 'no' || parsedSearch.bag === 'false' || parsedSearch.bag === '0'
+  const selectedBagLocations = parsedSearch.locations ? parsedSearch.locations.split(',') : []
+
+  const toggleBagToken = (type: 'yes' | 'no' | 'location', value?: string) => {
+    let current = localSearch
+    
+    if (type === 'location' && value) {
+      const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      // Allow flexible whitespace around slashes and in general
+      const flexValue = escapedValue.replace(/\\? /g, '\\s*').replace(/\//g, '\\s*\\/\\s*')
+      
+      const regex1 = new RegExp(`location:"${flexValue}"`, 'gi')
+      const regex2 = new RegExp(`location:${value.replace(/\s+/g, '')}`, 'gi')
+      
+      if (regex1.test(current) || regex2.test(current)) {
+        current = current.replace(regex1, '').replace(regex2, '')
+      } else {
+        // Smart Stacking: remove any parents or children before adding
+        const toRemove = selectedBagLocations.filter(loc => {
+           const normLoc = loc.replace(/\s+/g, '').toLowerCase()
+           const normVal = value.replace(/\s+/g, '').toLowerCase()
+           return normVal.startsWith(normLoc + '/') || normLoc.startsWith(normVal + '/')
+        })
+        
+        toRemove.forEach(locToRemove => {
+           const escaped = locToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+           const flex = escaped.replace(/\\? /g, '\\s*').replace(/\//g, '\\s*\\/\\s*')
+           const r1 = new RegExp(`location:"${flex}"`, 'gi')
+           const r2 = new RegExp(`location:${locToRemove.replace(/\s+/g, '')}`, 'gi')
+           current = current.replace(r1, '').replace(r2, '')
+        })
+
+        current = `${current} location:"${value}"`
+      }
+    } else {
+      current = current.replace(/bag:(yes|no|true|false|1|0)/gi, '').replace(/inbag:(yes|no|true|false|1|0)/gi, '')
+      if (type === 'yes' && !isBagYes) current = `${current} bag:yes`
+      else if (type === 'no' && !isBagNo) current = `${current} bag:no`
+    }
+    
+    setLocalSearch(current.replace(/\s+/g, ' ').trim())
+    setShowBagSelector(false)
+  }
+
+  const activeFilterCount = localSearch ? 1 : 0
   const isAllMode = pathname === '/v/all'
 
   return (
@@ -288,117 +323,98 @@ export default function DashboardToolbar({
 
       {/* Main Toolbar */}
       <div className="bg-white p-2 sm:p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-3 md:gap-4 justify-between relative z-40">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full">
           <div className="hidden sm:flex items-center text-slate-400 mr-2 shrink-0">
             <Filter className="h-5 w-5 mr-2" />
-            <span className="font-bold text-[10px] uppercase tracking-widest hidden md:inline">Filter</span>
+            <span className="font-bold text-[10px] uppercase tracking-widest hidden md:inline">Search</span>
           </div>
           
-          <div className="relative flex-grow sm:flex-grow-0 w-full sm:w-64">
-            <input
-              type="text"
-              id="toolbar-search"
-              placeholder="Search discs..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs font-black focus:ring-4 focus:ring-indigo-100 outline-none bg-slate-50 text-slate-900 transition-all placeholder:text-slate-400 placeholder:font-medium"
-            />
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-          </div>
+          <AutocompleteSearch
+            value={localSearch}
+            onChange={setLocalSearch}
+            categories={categories}
+            brands={brands}
+            plastics={plastics}
+            colors={colors}
+            stamps={stamps}
+            stampFoils={stampFoils}
+            availableLocations={availableLocations}
+          />
 
           <div className="hidden sm:flex items-center gap-2">
             <div className="relative" ref={bagRef}>
               <button
                 onClick={() => setShowBagSelector(!showBagSelector)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${currentBag ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-white border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600'}`}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 bg-white border-slate-200 text-slate-500 hover:border-emerald-200 hover:text-emerald-600`}
               >
-                {currentBag === 'true' ? 'All Bags' : 
-                 currentBag === 'false' ? 'No Bag' : 
-                 currentBag ? bagOptions.find(b => b.value === currentBag)?.label?.split('/').pop() || 'Bag' : 
-                 'Bags'}
+                Bags
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showBagSelector ? 'rotate-180' : ''}`} />
               </button>
               
               <div className={`absolute top-full left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 transition-all origin-top ${showBagSelector ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}>
                 <button
-                  onClick={() => { updateParams({ inBag: null }); setShowBagSelector(false); }}
-                  className={`w-full text-left px-4 py-2 text-sm font-bold transition-colors ${!currentBag ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}
+                  onClick={() => toggleBagToken('yes')}
+                  className={`w-full flex items-center justify-between px-4 py-2 text-sm font-bold transition-colors group hover:bg-slate-50 ${isBagYes ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600'}`}
                 >
-                  Clear Bag Filter
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-3.5 h-3.5" />
+                    In Bag
+                  </div>
+                  {isBagYes && <Check className="w-3.5 h-3.5" />}
                 </button>
                 <button
-                  onClick={() => { updateParams({ inBag: 'true' }); setShowBagSelector(false); }}
-                  className={`w-full flex items-center gap-2 text-left px-4 py-2 text-sm font-bold transition-colors ${currentBag === 'true' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}
+                  onClick={() => toggleBagToken('no')}
+                  className={`w-full flex items-center justify-between px-4 py-2 text-sm font-bold transition-colors group hover:bg-slate-50 ${isBagNo ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600'}`}
                 >
-                  <Briefcase className="w-3.5 h-3.5" />
-                  All Bags
-                </button>
-                <button
-                  onClick={() => { updateParams({ inBag: 'false' }); setShowBagSelector(false); }}
-                  className={`w-full flex items-center gap-2 text-left px-4 py-2 text-sm font-bold transition-colors ${currentBag === 'false' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}
-                >
-                  <span className="w-3.5 h-3.5 border-2 border-slate-300 rounded inline-block" />
-                  No Bag
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 border-2 border-current rounded inline-block" />
+                    Not In Bag
+                  </div>
+                  {isBagNo && <Check className="w-3.5 h-3.5" />}
                 </button>
                 {bagOptions.length > 0 && <div className="my-1 border-t border-slate-100" />}
-                {bagOptions.map(bag => (
-                  <button
-                    key={bag.value}
-                    onClick={() => { updateParams({ inBag: bag.value }); setShowBagSelector(false); }}
-                    className={`w-full truncate text-left px-4 py-2 text-sm font-bold transition-colors ${currentBag === bag.value ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600 hover:bg-slate-50'}`}
-                    title={bag.label}
-                  >
-                    {bag.label.split(' / ').pop()}
-                  </button>
-                ))}
+                {bagOptions.map(bag => {
+                  const isActive = selectedBagLocations.some(l => 
+                    l.replace(/\s+/g, '').toLowerCase() === bag.value.replace(/\s+/g, '').toLowerCase()
+                  )
+                  return (
+                    <button
+                      key={bag.value}
+                      onClick={() => toggleBagToken('location', bag.value)}
+                      className={`w-full flex items-center justify-between px-4 py-2 text-sm font-bold transition-colors group hover:bg-slate-50 ${isActive ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600'}`}
+                      title={bag.label}
+                    >
+                      <span className="truncate pr-2">{bag.label.split(' / ').pop()}</span>
+                      {isActive && <Check className="w-3.5 h-3.5 shrink-0" />}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
           <div className="relative" ref={advancedRef}>
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${showAdvanced || activeAdvancedCount > 0 ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 flex items-center gap-2 shrink-0 ${showAdvanced ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600'}`}
             >
               <SlidersHorizontal className="w-4 h-4" />
-              Advanced
-              {activeAdvancedCount > 0 && (
-                <span className="bg-white text-indigo-600 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black">
-                  {activeAdvancedCount}
-                </span>
-              )}
+              Builder
             </button>
 
             {showAdvanced && (
               <AdvancedSearch 
-                filters={advancedFilters}
+                categories={categories}
+                brands={brands}
                 availableLocations={availableLocations}
                 plastics={plastics}
                 colors={colors}
                 stamps={stamps}
                 stampFoils={stampFoils}
+                initialQuery={localSearch}
+                onAppendSearch={(str) => setLocalSearch(prev => (prev ? prev + ' ' + str : str))}
                 onClose={() => setShowAdvanced(false)} 
               />
             )}
-          </div>
-          
-          <div className="w-32 hidden lg:block">
-            <MultiSelectDropdown
-              label="Category"
-              options={categories}
-              selectedValues={currentCategoryArray}
-              onChange={(vals) => updateParams({ category: vals.length ? vals.join(',') : null })}
-              placeholder="Categories"
-            />
-          </div>
-
-          <div className="w-32 hidden lg:block">
-            <MultiSelectDropdown
-              label="Brand"
-              options={brands}
-              selectedValues={currentBrandArray}
-              onChange={(vals) => updateParams({ brand: vals.length ? vals.join(',') : null })}
-              placeholder="Brands"
-            />
           </div>
           </div>
 
@@ -561,11 +577,8 @@ export default function DashboardToolbar({
         stamps={stamps}
         stampFoils={stampFoils}
         availableLocations={availableLocations}
-        currentCategory={currentCategory}
-        currentBrand={currentBrand}
-        currentBag={currentBag}
-        bagOptions={bagOptions}
-        advancedFilters={advancedFilters}
+        initialQuery={localSearch}
+        onAppendSearch={(str) => setLocalSearch(prev => (prev ? prev + ' ' + str : str))}
       />
     </div>
   )

@@ -98,7 +98,8 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
 
   const handleUpdate = async (formData: FormData) => {
     await updateDisc(disc.id, formData)
-    router.back()
+    const targetVault = formData.get('collectionId') as string || 'all'
+    router.push(`/v/${targetVault}/inventory/${disc.id}`)
   }
 
   const handleDelete = async () => {
@@ -150,7 +151,7 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
           </select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-50">
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Weight (g)</label>
             <input
@@ -183,7 +184,7 @@ export default function EditDiscForm({ disc, collections }: Omit<EditDiscFormPro
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-40">
           <div className="md:col-span-3 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <ColorInput 

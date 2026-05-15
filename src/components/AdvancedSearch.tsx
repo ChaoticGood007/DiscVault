@@ -1,55 +1,24 @@
-/*
- * Copyright 2026 ChaoticGood007
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 'use client'
 
-import { useState } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { X, SlidersHorizontal, RotateCcw } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { extractSearchTokens } from '@/lib/searchParser'
 import MultiSelectDropdown from './MultiSelectDropdown'
 const LocationTreePicker = dynamic(() => import('./LocationTreePicker'), { ssr: false })
 
-export interface AdvancedFilters {
-  minSpeed?: number | string
-  maxSpeed?: number | string
-  minGlide?: number | string
-  maxGlide?: number | string
-  minTurn?: number | string
-  maxTurn?: number | string
-  minFade?: number | string
-  maxFade?: number | string
-  minWeight?: number | string
-  maxWeight?: number | string
-  minCond?: number | string
-  maxCond?: number | string
-  ink?: string
-  plastic?: string
-  color?: string
-  stamp?: string
-  stampFoil?: string
-  // locations stored as comma-separated string in URL
-  locations?: string
+interface AdvancedSearchProps {
+  categories: string[]
+  brands: string[]
+  plastics: string[]
+  colors: string[]
+  stamps: string[]
+  stampFoils: string[]
+  availableLocations: string[]
+  initialQuery?: string
+  onAppendSearch: (query: string) => void
+  onClose: () => void
 }
-
-export const ADVANCED_KEYS: (keyof AdvancedFilters)[] = [
-  'minSpeed', 'maxSpeed', 'minGlide', 'maxGlide', 'minTurn', 'maxTurn',
-  'minFade', 'maxFade', 'minWeight', 'maxWeight', 'minCond', 'maxCond',
-  'ink', 'plastic', 'color', 'stamp', 'stampFoil', 'locations'
-]
 
 const allowNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
   if (['Backspace','Delete','Tab','Enter','ArrowLeft','ArrowRight','-','.'].includes(e.key)) return
@@ -59,53 +28,70 @@ const allowNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
 const inputCls = "w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-200 transition-all text-slate-900 placeholder:text-slate-300 placeholder:font-medium"
 const labelCls = "text-[10px] font-black text-slate-400 uppercase tracking-widest"
 
-interface AdvancedSearchProps {
-  filters: AdvancedFilters
-  availableLocations: string[]
-  plastics: string[]
-  colors: string[]
-  stamps: string[]
-  stampFoils: string[]
-  onClose: () => void
-}
-
 export default function AdvancedSearch({ 
-  filters, availableLocations, 
+  categories, brands,
   plastics, colors, stamps, stampFoils,
-  onClose 
+  availableLocations,
+  initialQuery,
+  onAppendSearch, onClose 
 }: AdvancedSearchProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
   
-  const [localFilters, setLocalFilters] = useState<AdvancedFilters>(filters)
+  const [localState, setLocalState] = useState<Record<string, any>>({})
 
-  // Parse current selected locations from comma-separated string
-  const selectedLocations = localFilters.locations ? localFilters.locations.split(',').filter(Boolean) : []
+  useEffect(() => {
+    setLocalState(extractSearchTokens(initialQuery || ''))
+  }, [initialQuery])
 
-  const handleUpdate = (key: keyof AdvancedFilters, value: string | number | undefined) => {
-    setLocalFilters(prev => ({ ...prev, [key]: value }))
+  const handleUpdate = (key: string, value: any) => {
+    setLocalState(prev => ({ ...prev, [key]: value }))
   }
 
   const applyFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    Object.entries(localFilters).forEach(([key, value]) => {
-      if (value !== undefined && value !== '') {
-        params.set(key, value.toString())
-      } else {
-        params.delete(key)
-      }
-    })
-    params.set('page', '1')
-    router.push(`${pathname}?${params.toString()}`)
-    onClose()
-  }
+    const tokens: string[] = []
 
-  const resetFilters = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    ADVANCED_KEYS.forEach(k => params.delete(k))
-    router.push(`${pathname}?${params.toString()}`)
-    setLocalFilters({})
+    const addRange = (minKey: string, maxKey: string, field: string) => {
+      const min = localState[minKey];
+      const max = localState[maxKey];
+      if (min && max) tokens.push(`${field}:${min}-${max}`)
+      else if (min) tokens.push(`${field}:>=${min}`)
+      else if (max) tokens.push(`${field}:<=${max}`)
+    }
+
+    addRange('minSpeed', 'maxSpeed', 'speed')
+    addRange('minGlide', 'maxGlide', 'glide')
+    addRange('minTurn', 'maxTurn', 'turn')
+    addRange('minFade', 'maxFade', 'fade')
+    addRange('minWeight', 'maxWeight', 'weight')
+    addRange('minCond', 'maxCond', 'condition')
+
+    const addMulti = (key: string, field: string) => {
+      if (localState[key]) {
+        localState[key].split(',').filter(Boolean).forEach((val: string) => {
+          tokens.push(`${field}:"${val}"`)
+        })
+      }
+    }
+
+    addMulti('category', 'category')
+    addMulti('brand', 'brand')
+    addMulti('plastic', 'plastic')
+    addMulti('color', 'color')
+    addMulti('stamp', 'stamp')
+    addMulti('stampFoil', 'foil')
+
+    if (localState.locations) {
+      localState.locations.split(',').filter(Boolean).forEach((val: string) => {
+        tokens.push(`location:"${val}"`)
+      })
+    }
+
+    if (localState.ink && localState.ink !== 'any') {
+      tokens.push(`ink:${localState.ink}`)
+    }
+
+    if (tokens.length > 0) {
+      onAppendSearch(tokens.join(' '))
+    }
     onClose()
   }
 
@@ -114,16 +100,44 @@ export default function AdvancedSearch({
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2 text-indigo-600">
           <SlidersHorizontal className="w-5 h-5" />
-          <h2 className="text-lg font-black text-slate-900">Advanced Filters</h2>
+          <h2 className="text-lg font-black text-slate-900">Query Builder</h2>
         </div>
         <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-xl text-slate-400 transition-colors">
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="space-y-6">
-        {/* Flight Numbers */}
+      <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-6">
+        {/* Core Properties */}
         <div>
+          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-3">Core Properties</p>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div className="space-y-2">
+              <label className={labelCls}>Category</label>
+              <MultiSelectDropdown
+                label="Category"
+                options={categories}
+                selectedValues={(localState.category || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('category', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Categories"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Brand</label>
+              <MultiSelectDropdown
+                label="Brand"
+                options={brands}
+                selectedValues={(localState.brand || '').split(',').filter(Boolean)}
+                onChange={(vals) => handleUpdate('brand', vals.length ? vals.join(',') : undefined)}
+                placeholder="All Brands"
+                align="right"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Flight Numbers */}
+        <div className="pt-4 border-t border-slate-50">
           <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-3">Flight Numbers</p>
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             {([
@@ -131,17 +145,17 @@ export default function AdvancedSearch({
               ['Glide', 'minGlide', 'maxGlide'],
               ['Turn', 'minTurn', 'maxTurn'],
               ['Fade', 'minFade', 'maxFade'],
-            ] as [string, keyof AdvancedFilters, keyof AdvancedFilters][]).map(([label, minKey, maxKey]) => (
+            ] as [string, string, string][]).map(([label, minKey, maxKey]) => (
               <div key={label} className="space-y-2">
                 <label className={labelCls}>{label}</label>
                 <div className="flex items-center gap-2">
                   <input type="text" inputMode="decimal" placeholder="Min"
-                    value={localFilters[minKey] ?? ''} onKeyDown={allowNumeric}
+                    value={localState[minKey] ?? ''} onKeyDown={allowNumeric}
                     onChange={(e) => handleUpdate(minKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                   <span className="text-slate-200 font-bold shrink-0">—</span>
                   <input type="text" inputMode="decimal" placeholder="Max"
-                    value={localFilters[maxKey] ?? ''} onKeyDown={allowNumeric}
+                    value={localState[maxKey] ?? ''} onKeyDown={allowNumeric}
                     onChange={(e) => handleUpdate(maxKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                 </div>
@@ -157,17 +171,17 @@ export default function AdvancedSearch({
             {([
               ['Weight (g)', 'minWeight', 'maxWeight'],
               ['Condition', 'minCond', 'maxCond'],
-            ] as [string, keyof AdvancedFilters, keyof AdvancedFilters][]).map(([label, minKey, maxKey]) => (
+            ] as [string, string, string][]).map(([label, minKey, maxKey]) => (
               <div key={label} className="space-y-2">
                 <label className={labelCls}>{label}</label>
                 <div className="flex items-center gap-2">
                   <input type="text" inputMode="decimal" placeholder="Min"
-                    value={localFilters[minKey] ?? ''} onKeyDown={allowNumeric}
+                    value={localState[minKey] ?? ''} onKeyDown={allowNumeric}
                     onChange={(e) => handleUpdate(minKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                   <span className="text-slate-200 font-bold shrink-0">—</span>
                   <input type="text" inputMode="decimal" placeholder="Max"
-                    value={localFilters[maxKey] ?? ''} onKeyDown={allowNumeric}
+                    value={localState[maxKey] ?? ''} onKeyDown={allowNumeric}
                     onChange={(e) => handleUpdate(maxKey, e.target.value !== '' ? e.target.value : undefined)}
                     className={inputCls} />
                 </div>
@@ -178,7 +192,7 @@ export default function AdvancedSearch({
               <MultiSelectDropdown
                 label="Plastic"
                 options={plastics}
-                selectedValues={(localFilters.plastic as string || '').split(',').filter(Boolean)}
+                selectedValues={(localState.plastic as string || '').split(',').filter(Boolean)}
                 onChange={(vals) => handleUpdate('plastic', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Plastics"
               />
@@ -188,9 +202,10 @@ export default function AdvancedSearch({
               <MultiSelectDropdown
                 label="Color"
                 options={colors}
-                selectedValues={(localFilters.color as string || '').split(',').filter(Boolean)}
+                selectedValues={(localState.color as string || '').split(',').filter(Boolean)}
                 onChange={(vals) => handleUpdate('color', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Colors"
+                align="right"
               />
             </div>
             <div className="space-y-2">
@@ -198,7 +213,7 @@ export default function AdvancedSearch({
               <MultiSelectDropdown
                 label="Stamp"
                 options={stamps}
-                selectedValues={(localFilters.stamp as string || '').split(',').filter(Boolean)}
+                selectedValues={(localState.stamp as string || '').split(',').filter(Boolean)}
                 onChange={(vals) => handleUpdate('stamp', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Stamps"
               />
@@ -208,9 +223,10 @@ export default function AdvancedSearch({
               <MultiSelectDropdown
                 label="Foil"
                 options={stampFoils}
-                selectedValues={(localFilters.stampFoil as string || '').split(',').filter(Boolean)}
+                selectedValues={(localState.stampFoil as string || '').split(',').filter(Boolean)}
                 onChange={(vals) => handleUpdate('stampFoil', vals.length ? vals.join(',') : undefined)}
                 placeholder="All Foils"
+                align="right"
               />
             </div>
 
@@ -218,14 +234,14 @@ export default function AdvancedSearch({
             {availableLocations.length > 0 && (
               <div className="space-y-2 col-span-2">
                 <label className={labelCls}>Location</label>
-                {selectedLocations.length > 0 && (
+                {(localState.locations ? localState.locations.split(',').filter(Boolean) : []).length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-1">
-                    {selectedLocations.map(loc => (
+                    {(localState.locations ? localState.locations.split(',').filter(Boolean) : []).map((loc: string) => (
                       <span key={loc} className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-1 rounded-lg">
                         {loc.split('/').pop()}
                         <button type="button" onClick={() => {
-                          const next = selectedLocations.filter(l => l !== loc)
-                          setLocalFilters(prev => ({ ...prev, locations: next.length ? next.join(',') : undefined }))
+                          const next = (localState.locations ? localState.locations.split(',').filter(Boolean) : []).filter((l: string) => l !== loc)
+                          setLocalState(prev => ({ ...prev, locations: next.length ? next.join(',') : undefined }))
                         }} className="hover:text-indigo-900">×</button>
                       </span>
                     ))}
@@ -233,8 +249,8 @@ export default function AdvancedSearch({
                 )}
                 <LocationTreePicker
                   availableLocations={availableLocations}
-                  selectedLocations={selectedLocations}
-                  onChange={(locs) => setLocalFilters(prev => ({ ...prev, locations: locs.length ? locs.join(',') : undefined }))}
+                  selectedLocations={(localState.locations ? localState.locations.split(',').filter(Boolean) : [])}
+                  onChange={(locs) => setLocalState(prev => ({ ...prev, locations: locs.length ? locs.join(',') : undefined }))}
                 />
               </div>
             )}
@@ -249,7 +265,7 @@ export default function AdvancedSearch({
               <button key={option}
                 onClick={() => handleUpdate('ink', option === 'any' ? undefined : option)}
                 className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                  (localFilters.ink || 'any') === option 
+                  (localState.ink || 'any') === option 
                     ? 'bg-slate-900 border-slate-900 text-white shadow-lg' 
                     : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                 }`}
@@ -262,14 +278,14 @@ export default function AdvancedSearch({
       </div>
 
       <div className="mt-8 pt-6 border-t border-slate-50 flex gap-3">
-        <button onClick={resetFilters}
+        <button onClick={() => { setLocalState({}); onClose(); }}
           className="flex-1 inline-flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95">
           <RotateCcw className="w-4 h-4" />
-          Reset
+          Cancel
         </button>
         <button onClick={applyFilters}
           className="flex-[2] py-4 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 shadow-xl shadow-indigo-100">
-          Apply Filters
+          Add to Search
         </button>
       </div>
     </div>
